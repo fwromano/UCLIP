@@ -1,0 +1,83 @@
+{
+  "dropout_modules": 1,
+  "dropout_rates": [
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 0.01,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 17.02300262451172,
+      "entropy_mean": 2.0012617111206055,
+      "mi_mean": 0.03283958775656564
+    },
+    "2": {
+      "count": 5,
+      "accuracy": 1.0,
+      "trace_mean": 16.00597438812256,
+      "entropy_mean": 2.0745973348617555,
+      "mi_mean": 0.0404395341873169
+    },
+    "1": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 18.485033321380616,
+      "entropy_mean": 2.21387619972229,
+      "mi_mean": 0.051889872550964354
+    },
+    "0": {
+      "count": 6,
+      "accuracy": 0.8333333333333334,
+      "trace_mean": 16.94092082977295,
+      "entropy_mean": 2.1672093868255615,
+      "mi_mean": 0.06454892953236897
+    },
+    "4": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 16.010504913330077,
+      "entropy_mean": 2.1958925247192385,
+      "mi_mean": 0.027616024017333984
+    },
+    "9": {
+      "count": 7,
+      "accuracy": 0.2857142857142857,
+      "trace_mean": 14.43409524645124,
+      "entropy_mean": 2.185868263244629,
+      "mi_mean": 0.025576489312308177
+    },
+    "5": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 15.537040029253278,
+      "entropy_mean": 2.1702981335776195,
+      "mi_mean": 0.026422432490757534
+    },
+    "6": {
+      "count": 5,
+      "accuracy": 0.2,
+      "trace_mean": 14.4278169631958,
+      "entropy_mean": 2.198544645309448,
+      "mi_mean": 0.03446526527404785
+    },
+    "3": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 15.084420045216879,
+      "entropy_mean": 2.163049817085266,
+      "mi_mean": 0.03229626019795736
+    },
+    "8": {
+      "count": 1,
+      "accuracy": 0.0,
+      "trace_mean": 16.819499969482422,
+      "entropy_mean": 2.2209866046905518,
+      "mi_mean": 0.043120622634887695
+    }
+  },
+  "overall_accuracy": 0.203125
+}

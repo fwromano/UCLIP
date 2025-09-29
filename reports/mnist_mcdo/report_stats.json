@@ -1,0 +1,7 @@
+{
+  "overall_accuracy": 0.203125,
+  "avg_trace_correct": 16.121566992539627,
+  "avg_trace_incorrect": 16.185774092580758,
+  "avg_mi_correct": 5.868765024038462e-06,
+  "avg_mi_incorrect": 5.100287643133425e-06
+}

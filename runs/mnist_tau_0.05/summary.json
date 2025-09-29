@@ -1,0 +1,83 @@
+{
+  "dropout_modules": 1,
+  "dropout_rates": [
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 0.05,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 17.02300262451172,
+      "entropy_mean": 2.287832430430821,
+      "mi_mean": 0.002306086676461356
+    },
+    "2": {
+      "count": 5,
+      "accuracy": 1.0,
+      "trace_mean": 16.00597438812256,
+      "entropy_mean": 2.292103385925293,
+      "mi_mean": 0.002245187759399414
+    },
+    "1": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 18.485033321380616,
+      "entropy_mean": 2.2989152669906616,
+      "mi_mean": 0.002139115333557129
+    },
+    "0": {
+      "count": 6,
+      "accuracy": 0.8333333333333334,
+      "trace_mean": 16.94092082977295,
+      "entropy_mean": 2.297411640485128,
+      "mi_mean": 0.0024791558583577475
+    },
+    "4": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 16.010504913330077,
+      "entropy_mean": 2.296445870399475,
+      "mi_mean": 0.0017542362213134766
+    },
+    "9": {
+      "count": 7,
+      "accuracy": 0.2857142857142857,
+      "trace_mean": 14.43409524645124,
+      "entropy_mean": 2.2965387276240756,
+      "mi_mean": 0.0015706334795270646
+    },
+    "5": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 15.537040029253278,
+      "entropy_mean": 2.295532158442906,
+      "mi_mean": 0.0015251636505126953
+    },
+    "6": {
+      "count": 5,
+      "accuracy": 0.2,
+      "trace_mean": 14.4278169631958,
+      "entropy_mean": 2.297781562805176,
+      "mi_mean": 0.0014876365661621095
+    },
+    "3": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 15.084420045216879,
+      "entropy_mean": 2.2957229216893515,
+      "mi_mean": 0.001722097396850586
+    },
+    "8": {
+      "count": 1,
+      "accuracy": 0.0,
+      "trace_mean": 16.819499969482422,
+      "entropy_mean": 2.2988333702087402,
+      "mi_mean": 0.0019698143005371094
+    }
+  },
+  "overall_accuracy": 0.203125
+}

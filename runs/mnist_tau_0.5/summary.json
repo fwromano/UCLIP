@@ -1,0 +1,83 @@
+{
+  "dropout_modules": 1,
+  "dropout_rates": [
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 0.5,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 17.02300262451172,
+      "entropy_mean": 2.3024329117366245,
+      "mi_mean": 2.7009419032505582e-05
+    },
+    "2": {
+      "count": 5,
+      "accuracy": 1.0,
+      "trace_mean": 16.00597438812256,
+      "entropy_mean": 2.3024799823760986,
+      "mi_mean": 2.3555755615234374e-05
+    },
+    "1": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 18.485033321380616,
+      "entropy_mean": 2.302548313140869,
+      "mi_mean": 2.1457672119140625e-05
+    },
+    "0": {
+      "count": 6,
+      "accuracy": 0.8333333333333334,
+      "trace_mean": 16.94092082977295,
+      "entropy_mean": 2.3025354941685996,
+      "mi_mean": 2.364317576090495e-05
+    },
+    "4": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 16.010504913330077,
+      "entropy_mean": 2.3025155544281004,
+      "mi_mean": 2.117156982421875e-05
+    },
+    "9": {
+      "count": 7,
+      "accuracy": 0.2857142857142857,
+      "trace_mean": 14.43409524645124,
+      "entropy_mean": 2.3025200366973877,
+      "mi_mean": 1.8085752214704242e-05
+    },
+    "5": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 15.537040029253278,
+      "entropy_mean": 2.3025078092302596,
+      "mi_mean": 1.7711094447544644e-05
+    },
+    "6": {
+      "count": 5,
+      "accuracy": 0.2,
+      "trace_mean": 14.4278169631958,
+      "entropy_mean": 2.3025349140167237,
+      "mi_mean": 1.5687942504882812e-05
+    },
+    "3": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 15.084420045216879,
+      "entropy_mean": 2.302512009938558,
+      "mi_mean": 1.919269561767578e-05
+    },
+    "8": {
+      "count": 1,
+      "accuracy": 0.0,
+      "trace_mean": 16.819499969482422,
+      "entropy_mean": 2.3025457859039307,
+      "mi_mean": 2.0503997802734375e-05
+    }
+  },
+  "overall_accuracy": 0.203125
+}

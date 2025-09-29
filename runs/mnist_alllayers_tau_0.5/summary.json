@@ -1,0 +1,95 @@
+{
+  "dropout_modules": 13,
+  "dropout_rates": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 0.5,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 38.67120851789202,
+      "entropy_mean": 2.302506072180612,
+      "mi_mean": 3.8351331438337055e-05
+    },
+    "2": {
+      "count": 5,
+      "accuracy": 0.0,
+      "trace_mean": 37.5335090637207,
+      "entropy_mean": 2.302504634857178,
+      "mi_mean": 3.905296325683594e-05
+    },
+    "1": {
+      "count": 10,
+      "accuracy": 1.0,
+      "trace_mean": 39.29090118408203,
+      "entropy_mean": 2.302499508857727,
+      "mi_mean": 4.026889801025391e-05
+    },
+    "0": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 38.62520535786947,
+      "entropy_mean": 2.302503546079,
+      "mi_mean": 3.842512766520182e-05
+    },
+    "4": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 39.52858200073242,
+      "entropy_mean": 2.3025015592575073,
+      "mi_mean": 3.888607025146484e-05
+    },
+    "9": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 40.10554885864258,
+      "entropy_mean": 2.3025035858154297,
+      "mi_mean": 3.8896288190569195e-05
+    },
+    "5": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 37.49132973807199,
+      "entropy_mean": 2.302505220685686,
+      "mi_mean": 3.961154392787388e-05
+    },
+    "6": {
+      "count": 5,
+      "accuracy": 0.0,
+      "trace_mean": 39.477664947509766,
+      "entropy_mean": 2.3025050163269043,
+      "mi_mean": 3.7384033203125e-05
+    },
+    "3": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 38.88816515604655,
+      "entropy_mean": 2.3025046984354653,
+      "mi_mean": 3.866354624430338e-05
+    },
+    "8": {
+      "count": 1,
+      "accuracy": 0.0,
+      "trace_mean": 37.747676849365234,
+      "entropy_mean": 2.302502155303955,
+      "mi_mean": 4.5299530029296875e-05
+    }
+  },
+  "overall_accuracy": 0.15625
+}

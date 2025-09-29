@@ -1,0 +1,83 @@
+{
+  "dropout_modules": 1,
+  "dropout_rates": [
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 1.0,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 17.02300262451172,
+      "entropy_mean": 2.302546943937029,
+      "mi_mean": 6.846019199916295e-06
+    },
+    "2": {
+      "count": 5,
+      "accuracy": 1.0,
+      "trace_mean": 16.00597438812256,
+      "entropy_mean": 2.302558755874634,
+      "mi_mean": 5.865097045898438e-06
+    },
+    "1": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 18.485033321380616,
+      "entropy_mean": 2.302575922012329,
+      "mi_mean": 5.316734313964844e-06
+    },
+    "0": {
+      "count": 6,
+      "accuracy": 0.8333333333333334,
+      "trace_mean": 16.94092082977295,
+      "entropy_mean": 2.3025726477305093,
+      "mi_mean": 5.920728047688802e-06
+    },
+    "4": {
+      "count": 10,
+      "accuracy": 0.0,
+      "trace_mean": 16.010504913330077,
+      "entropy_mean": 2.3025675773620606,
+      "mi_mean": 5.316734313964844e-06
+    },
+    "9": {
+      "count": 7,
+      "accuracy": 0.2857142857142857,
+      "trace_mean": 14.43409524645124,
+      "entropy_mean": 2.3025687081473216,
+      "mi_mean": 4.598072596958705e-06
+    },
+    "5": {
+      "count": 7,
+      "accuracy": 0.0,
+      "trace_mean": 15.537040029253278,
+      "entropy_mean": 2.302565710885184,
+      "mi_mean": 4.427773611886161e-06
+    },
+    "6": {
+      "count": 5,
+      "accuracy": 0.2,
+      "trace_mean": 14.4278169631958,
+      "entropy_mean": 2.30257248878479,
+      "mi_mean": 3.862380981445312e-06
+    },
+    "3": {
+      "count": 6,
+      "accuracy": 0.0,
+      "trace_mean": 15.084420045216879,
+      "entropy_mean": 2.302566727002462,
+      "mi_mean": 4.927317301432292e-06
+    },
+    "8": {
+      "count": 1,
+      "accuracy": 0.0,
+      "trace_mean": 16.819499969482422,
+      "entropy_mean": 2.30257511138916,
+      "mi_mean": 5.245208740234375e-06
+    }
+  },
+  "overall_accuracy": 0.203125
+}

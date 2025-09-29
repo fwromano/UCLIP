@@ -1,0 +1,84 @@
+{
+  "dropout_modules": 13,
+  "dropout_rates": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+  ],
+  "limit": 64,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 1.0,
+  "label_summaries": {
+    "7": {
+      "count": 7,
+      "trace_mean": 38.67120851789202,
+      "logdet_mean": -6281.294084821428,
+      "off_diag_mean": 3143.15576171875
+    },
+    "2": {
+      "count": 5,
+      "trace_mean": 37.5335090637207,
+      "logdet_mean": -6280.07099609375,
+      "off_diag_mean": 2986.0568359375
+    },
+    "1": {
+      "count": 10,
+      "trace_mean": 39.29090118408203,
+      "logdet_mean": -6280.928125,
+      "off_diag_mean": 3098.0778564453126
+    },
+    "0": {
+      "count": 6,
+      "trace_mean": 38.62520535786947,
+      "logdet_mean": -6280.812906901042,
+      "off_diag_mean": 3002.2772623697915
+    },
+    "4": {
+      "count": 10,
+      "trace_mean": 39.52858200073242,
+      "logdet_mean": -6280.625,
+      "off_diag_mean": 3108.9378662109375
+    },
+    "9": {
+      "count": 7,
+      "trace_mean": 40.10554885864258,
+      "logdet_mean": -6278.424944196428,
+      "off_diag_mean": 3095.0817522321427
+    },
+    "5": {
+      "count": 7,
+      "trace_mean": 37.49132973807199,
+      "logdet_mean": -6280.621861049107,
+      "off_diag_mean": 2901.299002511161
+    },
+    "6": {
+      "count": 5,
+      "trace_mean": 39.477664947509766,
+      "logdet_mean": -6278.39130859375,
+      "off_diag_mean": 3034.095947265625
+    },
+    "3": {
+      "count": 6,
+      "trace_mean": 38.88816515604655,
+      "logdet_mean": -6282.09228515625,
+      "off_diag_mean": 3055.921915690104
+    },
+    "8": {
+      "count": 1,
+      "trace_mean": 37.747676849365234,
+      "logdet_mean": -6275.20947265625,
+      "off_diag_mean": 2856.0458984375
+    }
+  }
+}

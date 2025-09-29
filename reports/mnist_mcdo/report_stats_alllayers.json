@@ -1,0 +1,10 @@
+{
+  "overall_accuracy": 0.15625,
+  "avg_trace": 38.90555018186569,
+  "avg_mi": 0.08966309949755666,
+  "avg_entropy": 2.1071968860924244,
+  "correct_trace_mean": 39.29090118408203,
+  "incorrect_trace_mean": 38.834188885158966,
+  "correct_mi_mean": 0.09411952495574946,
+  "incorrect_mi_mean": 0.08883783552381724
+}
