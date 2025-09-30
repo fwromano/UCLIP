@@ -1,0 +1,36 @@
+{
+  "dropout_modules": 13,
+  "dropout_rates": [
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1,
+    0.1
+  ],
+  "limit": 2,
+  "passes": 64,
+  "microbatch": 8,
+  "temperature": 1.0,
+  "label_summaries": {
+    "7": {
+      "count": 1,
+      "trace_mean": 39.678932189941406,
+      "logdet_mean": -6286.68896484375,
+      "off_diag_mean": 3200.354736328125
+    },
+    "2": {
+      "count": 1,
+      "trace_mean": 35.969940185546875,
+      "logdet_mean": -6274.5634765625,
+      "off_diag_mean": 2582.27392578125
+    }
+  }
+}
