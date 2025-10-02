@@ -1,8 +1,11 @@
 """General utilities for Monte Carlo Dropout workflows."""
 from __future__ import annotations
 
+import importlib
 import json
 import random
+import sys
+import types
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Sequence
@@ -11,6 +14,39 @@ import numpy as np
 import torch
 from PIL import Image
 from torch import nn
+
+def _ensure_flex_attention_stub() -> None:
+    """Avoid importing torch flex attention when optional deps are missing."""
+
+    module_name = "transformers.integrations.flex_attention"
+    if module_name in sys.modules:
+        return
+
+    try:
+        importlib.import_module(module_name)
+    except Exception:  # pragma: no cover - exercised only when deps are missing
+        # Ensure parent package is initialised before injecting the stub.
+        try:
+            importlib.import_module("transformers.integrations")
+        except Exception:
+            pass
+
+        stub = types.ModuleType(module_name)
+
+        def _unavailable(*_args, **_kwargs):
+            raise RuntimeError(
+                "Flex attention support is unavailable in this environment."
+            )
+
+        stub.flex_attention_forward = _unavailable  # type: ignore[attr-defined]
+        stub.make_flex_block_causal_mask = _unavailable  # type: ignore[attr-defined]
+        stub.WrappedFlexAttention = None  # type: ignore[attr-defined]
+        stub.repeat_kv = _unavailable  # type: ignore[attr-defined]
+        sys.modules[module_name] = stub
+
+
+_ensure_flex_attention_stub()
+
 
 try:  # transformers is optional until runtime
     from transformers import CLIPModel, CLIPProcessor

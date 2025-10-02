@@ -1,0 +1,11 @@
+# Experiment artifacts
+runs/
+reports/mnist_mcdo/REPORT_*.html
+
+# Local reports exported to PDF
+reports/mnist_mcdo/REPORT_*.pdf
+
+# Python cache
+__pycache__/
+*.pyc
+
