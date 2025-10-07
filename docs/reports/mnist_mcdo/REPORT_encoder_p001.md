@@ -105,14 +105,14 @@ Per-digit means:
 
 
 ## 7. 3D PCA snapshot (5 images per digit)
-![3D PCA of encoder dropout p=0.01](assets/pca_encoder_p001_3d.png)
+![3D PCA of encoder dropout p=0.01](../report_assets/mnist_mcdo/assets/pca_encoder_p001_3d.png)
 
 - Clusters are tighter than at `p = 0.10`. Most ellipsoids are small and round; a few digit **1** samples show elongated lobes.
 - Digits **4** and **5** overlap, matching their shared misclassification streak.
 - The first three PCs explain 56.4%, 18.7%, and 7.5% of variance, so a handful of directions still capture most perturbations.
 
 ### 7.1 Focused view: digits 1 vs 7 (4 samples each)
-![3D PCA of digits 1 and 7](assets/pca_digits1_7_3d.png)
+![3D PCA of digits 1 and 7](../report_assets/mnist_mcdo/assets/pca_digits1_7_3d.png)
 
 - Digits **1** (orange) occupy a stretched ridge along the first principal axis; their ellipsoids are elongated, illustrating why digit 1 records the highest average trace.
 - Digits **7** (gray) sit in a tighter cluster with smaller ellipsoids, matching their lower mean trace (12.02 vs 14.15 for 1s).
@@ -120,11 +120,11 @@ Per-digit means:
 
 | idx 0 (digit 7) | idx 2 (digit 1) | idx 5 (digit 1) | idx 14 (digit 1) |
 | --- | --- | --- | --- |
-| ![](assets/pca_d1d7_00000_digit7.png) | ![](assets/pca_d1d7_00002_digit1.png) | ![](assets/pca_d1d7_00005_digit1.png) | ![](assets/pca_d1d7_00014_digit1.png) |
+| ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00000_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00002_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00005_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00014_digit1.png) |
 
 | idx 17 (digit 7) | idx 26 (digit 7) | idx 29 (digit 1) | idx 34 (digit 7) |
 | --- | --- | --- | --- |
-| ![](assets/pca_d1d7_00017_digit7.png) | ![](assets/pca_d1d7_00026_digit7.png) | ![](assets/pca_d1d7_00029_digit1.png) | ![](assets/pca_d1d7_00034_digit7.png) |
+| ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00017_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00026_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00029_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00034_digit7.png) |
 
 | Index | Digit | Trace | Off-diagonal mass |
 | --- | --- | --- | --- |
@@ -138,7 +138,7 @@ Per-digit means:
 | 34 | 7 | 8.99 | 1,152.48 |
 
 ### 7.2 Focused view: digits 3 vs 5 (4 samples each)
-![3D PCA of digits 3 and 5](assets/pca_digits3_5_3d.png)
+![3D PCA of digits 3 and 5](../report_assets/mnist_mcdo/assets/pca_digits3_5_3d.png)
 
 - Digits **3** (red) and **5** (brown) overlap substantially, reflecting similar handwriting shapes and explaining their matching zero accuracy in this run.
 - Ellipsoids for both digits are moderately elongated along the second principal axis, indicating correlated perturbations despite the low dropout rate.
@@ -146,11 +146,11 @@ Per-digit means:
 
 | idx 8 (digit 5) | idx 15 (digit 5) | idx 18 (digit 3) | idx 23 (digit 5) |
 | --- | --- | --- | --- |
-| ![](assets/pca_d3d5_00008_digit5.png) | ![](assets/pca_d3d5_00015_digit5.png) | ![](assets/pca_d3d5_00018_digit3.png) | ![](assets/pca_d3d5_00023_digit5.png) |
+| ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00008_digit5.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00015_digit5.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00018_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00023_digit5.png) |
 
 | idx 30 (digit 3) | idx 32 (digit 3) | idx 44 (digit 3) | idx 45 (digit 5) |
 | --- | --- | --- | --- |
-| ![](assets/pca_d3d5_00030_digit3.png) | ![](assets/pca_d3d5_00032_digit3.png) | ![](assets/pca_d3d5_00044_digit3.png) | ![](assets/pca_d3d5_00045_digit5.png) |
+| ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00030_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00032_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00044_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00045_digit5.png) |
 
 | Index | Digit | Trace | Off-diagonal mass |
 | --- | --- | --- | --- |
@@ -170,14 +170,14 @@ Per-digit means:
 
 | idx 279 (digit 1) | idx 688 (digit 6) |
 | --- | --- |
-| ![](assets/sample_00279_digit1.png) | ![](assets/sample_00688_digit6.png) |
+| ![](../report_assets/mnist_mcdo/assets/sample_00279_digit1.png) | ![](../report_assets/mnist_mcdo/assets/sample_00688_digit6.png) |
 
 | Index | Digit | Trace | Off-diagonal mass |
 | --- | --- | --- | --- |
 | 279 | 1 | 28.87 | 3,798 |
 | 688 | 6 | 2.90 | 392 |
 
-![2D PCA of samples 279 & 688](assets/pca_samples_279_688.png)
+![2D PCA of samples 279 & 688](../report_assets/mnist_mcdo/assets/pca_samples_279_688.png)
 
 Ten stochastic embeddings from each sample were projected onto two PCA axes. The digit 1 cloud (orange) spans a wide arc, while the digit 6 cloud (pink) collapses into a tight knot-visual confirmation of the variance gap reported above.
 

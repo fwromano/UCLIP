@@ -2,7 +2,7 @@
 set -euo pipefail
 
 RUN_DIR="runs/mnist_encoder_only_dropout_p001_T10_L1000"
-OUT_DIR="reports/mnist_mcdo"
+OUT_DIR="docs/report_assets/mnist_mcdo"
 
 options=(
   "Digits 1 vs 7 (ambient, 4 samples each)"
@@ -67,12 +67,12 @@ build_interactive_plot(
     covariances,
     labels,
     indices,
-    Path("reports/mnist_mcdo/pca_top10_trace_interactive.html"),
+    Path(OUT_DIR) / "pca_top10_trace_interactive.html",
     "Top 10 trace samples (interactive)",
     auto_open=True,
     image_data=images,
 )
-print("Opened reports/mnist_mcdo/pca_top10_trace_interactive.html")
+print(f"Opened {OUT_DIR}/pca_top10_trace_interactive.html")
 PY
       break
       ;;

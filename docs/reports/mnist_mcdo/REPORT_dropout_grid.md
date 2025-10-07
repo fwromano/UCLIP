@@ -34,11 +34,11 @@ Overall, projection dropout consistently lifts the mean statistics while making 
 _Reading the log-determinant:_ the values hover around −6.86×10³ because the covariance is 512-dimensional. Each eigenvalue is the variance along one embedding axis; their product is the determinant, so the logdet is the sum of 512 log-variances. Dividing the mean logdet by 512 gives an average log-eigenvalue of about −13.4 (variance ≈ 1.6×10⁻⁶), which is a compact, intuitive scale. A seemingly small +4 shift in logdet still matters: `exp(4) ≈ 54`, so the uncertainty volume expands ~54× even though the baseline offset is dominated by dimensionality.
 
 
-![Aggregate dropout metrics](assets/dropout_grid_metrics.png)
+![Aggregate dropout metrics](../report_assets/mnist_mcdo/assets/dropout_grid_metrics.png)
 
-![Projection dropout gain](assets/dropout_grid_gain.png)
+![Projection dropout gain](../report_assets/mnist_mcdo/assets/dropout_grid_gain.png)
 
-![Trace distribution across configurations](assets/dropout_grid_trace_violin.png)
+![Trace distribution across configurations](../report_assets/mnist_mcdo/assets/dropout_grid_trace_violin.png)
 
 
 ## 3. Run-by-Run Snapshots
@@ -57,7 +57,7 @@ _Reading the log-determinant:_ the values hover around −6.86×10³ because the
 - p = 0.01 encoder + projection: index 72 (digit 2) managed trace 29.17 yet most samples clustered much lower, such as index 334 (digit 3) at trace 3.96 with off-diagonal 423.
 - p = 0.01 encoder only: index 400 (digit 2) held the peak trace 22.95 while index 374 (digit 8) nearly collapsed to trace 3.30, confirming that low p with no projection dropout becomes almost deterministic.
 
-![Digit-wise trace comparison](assets/dropout_grid_digit_trace.png)
+![Digit-wise trace comparison](../report_assets/mnist_mcdo/assets/dropout_grid_digit_trace.png)
 
 ## 5. Digit-Level Notes
 - At `p = 0.10` the model with projection dropout shows the largest trace for digit **1** (39.87) and the smallest for **3** (38.17), pointing to class-dependent sensitivity.

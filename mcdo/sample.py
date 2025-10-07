@@ -1,5 +1,3 @@
-from .cli import main
+"""Backwards-compatible script entry point."""
 
-
-if __name__ == "__main__":
-    main()
+from uclip.cli.sample import *  # noqa: F401,F403

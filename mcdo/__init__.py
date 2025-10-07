@@ -1,37 +1,28 @@
-"""Monte Carlo Dropout utilities for CLIP-style models."""
+"""Compatibility layer re-exporting the refactored uclip package."""
 
-from .dropout import (
-    DropoutAdapter,
-    collect_dropout_modules,
-    dump_dropout_rates,
-    enable_mc_dropout,
-    insert_adapters,
-    override_dropout_rate,
-    wrap_with_dropout,
-)
-from .sampling import (
-    MCDOSamplingResult,
-    MCSDiagnosticMetrics,
-    compute_embedding_statistics,
-    compute_predictive_distribution,
-    diagnostics,
-    sample_embeddings,
-)
-from .utils import set_determinism
+from __future__ import annotations
 
-__all__ = [
-    "DropoutAdapter",
-    "collect_dropout_modules",
-    "dump_dropout_rates",
-    "enable_mc_dropout",
-    "insert_adapters",
-    "override_dropout_rate",
-    "wrap_with_dropout",
-    "MCDOSamplingResult",
-    "MCSDiagnosticMetrics",
-    "compute_embedding_statistics",
-    "compute_predictive_distribution",
-    "diagnostics",
-    "sample_embeddings",
-    "set_determinism",
-]
+import sys
+from importlib import import_module
+from pathlib import Path
+
+
+def _ensure_src_on_path() -> None:
+    """Add the `src/` directory for editable installs if needed."""
+
+    try:
+        import_module("uclip")
+        return
+    except ModuleNotFoundError:
+        pass
+
+    src_dir = Path(__file__).resolve().parent.parent / "src"
+    if src_dir.exists():
+        sys.path.append(str(src_dir))
+
+
+_ensure_src_on_path()
+
+from uclip import analysis, cli, core, viz  # noqa: E402
+
+__all__ = ["analysis", "cli", "core", "viz"]

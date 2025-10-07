@@ -2,16 +2,28 @@
 
 Utilities for running Monte Carlo Dropout (MCDO) uncertainty with CLIP-style backbones. The toolkit follows the battle-tested checklist for toggling `nn.Dropout` at inference, sampling stochastic embeddings, and logging scalar diagnostics and predictive metrics.
 
+## Installation
+
+Install the toolkit in editable mode so the `src/` layout is discoverable:
+
+```bash
+pip install -e .[analysis]
+```
+
+If you prefer requirements files, `requirements/base.txt` mirrors the runtime dependencies and optional plotting extras can be found in the `analysis` extra above.
+
 ## Quick start
 
 ```bash
-python -m mcdo.sample \
+uclip-sample \
   --model openai/clip-vit-base-patch32 \
   --img path/to/image.jpg \
   --out runs/example \
   --passes 128 \
   --labels prompts.txt
 ```
+
+The legacy invocation (`python -m mcdo.sample`) remains available via lightweight compatibility shims.
 
 Key flags:
 
@@ -37,12 +49,4 @@ Provide either `--labels prompts.txt` (newline-separated prompts) or `--text-emb
 - TF32 is enabled unless `--disable-tf32` is supplied.
 - The CLI reapplies selective dropout enabling before every pass so LayerNorm and other modules stay in evaluation mode.
 
-## Installation
-
-Install dependencies with:
-
-```bash
-pip install -r requirements.txt
-```
-
-The script expects the Hugging Face `transformers` cache to be accessible or network downloads to be allowed the first time a backbone is requested.
+The scripts expect the Hugging Face `transformers` cache to be accessible or network downloads to be allowed the first time a backbone is requested.

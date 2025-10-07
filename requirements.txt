@@ -1,4 +1,1 @@
-torch>=2.2
-transformers>=4.43
-numpy
-Pillow
+-r requirements/base.txt

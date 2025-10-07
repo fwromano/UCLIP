@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "uclip"
+version = "0.1.0"
+description = "Monte Carlo Dropout toolkit for CLIP-style backbones"
+readme = "README.md"
+requires-python = ">=3.9"
+authors = [
+  { name = "UCLIP contributors" }
+]
+dependencies = [
+  "torch>=2.2",
+  "transformers>=4.43",
+  "numpy",
+  "Pillow",
+]
+
+[project.optional-dependencies]
+analysis = [
+  "matplotlib>=3.8",
+  "scikit-learn>=1.3",
+  "plotly>=5.20",
+  "torchvision>=0.17",
+  "pandas>=1.5",
+]
+
+[project.scripts]
+uclip-sample = "uclip.cli.sample:main"
+uclip-mnist = "uclip.cli.mnist_driver:main"
+uclip-perturb = "uclip.cli.perturbation_study:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
