@@ -20,7 +20,7 @@
 
 - For reference only, the ambient trace was 11.61 (std 5.45); the tangent projection trims ~30% of the energy and collapses the dominant eigenvalue by ~75%.
 
-![Ambient vs Tangent trace](../report_assets/mnist_mcdo/assets/trace_ambient_vs_tangent.png)
+![Ambient vs Tangent trace](../../report_assets/mnist_mcdo/assets/trace_ambient_vs_tangent.png)
 
 ## 3. Circular statistics (single scalar of dispersion)
 - Treat each dropout embedding as a point on the sphere; the **resultant length** `R = |(1/T)sum z^{(t)}|` summarises how tightly they cluster. The complementary **circular variance** is `V_circ = 1 - R`.
@@ -28,11 +28,11 @@
   - `R_mean = 0.957 +/- 0.024` (1.0 means perfect agreement).
   - `V_circ = 0.043 +/- 0.024` - a compact, unitless uncertainty scalar you can quote per image.
 
-![Circular variance histogram](../report_assets/mnist_mcdo/assets/circular_variance_hist.png)
+![Circular variance histogram](../../report_assets/mnist_mcdo/assets/circular_variance_hist.png)
 
 Resultant length tends to drop whenever tangent trace grows:
 
-![Resultant vs Tangent](../report_assets/mnist_mcdo/assets/resultant_vs_tangent.png)
+![Resultant vs Tangent](../../report_assets/mnist_mcdo/assets/resultant_vs_tangent.png)
 
 ## 4. Sample call-outs (images + numbers)
 - The eight samples previously used in the ambient report are revisited here with tangent-only metrics. Larger tangent trace -> more elongated ellipsoid -> lower resultant length.
@@ -58,22 +58,22 @@ Resultant length tends to drop whenever tangent trace grows:
 
 | idx 318 (digit 2) | idx 640 (digit 1) | idx 200 (digit 3) | idx 279 (digit 1) | idx 945 (digit 2) |
 | --- | --- | --- | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/sample_00318_digit2.png) | ![](../report_assets/mnist_mcdo/assets/sample_00640_digit1.png) | ![](../report_assets/mnist_mcdo/assets/sample_00200_digit3.png) | ![](../report_assets/mnist_mcdo/assets/sample_00279_digit1.png) | ![](../report_assets/mnist_mcdo/assets/sample_00945_digit2.png) |
+| ![](../../report_assets/mnist_mcdo/assets/sample_00318_digit2.png) | ![](../../report_assets/mnist_mcdo/assets/sample_00640_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/sample_00200_digit3.png) | ![](../../report_assets/mnist_mcdo/assets/sample_00279_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/sample_00945_digit2.png) |
 
 ### 4.1 Tangent-space PCA views
-- **All digits (tangent covariances):** ![Tangent PCA (all digits)](../report_assets/mnist_mcdo/assets/pca_tangent_all.png)
+- **All digits (tangent covariances):** ![Tangent PCA (all digits)](../../report_assets/mnist_mcdo/assets/pca_tangent_all.png)
   - Ellipsoids shrink noticeably compared to the ambient plot; the projection removes radial artefacts.
 - **Digits 1 vs 7 (tangent):**
 
-  ![Tangent PCA digits 1 and 7](../report_assets/mnist_mcdo/assets/pca_tangent_1_7.png)
+  ![Tangent PCA digits 1 and 7](../../report_assets/mnist_mcdo/assets/pca_tangent_1_7.png)
 
 | idx 0 (digit 7) | idx 2 (digit 1) | idx 5 (digit 1) | idx 14 (digit 1) |
 | --- | --- | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00000_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00002_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00005_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00014_digit1.png) |
+| ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00000_digit7.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00002_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00005_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00014_digit1.png) |
 
 | idx 17 (digit 7) | idx 26 (digit 7) | idx 29 (digit 1) | idx 34 (digit 7) |
 | --- | --- | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00017_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00026_digit7.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00029_digit1.png) | ![](../report_assets/mnist_mcdo/assets/pca_d1d7_00034_digit7.png) |
+| ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00017_digit7.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00026_digit7.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00029_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d1d7_00034_digit7.png) |
 
 | Index | Digit | Tangent trace | lambda_max(tan) | `V_circ` |
 | --- | --- | --- | --- | --- |
@@ -88,15 +88,15 @@ Resultant length tends to drop whenever tangent trace grows:
 
 - **Digits 3 vs 5 (tangent):**
 
-  ![Tangent PCA digits 3 and 5](../report_assets/mnist_mcdo/assets/pca_tangent_3_5.png)
+  ![Tangent PCA digits 3 and 5](../../report_assets/mnist_mcdo/assets/pca_tangent_3_5.png)
 
 | idx 8 (digit 5) | idx 15 (digit 5) | idx 18 (digit 3) | idx 23 (digit 5) |
 | --- | --- | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00008_digit5.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00015_digit5.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00018_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00023_digit5.png) |
+| ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00008_digit5.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00015_digit5.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00018_digit3.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00023_digit5.png) |
 
 | idx 30 (digit 3) | idx 32 (digit 3) | idx 44 (digit 3) | idx 45 (digit 5) |
 | --- | --- | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00030_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00032_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00044_digit3.png) | ![](../report_assets/mnist_mcdo/assets/pca_d3d5_00045_digit5.png) |
+| ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00030_digit3.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00032_digit3.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00044_digit3.png) | ![](../../report_assets/mnist_mcdo/assets/pca_d3d5_00045_digit5.png) |
 
 | Index | Digit | Tangent trace | lambda_max(tan) | `V_circ` |
 | --- | --- | --- | --- | --- |
@@ -114,9 +114,9 @@ Resultant length tends to drop whenever tangent trace grows:
 
 | idx 279 | idx 688 |
 | --- | --- |
-| ![](../report_assets/mnist_mcdo/assets/sample_00279_digit1.png) | ![](../report_assets/mnist_mcdo/assets/sample_00688_digit6.png) |
+| ![](../../report_assets/mnist_mcdo/assets/sample_00279_digit1.png) | ![](../../report_assets/mnist_mcdo/assets/sample_00688_digit6.png) |
 
-![2D Tangent PCA of samples 279 & 688](../report_assets/mnist_mcdo/assets/pca_samples_279_688_tangent.png)
+![2D Tangent PCA of samples 279 & 688](../../report_assets/mnist_mcdo/assets/pca_samples_279_688_tangent.png)
 
 ## 6. Towards epistemic vs aleatoric decomposition
 The tangent stats give you one knob; splitting them now requires a second knob (`a`) that injects data noise:
@@ -133,7 +133,7 @@ Implementation hook: `mcdo.geometry_analysis` already streams per-sample covaria
 - **OOD probes:** feed rotated/blurred digits as a separate slice. Expect tangent trace to rise primarily through the epistemic term (if you add the augmentation channel above).
 
 ## 8. Quick-start tooling
-- `python -m mcdo.geometry_analysis runs/mnist_encoder_only_dropout_p001_T10_L1000 --out docs/report_assets/mnist_mcdo/geometry_summary_p001.json`
+- `python -m mcdo.geometry_analysis runs/mnist_encoder_only_dropout_p001_T10_L1000 --out ../../report_assets/mnist_mcdo/geometry_summary_p001.json`
   - Produces per-sample tangent stats plus dataset summary.
 - `scripts/3dpca.sh`
   - Option 1/2/3 now open interactive Plotly PCA views with hover-inlined MNIST thumbnails.

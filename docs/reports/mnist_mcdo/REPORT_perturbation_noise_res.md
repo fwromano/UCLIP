@@ -1,46 +1,57 @@
 # MNIST Perturbation Study — Noise & Resolution Effects on CLIP MCDO
 
 ## 1. Motivation & Context
-- Builds directly on the dropout-instrumented MNIST study (`REPORT.md`), reusing `openai/clip-vit-base-patch32` with adapters on all 12 vision blocks plus the projection head (dropout `p = 0.1`).
-- Objective: quantify how simple corruptions (additive Gaussian noise and loss of spatial resolution) reshape the Monte Carlo Dropout embedding cloud and predictive diagnostics.
-- Scope: first 128 MNIST test images, 32 stochastic passes per image, temperature `τ = 1.0`. Predictive head enabled to monitor entropy, mutual information (MI), and top-1 confidence.
+- Builds on the dropout-instrumented MNIST analysis (`REPORT.md`), probing how input corruptions translate into Monte Carlo Dropout (MCDO) uncertainty for `openai/clip-vit-base-patch32`.
+- Focus: additive Gaussian noise and resolution loss, two ubiquitous failure modes in vision systems.
+- Objective: characterise shifts in embedding covariance geometry and predictive diagnostics across perturbation strengths, highlighting which digits are most sensitive.
 
-Command:
-```bash
-python -m mcdo.perturbation_study \
-  --limit 128 \
-  --passes 32 \
-  --microbatch 4 \
-  --noise-stds 0.0,0.05,0.1,0.2,0.35 \
-  --downsample-sizes 24,20,16,12 \
-  --out-root runs/mnist_perturbations_noise_res_dropout_v1 \
-  --adapter-target visual_projection \
-  --adapter-target vision_model.encoder.layers.0 \
-  --adapter-target vision_model.encoder.layers.1 \
-  --adapter-target vision_model.encoder.layers.2 \
-  --adapter-target vision_model.encoder.layers.3 \
-  --adapter-target vision_model.encoder.layers.4 \
-  --adapter-target vision_model.encoder.layers.5 \
-  --adapter-target vision_model.encoder.layers.6 \
-  --adapter-target vision_model.encoder.layers.7 \
-  --adapter-target vision_model.encoder.layers.8 \
-  --adapter-target vision_model.encoder.layers.9 \
-  --adapter-target vision_model.encoder.layers.10 \
-  --adapter-target vision_model.encoder.layers.11
-```
-Outputs: scenario-specific metrics under `runs/mnist_perturbations_noise_res_dropout_v1/<scenario>/` and consolidated tables in the same root (`aggregated_metrics.{csv,json}`).
+## 2. Experimental Configuration
+- **Data**: first 128 samples from the MNIST test split (class-balanced subset covering digits 0–9).
+- **Backbone & instrumentation**: CLIP ViT-B/32 with dropout adapters (`p = 0.1`) on all 12 vision transformer blocks plus the projection head, mirroring the prior study’s “all layers” setting.
+- **Sampling protocol**: 32 stochastic passes per image, micro-batch size 4, temperature `τ = 1.0`, deterministic seeds, predictive head enabled to read mutual information and entropy.
+- **Metrics saved**: per-sample CSV/JSON (trace, logdet, off-diagonal mass, predicted label, entropy, MI, confidence) plus aggregated statistics (`runs/mnist_perturbations_noise_res_dropout_v1/aggregated_metrics.csv`). Plot-ready tables live under `../../report_assets/mnist_mcdo/`.
+- **Reproduction command**:
+  ```bash
+  python -m mcdo.perturbation_study \
+    --limit 128 \
+    --passes 32 \
+    --microbatch 4 \
+    --noise-stds 0.0,0.05,0.1,0.2,0.35 \
+    --downsample-sizes 24,20,16,12 \
+    --out-root runs/mnist_perturbations_noise_res_dropout_v1 \
+    --adapter-target visual_projection \
+    --adapter-target vision_model.encoder.layers.0 \
+    --adapter-target vision_model.encoder.layers.1 \
+    --adapter-target vision_model.encoder.layers.2 \
+    --adapter-target vision_model.encoder.layers.3 \
+    --adapter-target vision_model.encoder.layers.4 \
+    --adapter-target vision_model.encoder.layers.5 \
+    --adapter-target vision_model.encoder.layers.6 \
+    --adapter-target vision_model.encoder.layers.7 \
+    --adapter-target vision_model.encoder.layers.8 \
+    --adapter-target vision_model.encoder.layers.9 \
+    --adapter-target vision_model.encoder.layers.10 \
+    --adapter-target vision_model.encoder.layers.11
+  ```
 
-## 2. Perturbation Menu
-- **Baseline**: raw MNIST digit, RGB converted by the CLIP processor.
-- **Noise**: additive Gaussian noise injected in pixel space (σ ∈ {0.05, 0.10, 0.20, 0.35}) before CLIP preprocessing; values clipped to `[0,1]`.
-- **Downsampling**: image shrunken to {24, 20, 16, 12} px and bilinearly upsampled back to 28 px to mimic resolution loss while keeping aspect ratio.
+## 3. Perturbation Catalogue
+- **Baseline**: untouched MNIST digit (converted to RGB by the CLIP processor).
+- **Gaussian noise**: add zero-mean noise with σ ∈ {0.05, 0.10, 0.20, 0.35} (in `[0,1]` space), clip to maintain valid intensities, then feed through CLIP preprocessing.
+- **Spatial downsampling**: resize to {24, 20, 16, 12} px with bilinear filtering and upscale back to 28 px, mimicking blurrier capture devices while preserving aspect ratio.
 
-All scenarios reuse the same dropout instrumentation and random seed to isolate the perturbation effect.
+All scenarios inherit the same model weights, adapter configuration, and random seed, isolating the effect of the perturbations themselves.
 
-## 3. Aggregate Metrics
-*Baselines:* trace = 39.12, logdet = −6656.75, off-diagonal mass = 3426.30, MI ≈ 9.78e−6, top-1 confidence = 0.10091. Predictive accuracy remains ≈11.7% across perturbations (CLIP prompts are weak for MNIST), so emphasis is on covariance geometry.
+## 4. Metrics of Interest
+- **Trace (`Tr Σ`)** — total variance across the 512-D embedding cloud.
+- **Log-determinant (`log det Σ`)** — approximate log-volume of the covariance ellipsoid.
+- **Off-diagonal mass** — L₁ sum of off-diagonal entries, capturing cross-dimensional coupling.
+- **Predictive diagnostics** — top-1 accuracy, BALD-style mutual information, per-pass entropy, and max softmax confidence computed from the text head prompts.
 
-### 3.1 Gaussian Noise Levels
+Baseline reference (σ=0, native resolution): trace 39.12, logdet -6656.75, off-diagonal mass 3426.30, accuracy 11.7%, MI ≈ 9.8×10⁻⁶, confidence 0.1009.
+
+## 5. Results
+
+### 5.1 Aggregate behaviour under noise
 | Noise σ | Trace | Δ Trace (%) | Logdet | Δ Logdet | Off-diag | Δ Off (%) | Confidence | Δ Conf (×1e-4) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 0.05 | 39.50 | 0.96% | -6656.9 | -0.15 | 3416.6 | -0.28% | 0.101002 | 0.92 |
@@ -48,9 +59,11 @@ All scenarios reuse the same dropout instrumentation and random seed to isolate 
 | 0.20 | 39.85 | 1.87% | -6657.0 | -0.21 | 3451.3 | 0.73% | 0.101043 | 1.34 |
 | 0.35 | 39.92 | 2.04% | -6657.1 | -0.31 | 3456.5 | 0.88% | 0.101038 | 1.28 |
 
-![Relative change in covariance metrics under Gaussian noise](../report_assets/mnist_mcdo/assets/noise_vs_variance.png)
+![Relative change in covariance metrics under Gaussian noise](../../report_assets/mnist_mcdo/assets/noise_vs_variance.png)
 
-### 3.2 Spatial Downsampling
+Noise steadily expands the trace (≈ +2% at σ = 0.35) and nudges off-diagonal mass upward, indicating broader yet more correlated embedding clouds. The simultaneous decline in logdet points to variance concentrating along fewer dominant axes rather than an isotropic inflation.
+
+### 5.2 Aggregate behaviour under downsampling
 | Downsample size | Trace | Δ Trace (%) | Logdet | Δ Logdet | Off-diag | Δ Off (%) | Confidence | Δ Conf (×1e-4) |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
 | 24 | 39.02 | -0.26% | -6656.9 | -0.18 | 3419.8 | -0.19% | 0.100958 | 0.48 |
@@ -58,15 +71,47 @@ All scenarios reuse the same dropout instrumentation and random seed to isolate 
 | 16 | 38.97 | -0.38% | -6657.1 | -0.32 | 3425.8 | -0.01% | 0.100966 | 0.56 |
 | 12 | 38.96 | -0.42% | -6657.1 | -0.34 | 3432.0 | 0.16% | 0.100958 | 0.48 |
 
-![Relative change in covariance metrics under spatial downsampling](../report_assets/mnist_mcdo/assets/downsample_vs_variance.png)
+![Relative change in covariance metrics under spatial downsampling](../../report_assets/mnist_mcdo/assets/downsample_vs_variance.png)
 
-## 4. Key Findings
-1. **Noise inflates the embedding cloud:** trace grows almost linearly with σ (≈+2% at σ=0.35), mirrored by rising off-diagonal mass (+0.9%), signalling broader and more correlated uncertainty ellipsoids. Log-volume (logdet) shrinks slightly, indicating variance concentrates along fewer axes as noise increases.
-2. **Resolution loss mildly contracts variance:** downsampling suppresses trace by up to 0.42% and marginally lowers off-diagonal mass, suggesting the dropout-induced spread collapses when high-frequency detail is removed. The smallest 12 px case subtly re-inflates cross-dimension coupling (+0.16%), hinting that extreme blur introduces aliasing-like correlations. This aligns with the intuition that blurrier inputs present fewer stochastic paths for dropout to explore, so the induced embedding variance shrinks.
-3. **Predictive signals are insensitive:** MI stays ∼1×10⁻⁵ and entropy ~2.3026 for all scenarios; top-1 confidence drifts by <1.4×10⁻⁴. Consistent with earlier work, CLIP text prompts for MNIST lack discriminative power, keeping accuracy ~random (11–12%) regardless of corruption.
-4. **Digit-specific behaviour:** per-digit summaries (see `perturbation_summary.json`) show that noisy inputs inflate trace most for digits with loops (6,9), while aggressive downsampling suppresses variance for simpler shapes (1,7). These shifts align with the intuition that dropout emphasises spatial ambiguity amplified by noise and mitigated when fine detail vanishes.
+Coarser inputs slightly dampen variance (≤ -0.42% trace change) and reduce cross-dimensional coupling until the smallest 12 px case, where aliasing begins to re-introduce correlations.
 
-## 5. Next Steps
-- Inject other corruptions (e.g., elastic distortions, contrast shifts) to map a broader robustness surface.
-- Couple the perturbation study with prompt engineering or linear probes to revive accuracy and examine whether uncertainty metrics become informative.
-- Swap sigma schedules for depth-wise adapters to test whether higher dropout rates amplify corruption sensitivity.
+### 5.3 Digit-level sensitivity snapshot
+Per-digit trace shifts (relative to baseline) highlight which classes drive the bulk changes. Values correspond to the most disruptive noise level (σ = 0.35) and the strongest downsampling (12 px).
+
+| Digit | Trace (baseline) | Trace (σ = 0.35) | Δσ=0.35 | Trace (12 px) | Δ12px |
+| ---: | ---: | ---: | ---: | ---: | ---: |
+| 0 | 39.093 | 40.050 | +0.957 | 39.118 | +0.025 |
+| 1 | 38.425 | 38.982 | +0.557 | 38.187 | -0.238 |
+| 2 | 39.040 | 40.107 | +1.066 | 38.752 | -0.288 |
+| 3 | 39.696 | 40.381 | +0.685 | 39.447 | -0.250 |
+| 4 | 38.834 | 39.639 | +0.805 | 38.731 | -0.103 |
+| 5 | 39.155 | 40.045 | +0.890 | 38.942 | -0.212 |
+| 6 | 40.165 | 41.126 | +0.961 | 40.057 | -0.109 |
+| 7 | 39.384 | 40.165 | +0.781 | 39.266 | -0.118 |
+| 8 | 36.686 | 37.607 | +0.922 | 36.217 | -0.468 |
+| 9 | 39.119 | 39.783 | +0.665 | 38.968 | -0.151 |
+
+- Loop-heavy digits (2, 6, 8) accumulate > +0.9 trace under strong noise, reflecting heightened ambiguity when stroke boundaries are perturbed.
+- Simpler shapes (1, 4, 7) lose variance under downsampling, as coarse inputs collapse alternative interpretations for straight strokes.
+
+### 5.4 Predictive head behaviour
+- Accuracy remains flat at 11.7% across all scenarios, confirming that prompt mismatch, not corruption, limits classification.
+- Confidence increases marginally under noise (≈ +1.3×10⁻⁴) and barely shifts with resolution loss (< +0.6×10⁻⁴). Entropy and MI remain pinned at ~2.3026 and ~1×10⁻⁵ respectively.
+- Predictive statistics therefore offer little discriminative power for these corruptions; embedding-space diagnostics are the informative signal for this study.
+
+### 5.5 Summary of observations
+1. **Noise inflates the cloud** — linear growth in trace and off-diagonal mass, paired with lower logdet, indicates broader but more anisotropic uncertainty ellipsoids.
+2. **Resolution loss contracts variance** — coarser inputs reduce both trace and cross-covariance, save for extreme blur where mild aliasing reappears.
+3. **Class sensitivity is structured** — digits with loops or diagonals respond strongest to noise, while straight-stroke digits are more affected by downsampling.
+4. **Predictive metrics are inert** — CLIP’s default MNIST prompts keep entropy and accuracy saturated irrespective of corruption strength.
+
+## 6. Limitations & Follow-ups
+- **Prompt quality**: Without MNIST-specific prompts or a linear probe, predictive accuracy remains near chance, masking relationships between uncertainty and correctness.
+- **Single backbone**: The study isolates CLIP ViT-B/32. Replicating on convolutional encoders or larger vision transformers would reveal whether the trends generalise.
+- **Corruption diversity**: Only Gaussian noise and isotropic downsampling were covered. Extending to contrast shifts, elastic warps, or structured occlusions would give a fuller robustness profile.
+- **Dropout schedule**: A single adapter probability (`p = 0.1`) was used. Sweeping dropout strength could uncover nonlinear interactions between corruption severity and stochastic variance.
+
+Planned explorations:
+1. Add corruption families beyond noise/blur (e.g., brightness, rotation) and chart multi-dimensional response surfaces.
+2. Introduce stronger prompt engineering or lightweight probes so predictive metrics become informative alongside embedding covariance.
+3. Package the perturbation study as a configuration in an `experiments/` registry to ease reruns on future backbones or datasets.

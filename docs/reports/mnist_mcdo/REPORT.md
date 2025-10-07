@@ -33,24 +33,24 @@
 - **Mean trace**: 38.9 (std 1.1) across the 64-sample subset.
 - **Mean log-det**: −6280.7 (std 2.1).
 - **Mean off-diagonal mass**: 3059.3 (std 120.3).
-  (Source: `docs/report_assets/mnist_mcdo/report_stats_embeddings.json`.)
+  (Source: `../../report_assets/mnist_mcdo/report_stats_embeddings.json`.)
 
-![Trace histogram](../report_assets/mnist_mcdo/assets/trace_histogram_embeddings.png)
+![Trace histogram](../../report_assets/mnist_mcdo/assets/trace_histogram_embeddings.png)
 *Trace spans roughly 35–41, confirming that dropout at every layer widens the embedding distribution compared to projection-only dropout.*
 
-![Logdet histogram](../report_assets/mnist_mcdo/assets/logdet_histogram_embeddings.png)
+![Logdet histogram](../../report_assets/mnist_mcdo/assets/logdet_histogram_embeddings.png)
 *Log-volumes show a compact band (~3 log-units wide), indicating the overall uncertainty ellipsoid scales consistently across digits.*
 
-![Trace vs off-diagonal mass](../report_assets/mnist_mcdo/assets/trace_vs_offdiag_embeddings.png)
+![Trace vs off-diagonal mass](../../report_assets/mnist_mcdo/assets/trace_vs_offdiag_embeddings.png)
 *Higher total variance correlates with stronger cross-dimensional covariance, suggesting dropout perturbs many embedding axes simultaneously.*
 
-![Trace per sample](../report_assets/mnist_mcdo/assets/trace_per_sample_embeddings.png)
+![Trace per sample](../../report_assets/mnist_mcdo/assets/trace_per_sample_embeddings.png)
 *Trace varies smoothly across MNIST indices; no single digit collapses the MCDO variance.*
 
 ## 4. Embedding Clouds
 To visualise the stochastic cloud for representative digits, we project each sample’s 64 embeddings onto the first two principal directions of its covariance and overlay a 2σ ellipse.
 
-![Embedding clouds](../report_assets/mnist_mcdo/assets/embedding_clouds_embeddings.png)
+![Embedding clouds](../../report_assets/mnist_mcdo/assets/embedding_clouds_embeddings.png)
 
 Even though predictive confidences were not computed, the figure shows rich structure: some digits exhibit narrow ellipses (low trace) while others admit broad, tilted shapes, confirming that MCDO exposes meaningful variability in CLIP’s feature space.
 
