@@ -8,3 +8,4 @@ docs/reports/mnist_mcdo/REPORT_*.pdf
 # Python cache
 __pycache__/
 *.pyc
+
