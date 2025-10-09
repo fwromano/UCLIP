@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import argparse
+import re
 import sys
 import webbrowser
 from pathlib import Path
-from typing import List, Sequence
+from typing import Dict, List, Sequence
 
 # Allow running without installing the package by injecting repository root.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +42,9 @@ COLOR_HEX = {
     "black": "#222222",
     "white": "#f0f0f0",
     "gray": "#7f7f7f",
+    "wolf": "#7f7f7f",
+    "moose": "#8c564b",
+    "chrome": "#aaaaaa",
 }
 
 FALLBACK_PALETTE = [
@@ -139,6 +143,12 @@ def parse_args(argv: Sequence[str] | None = None) -> argparse.Namespace:
         "--no-open",
         action="store_true",
         help="Do not automatically open the interactive HTML in a browser.",
+    )
+    parser.add_argument(
+        "--subset-output-dir",
+        type=Path,
+        default=Path("notebooks/clip_mcdo_pca_subsets"),
+        help="Directory for subgroup PCA plots (empty string to disable).",
     )
     return parser.parse_args(argv)
 
@@ -337,6 +347,89 @@ def ellipsoid_mesh(
     return x_r, y_r, z_r
 
 
+def slugify(text: str) -> str:
+    token = re.sub(r"[^A-Za-z0-9]+", "_", text).strip("_").lower()
+    return token or "group"
+
+
+def build_subset_plot(
+    subset_records: Sequence[dict],
+    title: str,
+    output_path: Path,
+    dpi: int,
+) -> None:
+    projected_records = []
+    combined = np.concatenate([record["mc_samples"] for record in subset_records], axis=0)
+    if combined.shape[0] < 2:
+        print(f"Skipping subset '{title}' (needs at least two stochastic samples).")
+        return
+    try:
+        subset_mean, subset_components, _, subset_ratio = fit_pca(combined, n_components=2)
+    except ValueError as exc:
+        print(f"Skipping subset '{title}' (PCA failed: {exc})")
+        return
+
+    for record in subset_records:
+        centered_samples = record["mc_samples"] - subset_mean
+        projected_samples = centered_samples @ subset_components.T
+        projected_mean = (record["mc_mean"] - subset_mean) @ subset_components.T
+        projected_det = (record["deterministic"] - subset_mean) @ subset_components.T
+        projected_records.append(
+            {
+                "label": record["label"],
+                "color": record["color"],
+                "proj_samples_2d": projected_samples,
+                "proj_mean_2d": projected_mean,
+                "proj_deterministic_2d": projected_det,
+                "proj_cov_2d": compute_projected_covariance(projected_samples),
+            }
+        )
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    build_plot(
+        records=projected_records,
+        explained_ratio=subset_ratio,
+        title=title,
+        dpi=dpi,
+        output_path=output_path,
+        show=False,
+    )
+    print(f"Saved subset PCA to {output_path}")
+
+
+def generate_subset_plots(
+    records: Sequence[dict],
+    output_dir: Path,
+    dpi: int,
+) -> None:
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    by_category: Dict[str, List[dict]] = {}
+    by_angle: Dict[str, List[dict]] = {}
+
+    for record in records:
+        category = record.get("category", "unknown")
+        by_category.setdefault(category, []).append(record)
+        angle = record.get("angle")
+        if angle and angle.lower() not in {"", "na"}:
+            by_angle.setdefault(angle, []).append(record)
+
+    for category, subset in by_category.items():
+        if not subset:
+            continue
+        title = f"PCA — category {category}"
+        path = output_dir / f"category_{slugify(category)}.png"
+        build_subset_plot(subset, title, path, dpi=dpi)
+
+    for angle, subset in by_angle.items():
+        if not subset:
+            continue
+        title = f"PCA — angle {angle}"
+        path = output_dir / f"angle_{slugify(angle)}.png"
+        build_subset_plot(subset, title, path, dpi=dpi)
+
+
 def build_interactive_plot(
     records: Sequence[dict],
     explained_ratio: np.ndarray,
@@ -515,10 +608,20 @@ def main(argv: Sequence[str] | None = None) -> None:
         # Ensure the backbone returns to evaluation mode after dropout sampling.
         model.eval()
 
+        label = path.stem
+        relative_parts = path.relative_to(args.data_dir).parts
+        if len(relative_parts) > 1:
+            category = relative_parts[0]
+        else:
+            category = label.split("_", 1)[0]
+        angle = label.split("_")[-1] if "_" in label else "NA"
+
         records.append(
             {
                 "path": path,
-                "label": path.stem,
+                "label": label,
+                "category": category,
+                "angle": angle,
                 "deterministic": deterministic.detach().cpu().numpy(),
                 "mc_samples": stats.embeddings.detach().cpu().numpy(),
                 "mc_mean": stats.mean.detach().cpu().numpy(),
@@ -552,6 +655,9 @@ def main(argv: Sequence[str] | None = None) -> None:
         record["proj_cov_3d"] = compute_projected_covariance(record["proj_samples_3d"])
 
         base_colour = record["label"].split("_", 1)[0].lower()
+        base_colour = base_colour.rstrip("0123456789")
+        if not base_colour:
+            base_colour = record["label"].split("_", 1)[0].lower()
         record["color"] = COLOR_HEX.get(base_colour, FALLBACK_PALETTE[idx % len(FALLBACK_PALETTE)])
 
     print(f"Explained variance ratios (first three PCs): {explained_ratio_3d}")
@@ -587,6 +693,14 @@ def main(argv: Sequence[str] | None = None) -> None:
                 webbrowser.open(args.html_output.resolve().as_uri(), new=2)
             except Exception as exc:  # pragma: no cover - best-effort IE environment
                 print(f"Warning: failed to open browser automatically: {exc}")
+
+    if args.subset_output_dir and str(args.subset_output_dir).strip():
+        print(f"Saving subset PCA visuals to {args.subset_output_dir}")
+        generate_subset_plots(
+            records=records,
+            output_dir=args.subset_output_dir,
+            dpi=args.dpi,
+        )
 
     print("Done.")
 
