@@ -1,3 +1,177 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>REPORT</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
 <h1 id="sim2-45-clip-mcdo-noise-study">Sim2 45° CLIP MCDO Noise
 Study</h1>
 <h2 id="introduction">1. Introduction</h2>
@@ -61,444 +235,127 @@ estimates converge as the number of stochastic passes T increases.</li>
 </ul>
 <h2 id="aggregate-mcdo-embedding-metrics">4. Aggregate MCDO Embedding
 Metrics</h2>
-<table>
-<colgroup>
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-<col style="width: 25%" />
-</colgroup>
-<thead>
-<tr>
-<th>transform</th>
-<th>trace</th>
-<th>logdet</th>
-<th>off-diag mass</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>original</td>
-<td>12.3135 ± 2.6974</td>
-<td>-6376.0333 ± 10.0092</td>
-<td>1609.7769 ± 490.2831</td>
-</tr>
-<tr>
-<td>gaussian_noise_010</td>
-<td>12.6023 ± 2.7577</td>
-<td>-6374.4188 ± 9.8618</td>
-<td>1637.2628 ± 489.9699</td>
-</tr>
-<tr>
-<td>gaussian_noise_020</td>
-<td>12.5631 ± 2.6985</td>
-<td>-6373.7425 ± 9.3996</td>
-<td>1578.3083 ± 471.0835</td>
-</tr>
-<tr>
-<td>gaussian_noise_050</td>
-<td>12.3926 ± 2.6261</td>
-<td>-6375.8614 ± 8.2435</td>
-<td>1554.1500 ± 465.1700</td>
-</tr>
-<tr>
-<td>gaussian_noise_100</td>
-<td>12.4558 ± 2.5969</td>
-<td>-6376.6802 ± 7.1463</td>
-<td>1554.7016 ± 455.9900</td>
-</tr>
-<tr>
-<td>gaussian_noise_200</td>
-<td>12.5629 ± 2.5728</td>
-<td>-6377.9926 ± 6.7516</td>
-<td>1515.4276 ± 458.6859</td>
-</tr>
-<tr>
-<td>gaussian_noise_500</td>
-<td>12.8031 ± 2.7534</td>
-<td>-6383.9255 ± 6.6858</td>
-<td>1419.4581 ± 431.2209</td>
-</tr>
-<tr>
-<td>saltpepper_5pct</td>
-<td>12.7279 ± 2.5296</td>
-<td>-6375.3044 ± 6.3954</td>
-<td>1533.5533 ± 450.0526</td>
-</tr>
-<tr>
-<td>downsample_1pct</td>
-<td>12.3825 ± 2.6268</td>
-<td>-6375.9890 ± 9.1654</td>
-<td>1581.4901 ± 470.5102</td>
-</tr>
-<tr>
-<td>downsample_2pct</td>
-<td>12.3977 ± 2.6292</td>
-<td>-6375.7912 ± 9.2649</td>
-<td>1582.6807 ± 469.3839</td>
-</tr>
-<tr>
-<td>downsample_5pct</td>
-<td>12.4478 ± 2.6403</td>
-<td>-6375.7133 ± 9.0908</td>
-<td>1583.8291 ± 468.7956</td>
-</tr>
-<tr>
-<td>downsample_10pct</td>
-<td>12.4398 ± 2.6474</td>
-<td>-6375.7898 ± 9.0936</td>
-<td>1583.6615 ± 468.6407</td>
-</tr>
-<tr>
-<td>downsample_20pct</td>
-<td>12.4790 ± 2.6145</td>
-<td>-6375.9428 ± 8.7840</td>
-<td>1585.3060 ± 469.0101</td>
-</tr>
-<tr>
-<td>downsample_40pct</td>
-<td>12.6968 ± 2.5948</td>
-<td>-6375.4607 ± 8.3049</td>
-<td>1591.4691 ± 464.4259</td>
-</tr>
-<tr>
-<td>downsample_60pct</td>
-<td>13.0259 ± 2.5301</td>
-<td>-6374.7296 ± 7.5273</td>
-<td>1596.7464 ± 451.3209</td>
-</tr>
-<tr>
-<td>downsample_80pct</td>
-<td>13.5591 ± 2.5690</td>
-<td>-6374.3342 ± 6.5821</td>
-<td>1558.9208 ± 451.8482</td>
-</tr>
-<tr>
-<td>downsample_85pct</td>
-<td>13.5157 ± 2.6575</td>
-<td>-6375.1753 ± 6.4177</td>
-<td>1530.2184 ± 465.0788</td>
-</tr>
-<tr>
-<td>downsample_90pct</td>
-<td>13.2171 ± 2.5903</td>
-<td>-6377.9928 ± 6.2483</td>
-<td>1445.2168 ± 435.0733</td>
-</tr>
-<tr>
-<td>downsample_93pct</td>
-<td>12.8271 ± 2.6290</td>
-<td>-6380.8724 ± 6.6015</td>
-<td>1409.7417 ± 420.4236</td>
-</tr>
-</tbody>
-</table>
-<p>Baseline trace is 12.31, with logdet -6376.03 and off-diagonal mass
-1609.78. Noise and downsampling progressively broaden the covariance
-while gradually reducing logdet, especially for the most aggressive
-settings.</p>
+<p>Baseline trace is 12.31, with logdet -6376.03. Noise and crop-based
+degradations broaden the covariance while logdet declines; we report
+anisotropy using correlation-based Frobenius norms for scale-free
+comparison.</p>
+<p><em>Figure 1. Aggregate metrics overview. Aggressive downsampling
+emerges as the dominant driver of higher trace and lower log-volume
+across transforms.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/aggregate_overview.png"
+alt="Aggregate metrics overview" />
+<figcaption aria-hidden="true">Aggregate metrics overview</figcaption>
+</figure>
+<p><em>Figure 2. Mean shift across transforms. Mean embedding
+displacement mirrors the same ordering: raw (nearest) and smoothed
+(bicubic) crops introduce the largest drift from the deterministic
+baseline.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/mean_shift_bar.png"
+alt="Mean shift across transforms" />
+<figcaption aria-hidden="true">Mean shift across transforms</figcaption>
+</figure>
 <h2 id="deterministic-baseline-1-pass-dropout-disabled">5. Deterministic
 Baseline (1 pass, dropout disabled)</h2>
-<table>
-<thead>
-<tr>
-<th>transform</th>
-<th>trace</th>
-<th>logdet</th>
-<th>off-diag mass</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>original</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_010</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_020</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_050</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_100</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_200</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>gaussian_noise_500</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>saltpepper_5pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_1pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_2pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_5pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_10pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_20pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_40pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_60pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_80pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_85pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_90pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-<tr>
-<td>downsample_93pct</td>
-<td>5.12e-04</td>
-<td>-7073.5400</td>
-<td>0.0000</td>
-</tr>
-</tbody>
-</table>
-<p>All deterministic baselines remain numerically identical: covariance
-mass collapses to machine precision (trace 5.12e-04) with zero
-off-diagonal structure, underscoring that stochasticity is solely
-induced by dropout.</p>
+<p>With dropout disabled every run collapses to trace ≈ 5.12 × 10⁻⁴ and
+a singular covariance; logdet and anisotropy are therefore
+undefined.</p>
 <h2 id="sensitivity-to-noise">6. Sensitivity to Noise</h2>
-<table>
-<thead>
-<tr>
-<th>transform</th>
-<th>Δ trace (%)</th>
-<th>Δ logdet</th>
-<th>Δ off-diag (%)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>gaussian_noise_010</td>
-<td>2.35</td>
-<td>1.6145</td>
-<td>1.71</td>
-</tr>
-<tr>
-<td>gaussian_noise_020</td>
-<td>2.03</td>
-<td>2.2908</td>
-<td>-1.95</td>
-</tr>
-<tr>
-<td>gaussian_noise_050</td>
-<td>0.64</td>
-<td>0.1719</td>
-<td>-3.46</td>
-</tr>
-<tr>
-<td>gaussian_noise_100</td>
-<td>1.16</td>
-<td>-0.6468</td>
-<td>-3.42</td>
-</tr>
-<tr>
-<td>gaussian_noise_200</td>
-<td>2.03</td>
-<td>-1.9593</td>
-<td>-5.86</td>
-</tr>
-<tr>
-<td>gaussian_noise_500</td>
-<td>3.98</td>
-<td>-7.8921</td>
-<td>-11.82</td>
-</tr>
-<tr>
-<td>saltpepper_5pct</td>
-<td>3.37</td>
-<td>0.7289</td>
-<td>-4.74</td>
-</tr>
-</tbody>
-</table>
 <p>Trace grows steadily with σ; at σ=0.50 it reaches 12.80 (≈+4.0% vs
-baseline) while logdet drops to -6383.93, signalling that variance is
-expanding yet concentrating into fewer dominant axes.</p>
+baseline) while logdet shifts to -6383.93 (-7.89 vs baseline),
+signalling that variance expands yet concentrates into fewer dominant
+axes.</p>
+<p><em>Figure 3. Relative trace change under noise. Noise-only
+perturbations peak at +4.0% trace change when σ reaches its maximum
+setting.</em></p>
 <figure>
-<img src="../../report_assets/sim2_noise_study/trace_relative.png"
-alt="Relative trace change under noise &amp; downsampling" />
-<figcaption aria-hidden="true">Relative trace change under noise &amp;
-downsampling</figcaption>
+<img src="../../report_assets/sim2_noise_study/noise_trace_relative.png"
+alt="Relative trace change under noise" />
+<figcaption aria-hidden="true">Relative trace change under
+noise</figcaption>
 </figure>
+<p><em>Figure 4. Logdet shift under noise. Log-volume steadily contracts
+with noise strength, finishing at -7.89 relative to baseline.</em></p>
 <figure>
-<img src="../../report_assets/sim2_noise_study/logdet_relative.png"
-alt="Logdet shift relative to original" />
-<figcaption aria-hidden="true">Logdet shift relative to
-original</figcaption>
+<img
+src="../../report_assets/sim2_noise_study/noise_logdet_relative.png"
+alt="Logdet shift under noise" />
+<figcaption aria-hidden="true">Logdet shift under noise</figcaption>
 </figure>
+<p><em>Figure 5. Trace vs noise severity. Trace increases monotonically
+with σ, indicating broader stochastic clouds as perturbations
+intensify.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/noise_severity_trace.png"
 alt="Trace vs noise severity" />
 <figcaption aria-hidden="true">Trace vs noise severity</figcaption>
 </figure>
+<p><em>Figure 6. Logdet vs noise severity. Log-volume falls steadily
+with stronger noise, reflecting variance concentrating into fewer
+dominant modes.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/noise_severity_logdet.png"
 alt="Logdet vs noise severity" />
 <figcaption aria-hidden="true">Logdet vs noise severity</figcaption>
 </figure>
+<p><em>Figure 7. Correlation anisotropy vs noise severity.
+Cross-dimensional coupling grows gradually with σ, showing correlated
+drift rather than isotropic spread.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/noise_severity_corr_anisotropy.png"
+alt="Correlation anisotropy vs noise severity" />
+<figcaption aria-hidden="true">Correlation anisotropy vs noise
+severity</figcaption>
+</figure>
+<p><em>Figure 8. Mean shift vs noise severity. Monte Carlo means drift
+further from the deterministic embedding as σ increases, tracking the
+speckle strength.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/mean_shift_noise.png"
+alt="Mean shift vs noise severity" />
+<figcaption aria-hidden="true">Mean shift vs noise severity</figcaption>
+</figure>
 <h2 id="sensitivity-to-downsampling">7. Sensitivity to Downsampling</h2>
-<table>
-<thead>
-<tr>
-<th>transform</th>
-<th>Δ trace (%)</th>
-<th>Δ logdet</th>
-<th>Δ off-diag (%)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>downsample_1pct</td>
-<td>0.56</td>
-<td>0.0444</td>
-<td>-1.76</td>
-</tr>
-<tr>
-<td>downsample_2pct</td>
-<td>0.68</td>
-<td>0.2421</td>
-<td>-1.68</td>
-</tr>
-<tr>
-<td>downsample_5pct</td>
-<td>1.09</td>
-<td>0.3200</td>
-<td>-1.61</td>
-</tr>
-<tr>
-<td>downsample_10pct</td>
-<td>1.03</td>
-<td>0.2436</td>
-<td>-1.62</td>
-</tr>
-<tr>
-<td>downsample_20pct</td>
-<td>1.34</td>
-<td>0.0905</td>
-<td>-1.52</td>
-</tr>
-<tr>
-<td>downsample_40pct</td>
-<td>3.11</td>
-<td>0.5727</td>
-<td>-1.14</td>
-</tr>
-<tr>
-<td>downsample_60pct</td>
-<td>5.79</td>
-<td>1.3038</td>
-<td>-0.81</td>
-</tr>
-<tr>
-<td>downsample_80pct</td>
-<td>10.12</td>
-<td>1.6991</td>
-<td>-3.16</td>
-</tr>
-<tr>
-<td>downsample_85pct</td>
-<td>9.76</td>
-<td>0.8580</td>
-<td>-4.94</td>
-</tr>
-<tr>
-<td>downsample_90pct</td>
-<td>7.34</td>
-<td>-1.9594</td>
-<td>-10.22</td>
-</tr>
-<tr>
-<td>downsample_93pct</td>
-<td>4.17</td>
-<td>-4.8391</td>
-<td>-12.43</td>
-</tr>
-</tbody>
-</table>
-<p>Downsampling beyond 60% sharply increases trace (e.g., 93% reduction
-→ trace 12.83) while logdet falls to -6380.87, indicating uncertainty
-balloons along a handful of directions once spatial detail is largely
-removed.</p>
+<p>Smoothed crops (bicubic upsample) beyond 60% sharply increase trace
+(e.g., 93% reduction → trace 12.83) while logdet becomes
+non-monotone—after a mild plateau it collapses to -6380.87 (volume ratio
+≈ 0.008), consistent with aliasing and patch-token collapse once only a
+few pixels remain.</p>
+<p><em>Figure 9. Relative trace change under smoothed crop (bicubic).
+Smoothed crops peak around +4.2% trace change once spatial resolution
+drops to 93%.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/downsample_trace_relative.png"
+alt="Relative trace change under smoothed crop (bicubic)" />
+<figcaption aria-hidden="true">Relative trace change under smoothed crop
+(bicubic)</figcaption>
+</figure>
+<p><em>Figure 10. Logdet shift under smoothed crop (bicubic). Covariance
+volume contracts by -4.84 at the harshest smoothed crop, underscoring
+aliasing-driven collapse.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/downsample_logdet_relative.png"
+alt="Logdet shift under smoothed crop (bicubic)" />
+<figcaption aria-hidden="true">Logdet shift under smoothed crop
+(bicubic)</figcaption>
+</figure>
+<p><em>Figure 11. Trace distribution per transform. Trace variance fans
+out for the most aggressive downsampling settings, underscoring their
+broader uncertainty.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/trace_violin.png"
 alt="Trace distribution per transform" />
 <figcaption aria-hidden="true">Trace distribution per
 transform</figcaption>
 </figure>
+<p><em>Figure 12. Trace vs downsampling severity. Trace rises almost
+linearly until about 60% reduction before the 93% case accelerates
+beyond +4.2%.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/downsample_severity_trace.png"
@@ -506,6 +363,9 @@ alt="Trace vs downsampling severity" />
 <figcaption aria-hidden="true">Trace vs downsampling
 severity</figcaption>
 </figure>
+<p><em>Figure 13. Logdet vs downsampling severity. Log-volume stays flat
+for mild reductions then plunges once images fall below 20% of their
+original side length.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/downsample_severity_logdet.png"
@@ -513,29 +373,120 @@ alt="Logdet vs downsampling severity" />
 <figcaption aria-hidden="true">Logdet vs downsampling
 severity</figcaption>
 </figure>
+<p><em>Figure 14. Correlation anisotropy vs downsampling severity.
+Severe downsampling amplifies cross-dimensional coupling, showing the
+embedding cloud stretching along fewer axes.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/downsample_severity_corr_anisotropy.png"
+alt="Correlation anisotropy vs downsampling severity" />
+<figcaption aria-hidden="true">Correlation anisotropy vs downsampling
+severity</figcaption>
+</figure>
+<p><em>Figure 15. Mean shift vs smoothed crop severity. Mean
+displacement spikes once resolution falls below 60%, matching the trace
+surge caused by aggressive smoothing.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/mean_shift_downsample.png"
+alt="Mean shift vs smoothed crop severity" />
+<figcaption aria-hidden="true">Mean shift vs smoothed crop
+severity</figcaption>
+</figure>
+<p><em>Figure 16. Logdet distribution per transform. The tail of extreme
+downsampling skews toward very low logdet values, reinforcing the volume
+collapse story.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/logdet_violin.png"
 alt="Logdet distribution per transform" />
 <figcaption aria-hidden="true">Logdet distribution per
 transform</figcaption>
 </figure>
+<p><em>Figure 17. Off-diagonal mass distribution per transform.
+Off-diagonal covariance mass swells as resolution drops, highlighting
+stronger axis entanglement.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/offdiag_violin.png"
 alt="Off-diagonal mass distribution per transform" />
 <figcaption aria-hidden="true">Off-diagonal mass distribution per
 transform</figcaption>
 </figure>
+<h3 id="raw-crop-nearest">Raw crop (nearest)</h3>
+<p>Keeping the raw nearest-neighbour crop (no smoothing) produces larger
+block artefacts; the harshest setting (pixel_downsample_93pct) yields
+trace 12.37 while logdet drops to -6382.75, indicating strong
+concentration of variance into a handful of axes.</p>
+<p><em>Figure 18. Relative trace change under raw crop (nearest). Trace
+rises steadily as the grid coarsens, confirming block artefacts inflate
+stochastic spread.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/pixel_trace_relative.png"
+alt="Relative trace change under raw crop (nearest)" />
+<figcaption aria-hidden="true">Relative trace change under raw crop
+(nearest)</figcaption>
+</figure>
+<p><em>Figure 19. Relative logdet change under raw crop (nearest).
+Log-volume decays more sharply once smoothing is removed, highlighting
+how raw crops squeeze variance into fewer modes.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pixel_logdet_relative.png"
+alt="Relative logdet change under raw crop (nearest)" />
+<figcaption aria-hidden="true">Relative logdet change under raw crop
+(nearest)</figcaption>
+</figure>
+<p><em>Figure 20. Trace vs raw crop severity. Nearest-neighbour crops
+reach +0.5% trace change once the short side is reduced by 93%.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/pixel_severity_trace.png"
+alt="Trace vs raw crop severity" />
+<figcaption aria-hidden="true">Trace vs raw crop severity</figcaption>
+</figure>
+<p><em>Figure 21. Logdet vs raw crop severity. Logdet collapses to
+-6382.75 (-6.71 vs baseline) for the 93% setting, showing volume loss
+once smoothing is removed.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pixel_severity_logdet.png"
+alt="Logdet vs raw crop severity" />
+<figcaption aria-hidden="true">Logdet vs raw crop severity</figcaption>
+</figure>
+<p><em>Figure 22. Correlation anisotropy vs raw crop severity. Raw crops
+amplify anisotropy faster than smoothed crops because hard edges align
+variance along token boundaries.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pixel_severity_corr_anisotropy.png"
+alt="Correlation anisotropy vs raw crop severity" />
+<figcaption aria-hidden="true">Correlation anisotropy vs raw crop
+severity</figcaption>
+</figure>
+<p><em>Figure 23. Mean shift vs raw crop severity. Nearest-neighbour
+reductions drive the largest centroid drift as aliasing artefacts
+dominate token activations.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/mean_shift_pixel.png"
+alt="Mean shift vs raw crop severity" />
+<figcaption aria-hidden="true">Mean shift vs raw crop
+severity</figcaption>
+</figure>
 <h2 id="cross-metric-geometry">8. Cross-Metric Geometry</h2>
+<p><em>Figure 24. Logdet vs trace scatter. Smoothed crop points cluster
+in the high-trace, low-logdet corner, separating cleanly from the
+noise-induced shifts.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/scatter_trace_logdet.png"
-alt="Logdet vs Trace scatter" />
-<figcaption aria-hidden="true">Logdet vs Trace scatter</figcaption>
+alt="Logdet vs trace scatter" />
+<figcaption aria-hidden="true">Logdet vs trace scatter</figcaption>
 </figure>
+<p><em>Figure 25. Off-diagonal mass vs trace scatter. Off-diagonal
+coupling grows hand-in-hand with trace for the strongest smoothed crops,
+reinforcing anisotropy concerns.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/scatter_trace_offdiag.png"
-alt="Off-diagonal mass vs Trace scatter" />
-<figcaption aria-hidden="true">Off-diagonal mass vs Trace
+alt="Off-diagonal mass vs trace scatter" />
+<figcaption aria-hidden="true">Off-diagonal mass vs trace
 scatter</figcaption>
 </figure>
 <h2 id="mean-shift-diagnostics">9. Mean Shift Diagnostics</h2>
@@ -594,9 +545,19 @@ scatter</figcaption>
 <td>1763.3735 ± 465.4738</td>
 </tr>
 <tr>
+<td>pixel_downsample_1pct</td>
+<td>3.8731 ± 1.1712</td>
+<td>2337.2949 ± 742.3540</td>
+</tr>
+<tr>
 <td>downsample_2pct</td>
 <td>2.9370 ± 0.7538</td>
 <td>1767.1616 ± 482.2413</td>
+</tr>
+<tr>
+<td>pixel_downsample_2pct</td>
+<td>3.8726 ± 1.1516</td>
+<td>2337.8885 ± 712.3581</td>
 </tr>
 <tr>
 <td>downsample_5pct</td>
@@ -604,9 +565,19 @@ scatter</figcaption>
 <td>1832.2940 ± 465.8001</td>
 </tr>
 <tr>
+<td>pixel_downsample_5pct</td>
+<td>3.9265 ± 1.2046</td>
+<td>2401.8979 ± 793.1497</td>
+</tr>
+<tr>
 <td>downsample_10pct</td>
 <td>3.1176 ± 0.7988</td>
 <td>1908.4585 ± 494.0486</td>
+</tr>
+<tr>
+<td>pixel_downsample_10pct</td>
+<td>4.0919 ± 1.1790</td>
+<td>2516.4781 ± 788.3843</td>
 </tr>
 <tr>
 <td>downsample_20pct</td>
@@ -614,9 +585,19 @@ scatter</figcaption>
 <td>2091.0686 ± 520.2487</td>
 </tr>
 <tr>
+<td>pixel_downsample_20pct</td>
+<td>4.4315 ± 1.1498</td>
+<td>2813.4398 ± 791.4507</td>
+</tr>
+<tr>
 <td>downsample_40pct</td>
 <td>4.0572 ± 0.8832</td>
 <td>2561.1259 ± 518.2966</td>
+</tr>
+<tr>
+<td>pixel_downsample_40pct</td>
+<td>5.1926 ± 1.0419</td>
+<td>3405.3319 ± 674.2687</td>
 </tr>
 <tr>
 <td>downsample_60pct</td>
@@ -624,9 +605,19 @@ scatter</figcaption>
 <td>3215.4408 ± 481.4732</td>
 </tr>
 <tr>
+<td>pixel_downsample_60pct</td>
+<td>6.2757 ± 1.0407</td>
+<td>4071.8815 ± 596.6683</td>
+</tr>
+<tr>
 <td>downsample_80pct</td>
 <td>6.9914 ± 0.7538</td>
 <td>4419.8093 ± 534.7429</td>
+</tr>
+<tr>
+<td>pixel_downsample_80pct</td>
+<td>8.7442 ± 0.9495</td>
+<td>5380.3463 ± 604.2322</td>
 </tr>
 <tr>
 <td>downsample_85pct</td>
@@ -634,22 +625,43 @@ scatter</figcaption>
 <td>4915.8207 ± 549.4709</td>
 </tr>
 <tr>
+<td>pixel_downsample_85pct</td>
+<td>9.3134 ± 0.7255</td>
+<td>5702.9129 ± 539.7879</td>
+</tr>
+<tr>
 <td>downsample_90pct</td>
 <td>8.8262 ± 0.6330</td>
 <td>5610.9697 ± 584.7671</td>
+</tr>
+<tr>
+<td>pixel_downsample_90pct</td>
+<td>9.7077 ± 0.5933</td>
+<td>6007.7963 ± 578.3062</td>
 </tr>
 <tr>
 <td>downsample_93pct</td>
 <td>9.3279 ± 0.6722</td>
 <td>5948.2206 ± 621.6978</td>
 </tr>
+<tr>
+<td>pixel_downsample_93pct</td>
+<td>9.7685 ± 0.5089</td>
+<td>6197.0443 ± 548.2255</td>
+</tr>
 </tbody>
 </table>
+<p><em>Figure 26. Mean shift vs noise severity. Mean L2 displacement
+tracks noise strength, reinforcing that stochastic means drift
+progressively under σ increases.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/mean_shift_noise.png"
 alt="Mean shift vs noise severity" />
 <figcaption aria-hidden="true">Mean shift vs noise severity</figcaption>
 </figure>
+<p><em>Figure 27. Mean shift vs downsampling severity. Resolution loss
+beyond 60% triggers a rapid rise in mean shift, reflecting
+aliasing-induced drift.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/mean_shift_downsample.png"
@@ -657,18 +669,43 @@ alt="Mean shift vs downsampling severity" />
 <figcaption aria-hidden="true">Mean shift vs downsampling
 severity</figcaption>
 </figure>
+<p><em>Figure 28. Mean shift vs pixelated downsampling severity.
+Pixelation pushes mean drift even harder once large blocks emerge,
+underscoring the harsher aliasing penalty.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/mean_shift_pixel.png"
+alt="Mean shift vs pixelated downsampling severity" />
+<figcaption aria-hidden="true">Mean shift vs pixelated downsampling
+severity</figcaption>
+</figure>
+<p><em>Figure 29. Mahalanobis shift vs noise severity.
+Covariance-normalised drift escalates with σ, showing that noise injects
+uncertainty aligned with high-variance directions.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/mahal_shift_noise.png"
 alt="Mahalanobis shift vs noise severity" />
 <figcaption aria-hidden="true">Mahalanobis shift vs noise
 severity</figcaption>
 </figure>
+<p><em>Figure 30. Mahalanobis shift vs downsampling severity. Heavy
+downsampling rockets Mahalanobis distance, indicating the embedding
+cloud moves far relative to its contracted covariance.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/mahal_shift_downsample.png"
 alt="Mahalanobis shift vs downsampling severity" />
 <figcaption aria-hidden="true">Mahalanobis shift vs downsampling
 severity</figcaption>
+</figure>
+<p><em>Figure 31. Mahalanobis shift vs pixelated downsampling severity.
+Nearest-neighbour reductions yield the largest covariance-normalised
+drift, showing block artefacts distort embeddings most
+severely.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/mahal_shift_pixel.png"
+alt="Mahalanobis shift vs pixelated downsampling severity" />
+<figcaption aria-hidden="true">Mahalanobis shift vs pixelated
+downsampling severity</figcaption>
 </figure>
 <h2 id="spectral-tangent-geometry">10. Spectral &amp; Tangent
 Geometry</h2>
@@ -765,12 +802,28 @@ Geometry</h2>
 <td>0.0619 ± 0.0148</td>
 </tr>
 <tr>
+<td>pixel_downsample_1pct</td>
+<td>8.4435 ± 1.5675</td>
+<td>2.2622 ± 0.8377</td>
+<td>2.5307 ± 0.2185</td>
+<td>0.7668 ± 0.0402</td>
+<td>0.0624 ± 0.0152</td>
+</tr>
+<tr>
 <td>downsample_2pct</td>
 <td>8.6612 ± 1.6923</td>
 <td>2.3173 ± 0.9090</td>
 <td>2.5889 ± 0.2245</td>
 <td>0.7570 ± 0.0402</td>
 <td>0.0620 ± 0.0149</td>
+</tr>
+<tr>
+<td>pixel_downsample_2pct</td>
+<td>8.4704 ± 1.5897</td>
+<td>2.2443 ± 0.8321</td>
+<td>2.5379 ± 0.2177</td>
+<td>0.7661 ± 0.0397</td>
+<td>0.0625 ± 0.0153</td>
 </tr>
 <tr>
 <td>downsample_5pct</td>
@@ -781,12 +834,28 @@ Geometry</h2>
 <td>0.0620 ± 0.0147</td>
 </tr>
 <tr>
+<td>pixel_downsample_5pct</td>
+<td>8.4340 ± 1.5407</td>
+<td>2.2468 ± 0.8251</td>
+<td>2.5309 ± 0.2111</td>
+<td>0.7665 ± 0.0382</td>
+<td>0.0622 ± 0.0147</td>
+</tr>
+<tr>
 <td>downsample_10pct</td>
 <td>8.6884 ± 1.7005</td>
 <td>2.3288 ± 0.9098</td>
 <td>2.5866 ± 0.2215</td>
 <td>0.7574 ± 0.0397</td>
 <td>0.0620 ± 0.0147</td>
+</tr>
+<tr>
+<td>pixel_downsample_10pct</td>
+<td>8.4308 ± 1.5376</td>
+<td>2.2362 ± 0.8280</td>
+<td>2.5284 ± 0.2178</td>
+<td>0.7670 ± 0.0388</td>
+<td>0.0621 ± 0.0150</td>
 </tr>
 <tr>
 <td>downsample_20pct</td>
@@ -797,12 +866,28 @@ Geometry</h2>
 <td>0.0620 ± 0.0147</td>
 </tr>
 <tr>
+<td>pixel_downsample_20pct</td>
+<td>8.3116 ± 1.5453</td>
+<td>2.2106 ± 0.8267</td>
+<td>2.5163 ± 0.2115</td>
+<td>0.7676 ± 0.0384</td>
+<td>0.0615 ± 0.0151</td>
+</tr>
+<tr>
 <td>downsample_40pct</td>
 <td>8.8511 ± 1.6547</td>
 <td>2.3567 ± 0.9101</td>
 <td>2.5755 ± 0.2080</td>
 <td>0.7617 ± 0.0360</td>
 <td>0.0625 ± 0.0144</td>
+</tr>
+<tr>
+<td>pixel_downsample_40pct</td>
+<td>8.1782 ± 1.5154</td>
+<td>2.1220 ± 0.7718</td>
+<td>2.4896 ± 0.2002</td>
+<td>0.7729 ± 0.0358</td>
+<td>0.0608 ± 0.0148</td>
 </tr>
 <tr>
 <td>downsample_60pct</td>
@@ -813,12 +898,28 @@ Geometry</h2>
 <td>0.0626 ± 0.0141</td>
 </tr>
 <tr>
+<td>pixel_downsample_60pct</td>
+<td>8.0991 ± 1.4896</td>
+<td>2.0949 ± 0.7705</td>
+<td>2.4697 ± 0.2094</td>
+<td>0.7765 ± 0.0361</td>
+<td>0.0588 ± 0.0142</td>
+</tr>
+<tr>
 <td>downsample_80pct</td>
 <td>9.0825 ± 1.4530</td>
 <td>2.2022 ± 0.7401</td>
 <td>2.5403 ± 0.2095</td>
 <td>0.7721 ± 0.0330</td>
 <td>0.0598 ± 0.0141</td>
+</tr>
+<tr>
+<td>pixel_downsample_80pct</td>
+<td>7.8798 ± 1.4360</td>
+<td>2.0334 ± 0.7217</td>
+<td>2.3964 ± 0.2044</td>
+<td>0.7866 ± 0.0350</td>
+<td>0.0553 ± 0.0138</td>
 </tr>
 <tr>
 <td>downsample_85pct</td>
@@ -829,12 +930,28 @@ Geometry</h2>
 <td>0.0585 ± 0.0141</td>
 </tr>
 <tr>
+<td>pixel_downsample_85pct</td>
+<td>7.6474 ± 1.3430</td>
+<td>1.9836 ± 0.6982</td>
+<td>2.3743 ± 0.2179</td>
+<td>0.7871 ± 0.0360</td>
+<td>0.0542 ± 0.0134</td>
+</tr>
+<tr>
 <td>downsample_90pct</td>
 <td>8.6496 ± 1.3900</td>
 <td>2.1075 ± 0.7272</td>
 <td>2.5033 ± 0.2229</td>
 <td>0.7787 ± 0.0332</td>
 <td>0.0573 ± 0.0138</td>
+</tr>
+<tr>
+<td>pixel_downsample_90pct</td>
+<td>7.7745 ± 1.3452</td>
+<td>2.0491 ± 0.6944</td>
+<td>2.3728 ± 0.2128</td>
+<td>0.7882 ± 0.0367</td>
+<td>0.0547 ± 0.0128</td>
 </tr>
 <tr>
 <td>downsample_93pct</td>
@@ -844,36 +961,159 @@ Geometry</h2>
 <td>0.7821 ± 0.0337</td>
 <td>0.0577 ± 0.0140</td>
 </tr>
+<tr>
+<td>pixel_downsample_93pct</td>
+<td>7.8503 ± 1.2907</td>
+<td>2.1015 ± 0.6964</td>
+<td>2.4103 ± 0.2141</td>
+<td>0.7830 ± 0.0370</td>
+<td>0.0558 ± 0.0130</td>
+</tr>
 </tbody>
 </table>
+<p><em>Figure 32. Trace by viewpoint angle. Flank viewpoints exhibit the
+largest trace gain once detail is stripped, pointing to
+orientation-sensitive uncertainty.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/angle_radar.png"
 alt="Trace by viewpoint angle" />
 <figcaption aria-hidden="true">Trace by viewpoint angle</figcaption>
 </figure>
+<p><em>Figure 33. PCA embeddings — Original (baseline). Baseline
+embeddings remain compact with minimal directional bias.</em></p>
 <figure>
-<img src="../../report_assets/sim2_noise_study/pca_gallery.png"
-alt="PCA gallery for representative sample" />
-<figcaption aria-hidden="true">PCA gallery for representative
-sample</figcaption>
+<img src="../../report_assets/sim2_noise_study/pca_original.png"
+alt="PCA embeddings — Original (baseline)" />
+<figcaption aria-hidden="true">PCA embeddings — Original
+(baseline)</figcaption>
+</figure>
+<p><em>Figure 34. PCA embeddings — gaussian_noise_500 (noise max trace).
+Gaussian noise with σ=0.50 widens the cluster without shifting its
+centre markedly.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pca_gaussian_noise_500.png"
+alt="PCA embeddings — gaussian_noise_500 (noise max trace)" />
+<figcaption aria-hidden="true">PCA embeddings — gaussian_noise_500
+(noise max trace)</figcaption>
+</figure>
+<p><em>Figure 35. PCA embeddings — gaussian_noise_050 (noise min trace).
+Gaussian noise with σ=0.05 widens the cluster without shifting its
+centre markedly.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pca_gaussian_noise_050.png"
+alt="PCA embeddings — gaussian_noise_050 (noise min trace)" />
+<figcaption aria-hidden="true">PCA embeddings — gaussian_noise_050
+(noise min trace)</figcaption>
+</figure>
+<p><em>Figure 36. PCA embeddings — downsample_80pct (downsample max
+trace). Smoothed crop (bicubic upsample) at 80% reduction elongates the
+embedding cloud along a single axis as detail is lost.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/pca_downsample_80pct.png"
+alt="PCA embeddings — downsample_80pct (downsample max trace)" />
+<figcaption aria-hidden="true">PCA embeddings — downsample_80pct
+(downsample max trace)</figcaption>
+</figure>
+<p><em>Figure 37. PCA embeddings — downsample_1pct (downsample min
+trace). Smoothed crop (bicubic upsample) at 1% reduction elongates the
+embedding cloud along a single axis as detail is lost.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/pca_downsample_1pct.png"
+alt="PCA embeddings — downsample_1pct (downsample min trace)" />
+<figcaption aria-hidden="true">PCA embeddings — downsample_1pct
+(downsample min trace)</figcaption>
+</figure>
+<p><em>Figure 38. PCA embeddings — pixel_downsample_80pct (pixelated max
+trace). Pixelation at 80% produces discrete clusters as block artefacts
+dominate token activations.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pca_pixel_downsample_80pct.png"
+alt="PCA embeddings — pixel_downsample_80pct (pixelated max trace)" />
+<figcaption aria-hidden="true">PCA embeddings — pixel_downsample_80pct
+(pixelated max trace)</figcaption>
+</figure>
+<p><em>Figure 39. PCA embeddings — pixel_downsample_93pct (pixelated min
+trace). Pixelation at 93% produces discrete clusters as block artefacts
+dominate token activations.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/pca_pixel_downsample_93pct.png"
+alt="PCA embeddings — pixel_downsample_93pct (pixelated min trace)" />
+<figcaption aria-hidden="true">PCA embeddings — pixel_downsample_93pct
+(pixelated min trace)</figcaption>
 </figure>
 <h2 id="pass-count-stability">11. Pass Count Stability</h2>
 <p>We evaluate trace and log-determinant stability across Monte Carlo
 pass counts T ∈ {2,4,8,16,32,64,128}. Lower T increases estimator noise;
 curves should flatten as T grows. See stability plots in this section if
 generated.</p>
+<p><em>Figure 40. Trace stability vs passes. Trace spans shrink to 6.637
+for the baseline sweep, while the harsh downsample stays within 5.915
+once T≥32.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/pass_stability_trace.png"
 alt="Trace stability vs passes" />
 <figcaption aria-hidden="true">Trace stability vs passes</figcaption>
 </figure>
+<p><em>Figure 41. Logdet stability vs passes. Logdet variance collapses
+as passes double, confirming that 64 draws are ample for stable volume
+estimates.</em></p>
 <figure>
 <img
 src="../../report_assets/sim2_noise_study/pass_stability_logdet.png"
 alt="Logdet stability vs passes" />
 <figcaption aria-hidden="true">Logdet stability vs passes</figcaption>
 </figure>
-<h2 id="discussion-outlook">12. Discussion &amp; Outlook</h2>
+<h2
+id="detection-to-embedding-pipeline-yolov8-crop-and-camera-distance">12.
+Detection-to-Embedding Pipeline (YOLOv8 Crop) and Camera Distance</h2>
+<p>Object scale shrinks as the camera moves away, mixing background into
+the crop and reducing effective resolution. To benchmark a practical
+workflow, we introduce a detection→crop→CLIP pipeline and study how
+distance-driven scale changes alter the embedding cloud.</p>
+<h3 id="pipeline">12.1 Pipeline</h3>
+<ul>
+<li>Detect vehicles in the full-resolution frame with YOLOv8 (COCO
+classes: car, bus, truck).</li>
+<li>Crop the predicted box, optionally expanding by ≈5% for context
+while staying inside image bounds.</li>
+<li>Resize the crop to CLIP’s 224×224 input via either bicubic
+antialiased resampling or nearest-neighbour upsampling.</li>
+<li>Apply CLIP preprocessing and run MCDO (T=64, p=0.01) to estimate the
+stochastic embedding cloud.</li>
+<li>Compare crop embeddings to a reference (full frame or near-distance
+crop) using mean and Mahalanobis shift, trace/logdet, and
+anisotropy.</li>
+</ul>
+<p>Notes: - CLIP always consumes 224×224 inputs; “raw low-res” crops
+therefore require an upsample stage. Nearest-neighbour preserves the
+block grid, while bicubic smooths detail. - Tiny crops widen trace and
+contract logdet, mirroring the high-severity downsampling response
+documented above.</p>
+<h3 id="distance-effects-expectedobserved">12.2 Distance Effects
+(Expected/Observed)</h3>
+<ul>
+<li>Smaller crops (greater distance) increase trace and Mahalanobis
+shift while logdet contracts.</li>
+<li>Mahalanobis shift reacts faster than raw mean shift because
+covariance volume shrinks as detail disappears.</li>
+<li>Raw (nearest) crops inject stronger anisotropy and larger shifts
+than smoothed (bicubic) crops at the same scale.</li>
+</ul>
+<h3 id="practical-guidance">12.3 Practical Guidance</h3>
+<ul>
+<li>Prefer bicubic antialiased resize before sending crops to CLIP;
+nearest-neighbour magnifies block artefacts.</li>
+<li>Maintain a minimum crop size by padding boxes with a narrow context
+band before resizing.</li>
+<li>Bin detections by object scale or distance and report
+mean/Mahalanobis shift, trace, logdet, and anisotropy per bin to
+visualise degradation.</li>
+</ul>
+<h2 id="discussion-outlook">13. Discussion &amp; Outlook</h2>
 <ul>
 <li><strong>High noise (σ=0.50)</strong> expands trace by +4.0% and
 drops logdet by 7.89. The stochastic mean drifts 8.70 L2 units from the
@@ -894,7 +1134,7 @@ widen the band only modestly, so T=64 remains a safe budget.</li>
 2.54e-05 for all conditions, so predictive entropy contributes little
 insight compared with embedding-space diagnostics.</li>
 </ul>
-<h2 id="class-level-trace-shifts">13. Class-Level Trace Shifts</h2>
+<h2 id="class-level-trace-shifts">14. Class-Level Trace Shifts</h2>
 <table style="width:100%;">
 <colgroup>
 <col style="width: 16%" />
@@ -965,72 +1205,638 @@ insight compared with embedding-space diagnostics.</li>
 </tr>
 </tbody>
 </table>
-<h2 id="example-perturbations">14. Example Perturbations</h2>
-<ul>
-<li><strong>Unmodified image:</strong> <img
-src="../../report_assets/sim2_noise_study/original.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.01):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_010.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.02):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_020.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.05):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_050.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.1):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_100.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.2):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_200.png" /></li>
-<li><strong>Additive Gaussian noise (σ = 0.5):</strong> <img
-src="../../report_assets/sim2_noise_study/gaussian_noise_500.png" /></li>
-<li><strong>Salt &amp; pepper noise (5% pixels, 60% salt):</strong> <img
-src="../../report_assets/sim2_noise_study/saltpepper_5pct.png" /></li>
-<li><strong>Downsample to 222px (encoder base 224px, 1% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_1pct.png" /></li>
-<li><strong>Downsample to 220px (encoder base 224px, 2% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_2pct.png" /></li>
-<li><strong>Downsample to 213px (encoder base 224px, 5% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_5pct.png" /></li>
-<li><strong>Downsample to 202px (encoder base 224px, 10% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_10pct.png" /></li>
-<li><strong>Downsample to 179px (encoder base 224px, 20% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_20pct.png" /></li>
-<li><strong>Downsample to 134px (encoder base 224px, 40% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_40pct.png" /></li>
-<li><strong>Downsample to 90px (encoder base 224px, 60% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_60pct.png" /></li>
-<li><strong>Downsample to 45px (encoder base 224px, 80% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_80pct.png" /></li>
-<li><strong>Downsample to 34px (encoder base 224px, 85% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_85pct.png" /></li>
-<li><strong>Downsample to 22px (encoder base 224px, 90% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_90pct.png" /></li>
-<li><strong>Downsample to 16px (encoder base 224px, 93% reduction) then
-upscale:</strong> <img
-src="../../report_assets/sim2_noise_study/downsample_93pct.png" /></li>
-</ul>
+<h2 id="example-perturbations">15. Example Perturbations</h2>
+<p>Preview grids illustrate how each perturbation family reshapes the
+rendered jeep: baseline is shown alongside rising severities.</p>
+<p><em>Figure 42. Jeep previews — noise sweep. Gaussian noise
+progressively speckles the frame while salt &amp; pepper corruption
+introduces isolated extreme pixels.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/noise_examples_grid.png"
+alt="Jeep previews — noise sweep" />
+<figcaption aria-hidden="true">Jeep previews — noise sweep</figcaption>
+</figure>
+<p><em>Figure 43. Jeep previews — smoothed crop sweep. Smoothing the
+coarse crop blurs structure as resolution falls, culminating in a soft,
+low-detail silhouette.</em></p>
+<figure>
+<img
+src="../../report_assets/sim2_noise_study/downsample_examples_grid.png"
+alt="Jeep previews — smoothed crop sweep" />
+<figcaption aria-hidden="true">Jeep previews — smoothed crop
+sweep</figcaption>
+</figure>
+<p><em>Figure 44. Jeep previews — raw crop sweep. Nearest-neighbour
+reductions replace detail with large blocks, emphasising aliasing
+artefacts at coarse grids.</em></p>
+<figure>
+<img src="../../report_assets/sim2_noise_study/pixel_examples_grid.png"
+alt="Jeep previews — raw crop sweep" />
+<figcaption aria-hidden="true">Jeep previews — raw crop
+sweep</figcaption>
+</figure>
+<h2 id="appendix-detailed-metrics">Appendix: Detailed Metrics</h2>
+<h3 id="aggregate-metrics">Aggregate metrics</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr>
+<th>transform</th>
+<th>trace</th>
+<th>logdet</th>
+<th>anisotropy (corr-F)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>original</td>
+<td>12.3135 ± 2.6974</td>
+<td>-6376.0333 ± 10.0092</td>
+<td>169.6903 ± 19.4235</td>
+</tr>
+<tr>
+<td>gaussian_noise_010</td>
+<td>12.6023 ± 2.7577</td>
+<td>-6374.4188 ± 9.8618</td>
+<td>169.3933 ± 18.9273</td>
+</tr>
+<tr>
+<td>gaussian_noise_020</td>
+<td>12.5631 ± 2.6985</td>
+<td>-6373.7425 ± 9.3996</td>
+<td>165.5048 ± 18.6221</td>
+</tr>
+<tr>
+<td>gaussian_noise_050</td>
+<td>12.3926 ± 2.6261</td>
+<td>-6375.8614 ± 8.2435</td>
+<td>166.7742 ± 18.1294</td>
+</tr>
+<tr>
+<td>gaussian_noise_100</td>
+<td>12.4558 ± 2.5969</td>
+<td>-6376.6802 ± 7.1463</td>
+<td>167.6568 ± 18.4162</td>
+</tr>
+<tr>
+<td>gaussian_noise_200</td>
+<td>12.5629 ± 2.5728</td>
+<td>-6377.9926 ± 6.7516</td>
+<td>166.6415 ± 19.0206</td>
+</tr>
+<tr>
+<td>gaussian_noise_500</td>
+<td>12.8031 ± 2.7534</td>
+<td>-6383.9255 ± 6.6858</td>
+<td>166.3067 ± 18.1931</td>
+</tr>
+<tr>
+<td>saltpepper_5pct</td>
+<td>12.7279 ± 2.5296</td>
+<td>-6375.3044 ± 6.3954</td>
+<td>163.6120 ± 18.6287</td>
+</tr>
+<tr>
+<td>downsample_1pct</td>
+<td>12.3825 ± 2.6268</td>
+<td>-6375.9890 ± 9.1654</td>
+<td>167.8046 ± 18.3878</td>
+</tr>
+<tr>
+<td>pixel_downsample_1pct</td>
+<td>12.5172 ± 2.6165</td>
+<td>-6377.2888 ± 8.4542</td>
+<td>168.4906 ± 18.3043</td>
+</tr>
+<tr>
+<td>downsample_2pct</td>
+<td>12.3977 ± 2.6292</td>
+<td>-6375.7912 ± 9.2649</td>
+<td>167.7650 ± 18.2637</td>
+</tr>
+<tr>
+<td>pixel_downsample_2pct</td>
+<td>12.5455 ± 2.6315</td>
+<td>-6376.9582 ± 8.7136</td>
+<td>167.9582 ± 18.1520</td>
+</tr>
+<tr>
+<td>downsample_5pct</td>
+<td>12.4478 ± 2.6403</td>
+<td>-6375.7133 ± 9.0908</td>
+<td>167.4770 ± 18.0066</td>
+</tr>
+<tr>
+<td>pixel_downsample_5pct</td>
+<td>12.5134 ± 2.5646</td>
+<td>-6377.1219 ± 8.2152</td>
+<td>168.4439 ± 17.7280</td>
+</tr>
+<tr>
+<td>downsample_10pct</td>
+<td>12.4398 ± 2.6474</td>
+<td>-6375.7898 ± 9.0936</td>
+<td>167.4970 ± 18.0020</td>
+</tr>
+<tr>
+<td>pixel_downsample_10pct</td>
+<td>12.5616 ± 2.6045</td>
+<td>-6377.0398 ± 8.0190</td>
+<td>168.4702 ± 18.0116</td>
+</tr>
+<tr>
+<td>downsample_20pct</td>
+<td>12.4790 ± 2.6145</td>
+<td>-6375.9428 ± 8.7840</td>
+<td>167.5528 ± 17.9934</td>
+</tr>
+<tr>
+<td>pixel_downsample_20pct</td>
+<td>12.4631 ± 2.5723</td>
+<td>-6377.8056 ± 7.6650</td>
+<td>169.1383 ± 17.8052</td>
+</tr>
+<tr>
+<td>downsample_40pct</td>
+<td>12.6968 ± 2.5948</td>
+<td>-6375.4607 ± 8.3049</td>
+<td>166.6609 ± 18.0419</td>
+</tr>
+<tr>
+<td>pixel_downsample_40pct</td>
+<td>12.4773 ± 2.5321</td>
+<td>-6378.9127 ± 8.2044</td>
+<td>170.3822 ± 17.2721</td>
+</tr>
+<tr>
+<td>downsample_60pct</td>
+<td>13.0259 ± 2.5301</td>
+<td>-6374.7296 ± 7.5273</td>
+<td>165.0812 ± 17.6869</td>
+</tr>
+<tr>
+<td>pixel_downsample_60pct</td>
+<td>12.5031 ± 2.5833</td>
+<td>-6380.0696 ± 7.6918</td>
+<td>169.9147 ± 17.9723</td>
+</tr>
+<tr>
+<td>downsample_80pct</td>
+<td>13.5591 ± 2.5690</td>
+<td>-6374.3342 ± 6.5821</td>
+<td>161.3558 ± 17.6353</td>
+</tr>
+<tr>
+<td>pixel_downsample_80pct</td>
+<td>12.6936 ± 2.6429</td>
+<td>-6382.2148 ± 7.4643</td>
+<td>163.9830 ± 17.1538</td>
+</tr>
+<tr>
+<td>downsample_85pct</td>
+<td>13.5157 ± 2.6575</td>
+<td>-6375.1753 ± 6.4177</td>
+<td>161.0859 ± 18.7373</td>
+</tr>
+<tr>
+<td>pixel_downsample_85pct</td>
+<td>12.4749 ± 2.5475</td>
+<td>-6383.4985 ± 7.2516</td>
+<td>161.6255 ± 17.7324</td>
+</tr>
+<tr>
+<td>downsample_90pct</td>
+<td>13.2171 ± 2.5903</td>
+<td>-6377.9928 ± 6.2483</td>
+<td>159.3951 ± 17.3251</td>
+</tr>
+<tr>
+<td>pixel_downsample_90pct</td>
+<td>12.5712 ± 2.5332</td>
+<td>-6383.3493 ± 6.4484</td>
+<td>161.4009 ± 16.0536</td>
+</tr>
+<tr>
+<td>downsample_93pct</td>
+<td>12.8271 ± 2.6290</td>
+<td>-6380.8724 ± 6.6015</td>
+<td>161.2282 ± 16.4835</td>
+</tr>
+<tr>
+<td>pixel_downsample_93pct</td>
+<td>12.3748 ± 2.4221</td>
+<td>-6382.7461 ± 6.0468</td>
+<td>163.5343 ± 15.9229</td>
+</tr>
+</tbody>
+</table>
+<h3 id="noise-severity-deltas">Noise severity deltas</h3>
+<table>
+<thead>
+<tr>
+<th>transform</th>
+<th>Δ trace (%)</th>
+<th>Δ logdet</th>
+<th>Δ off-diag (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>gaussian_noise_010</td>
+<td>2.35</td>
+<td>1.6145</td>
+<td>1.71</td>
+</tr>
+<tr>
+<td>gaussian_noise_020</td>
+<td>2.03</td>
+<td>2.2908</td>
+<td>-1.95</td>
+</tr>
+<tr>
+<td>gaussian_noise_050</td>
+<td>0.64</td>
+<td>0.1719</td>
+<td>-3.46</td>
+</tr>
+<tr>
+<td>gaussian_noise_100</td>
+<td>1.16</td>
+<td>-0.6468</td>
+<td>-3.42</td>
+</tr>
+<tr>
+<td>gaussian_noise_200</td>
+<td>2.03</td>
+<td>-1.9593</td>
+<td>-5.86</td>
+</tr>
+<tr>
+<td>gaussian_noise_500</td>
+<td>3.98</td>
+<td>-7.8921</td>
+<td>-11.82</td>
+</tr>
+<tr>
+<td>saltpepper_5pct</td>
+<td>3.37</td>
+<td>0.7289</td>
+<td>-4.74</td>
+</tr>
+</tbody>
+</table>
+<h3 id="smoothed-crop-severity-deltas">Smoothed crop severity
+deltas</h3>
+<table>
+<thead>
+<tr>
+<th>transform</th>
+<th>Δ trace (%)</th>
+<th>Δ logdet</th>
+<th>Δ off-diag (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>downsample_1pct</td>
+<td>0.56</td>
+<td>0.0444</td>
+<td>-1.76</td>
+</tr>
+<tr>
+<td>downsample_2pct</td>
+<td>0.68</td>
+<td>0.2421</td>
+<td>-1.68</td>
+</tr>
+<tr>
+<td>downsample_5pct</td>
+<td>1.09</td>
+<td>0.3200</td>
+<td>-1.61</td>
+</tr>
+<tr>
+<td>downsample_10pct</td>
+<td>1.03</td>
+<td>0.2436</td>
+<td>-1.62</td>
+</tr>
+<tr>
+<td>downsample_20pct</td>
+<td>1.34</td>
+<td>0.0905</td>
+<td>-1.52</td>
+</tr>
+<tr>
+<td>downsample_40pct</td>
+<td>3.11</td>
+<td>0.5727</td>
+<td>-1.14</td>
+</tr>
+<tr>
+<td>downsample_60pct</td>
+<td>5.79</td>
+<td>1.3038</td>
+<td>-0.81</td>
+</tr>
+<tr>
+<td>downsample_80pct</td>
+<td>10.12</td>
+<td>1.6991</td>
+<td>-3.16</td>
+</tr>
+<tr>
+<td>downsample_85pct</td>
+<td>9.76</td>
+<td>0.8580</td>
+<td>-4.94</td>
+</tr>
+<tr>
+<td>downsample_90pct</td>
+<td>7.34</td>
+<td>-1.9594</td>
+<td>-10.22</td>
+</tr>
+<tr>
+<td>downsample_93pct</td>
+<td>4.17</td>
+<td>-4.8391</td>
+<td>-12.43</td>
+</tr>
+</tbody>
+</table>
+<h3 id="raw-crop-severity-deltas">Raw crop severity deltas</h3>
+<table>
+<thead>
+<tr>
+<th>transform</th>
+<th>Δ trace (%)</th>
+<th>Δ logdet</th>
+<th>Δ off-diag (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>pixel_downsample_1pct</td>
+<td>1.65</td>
+<td>-1.2554</td>
+<td>-1.62</td>
+</tr>
+<tr>
+<td>pixel_downsample_2pct</td>
+<td>1.88</td>
+<td>-0.9249</td>
+<td>-1.73</td>
+</tr>
+<tr>
+<td>pixel_downsample_5pct</td>
+<td>1.62</td>
+<td>-1.0885</td>
+<td>-1.63</td>
+</tr>
+<tr>
+<td>pixel_downsample_10pct</td>
+<td>2.02</td>
+<td>-1.0065</td>
+<td>-1.52</td>
+</tr>
+<tr>
+<td>pixel_downsample_20pct</td>
+<td>1.22</td>
+<td>-1.7722</td>
+<td>-2.08</td>
+</tr>
+<tr>
+<td>pixel_downsample_40pct</td>
+<td>1.33</td>
+<td>-2.8794</td>
+<td>-2.58</td>
+</tr>
+<tr>
+<td>pixel_downsample_60pct</td>
+<td>1.54</td>
+<td>-4.0363</td>
+<td>-4.44</td>
+</tr>
+<tr>
+<td>pixel_downsample_80pct</td>
+<td>3.09</td>
+<td>-6.1815</td>
+<td>-11.66</td>
+</tr>
+<tr>
+<td>pixel_downsample_85pct</td>
+<td>1.31</td>
+<td>-7.4652</td>
+<td>-16.07</td>
+</tr>
+<tr>
+<td>pixel_downsample_90pct</td>
+<td>2.09</td>
+<td>-7.3160</td>
+<td>-15.49</td>
+</tr>
+<tr>
+<td>pixel_downsample_93pct</td>
+<td>0.50</td>
+<td>-6.7128</td>
+<td>-13.23</td>
+</tr>
+</tbody>
+</table>
+<h3 id="yolov8-detection-robustness-vs-downsampling">YOLOv8 detection
+robustness vs downsampling</h3>
+<p>Using the Section 12 pipeline (YOLOv8n detection → crop → CLIP
+resize), we evaluated detections for every original frame and each
+smoothed (bicubic) / raw (nearest) crop variant. Vehicle detections
+cover COCO classes {car, bus, truck}. Detailed outputs live in
+<code>runs/sim2_noise_study/yolov8/variant_summary.csv</code> and the
+accompanying per-image CSV. - Baseline detection succeeds on 43/46 views
+(93.5%), leaving 3 hard cases. - Smoothed crop (bicubic) recall trends:
+95.7% at 40% reduction, 82.6% at 60% reduction, 67.4% at 80% reduction,
+21.7% at 90% reduction, and 4.3% at 93% reduction. - Raw crop (nearest)
+recall drops to 82.6% at 10% reduction, 69.6% at 20% reduction, 54.3% at
+40% reduction, and 2.2% at 60% reduction; detections vanish once
+reductions exceed 80%. - Confidence slips from 0.61 (original) to 0.22
+at 90% smoothed crop while boxes still span 94.1% → 90.2% of the
+frame.</p>
+<table>
+<thead>
+<tr>
+<th>variant</th>
+<th>detection rate (%)</th>
+<th>mean best conf</th>
+<th>mean box area (%)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>original</td>
+<td>93.5</td>
+<td>0.61</td>
+<td>94.1</td>
+</tr>
+<tr>
+<td>downsample_1pct</td>
+<td>95.7</td>
+<td>0.61</td>
+<td>91.4</td>
+</tr>
+<tr>
+<td>downsample_2pct</td>
+<td>93.5</td>
+<td>0.63</td>
+<td>93.6</td>
+</tr>
+<tr>
+<td>downsample_5pct</td>
+<td>95.7</td>
+<td>0.63</td>
+<td>91.3</td>
+</tr>
+<tr>
+<td>downsample_10pct</td>
+<td>93.5</td>
+<td>0.62</td>
+<td>91.2</td>
+</tr>
+<tr>
+<td>downsample_20pct</td>
+<td>95.7</td>
+<td>0.61</td>
+<td>89.5</td>
+</tr>
+<tr>
+<td>downsample_40pct</td>
+<td>95.7</td>
+<td>0.61</td>
+<td>89.3</td>
+</tr>
+<tr>
+<td>downsample_60pct</td>
+<td>82.6</td>
+<td>0.56</td>
+<td>87.3</td>
+</tr>
+<tr>
+<td>downsample_80pct</td>
+<td>67.4</td>
+<td>0.46</td>
+<td>85.9</td>
+</tr>
+<tr>
+<td>downsample_85pct</td>
+<td>54.3</td>
+<td>0.34</td>
+<td>80.9</td>
+</tr>
+<tr>
+<td>downsample_90pct</td>
+<td>21.7</td>
+<td>0.22</td>
+<td>90.2</td>
+</tr>
+<tr>
+<td>downsample_93pct</td>
+<td>4.35</td>
+<td>0.13</td>
+<td>91.2</td>
+</tr>
+<tr>
+<td>pixel_downsample_1pct</td>
+<td>84.8</td>
+<td>0.60</td>
+<td>88.1</td>
+</tr>
+<tr>
+<td>pixel_downsample_2pct</td>
+<td>84.8</td>
+<td>0.59</td>
+<td>86.1</td>
+</tr>
+<tr>
+<td>pixel_downsample_5pct</td>
+<td>84.8</td>
+<td>0.54</td>
+<td>85.2</td>
+</tr>
+<tr>
+<td>pixel_downsample_10pct</td>
+<td>82.6</td>
+<td>0.50</td>
+<td>74.0</td>
+</tr>
+<tr>
+<td>pixel_downsample_20pct</td>
+<td>69.6</td>
+<td>0.49</td>
+<td>62.8</td>
+</tr>
+<tr>
+<td>pixel_downsample_40pct</td>
+<td>54.3</td>
+<td>0.33</td>
+<td>36.7</td>
+</tr>
+<tr>
+<td>pixel_downsample_60pct</td>
+<td>2.17</td>
+<td>0.17</td>
+<td>45.0</td>
+</tr>
+<tr>
+<td>pixel_downsample_80pct</td>
+<td>0.00</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>pixel_downsample_85pct</td>
+<td>0.00</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>pixel_downsample_90pct</td>
+<td>0.00</td>
+<td>—</td>
+<td>—</td>
+</tr>
+<tr>
+<td>pixel_downsample_93pct</td>
+<td>0.00</td>
+<td>—</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
 <h2 id="appendix-predictive-diagnostics-mi-entropy">Appendix: Predictive
 Diagnostics (MI &amp; Entropy)</h2>
 <p>Predictive mutual information (epistemic) and entropy are derived
 from the CLIP text head over class prompts. They remain near-zero here
 due to prompt unanimity and low dropout; we include them for
 completeness.</p>
+<p><em>Figure 45. Mutual information across transforms. Predictive
+mutual information remains near zero for every perturbation, confirming
+the head stays confident despite dropout.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/mi_line.png"
 alt="Mutual information across transforms" />
 <figcaption aria-hidden="true">Mutual information across
 transforms</figcaption>
 </figure>
+<p><em>Figure 46. Entropy across transforms. Predictive entropy barely
+moves across conditions, reinforcing that embedding diagnostics carry
+the informative signal.</em></p>
 <figure>
 <img src="../../report_assets/sim2_noise_study/entropy_line.png"
 alt="Entropy across transforms" />
 <figcaption aria-hidden="true">Entropy across transforms</figcaption>
 </figure>
+</body>
+</html>

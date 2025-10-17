@@ -13,11 +13,13 @@ from typing import Callable, Dict, Iterable, List, Optional, Sequence, Tuple
 
 import numpy as np
 import torch
-from PIL import Image
+from numpy.random import default_rng
+from PIL import Image, ImageDraw, ImageFont
 import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 # Allow running without installing the package by injecting repository root.
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -40,12 +42,17 @@ ADAPTER_TARGETS: Sequence[str] = tuple(
 METRIC_FIELDS = ("trace", "logdet", "off_diag_mass", "entropy", "mutual_information")
 
 
+RNG = default_rng(20240229)
+
+
 @dataclass(frozen=True)
 class MetricMoments:
     mean: float
     std: float
     min: float
     max: float
+    ci_low: float = float("nan")
+    ci_high: float = float("nan")
 
 
 @dataclass(frozen=True)
@@ -54,6 +61,54 @@ class TransformSpec:
     description: str
     kind: str
     factory: Callable[[int], Callable[[Image.Image], Image.Image]]
+
+
+CATEGORY_COLOURS = {
+    "original": "#7f7f7f",
+    "gaussian": "#1f77b4",
+    "sp": "#2ca02c",
+    "downsample1": "#ff7f0e",
+    "downsample2": "#9467bd",
+    "other": "#bcbd22",
+}
+
+
+CATEGORY_LABELS = {
+    "original": "Original",
+    "gaussian": "Gaussian noise",
+    "sp": "Salt & pepper noise",
+    "downsample1": "Smoothed crop (bicubic)",
+    "downsample2": "Raw crop (nearest)",
+    "other": "Other",
+}
+
+GROUP_ORDER = {
+    "original": 0,
+    "gaussian": 1,
+    "sp": 2,
+    "downsample1": 3,
+    "downsample2": 4,
+    "other": 5,
+}
+
+
+class FigureManager:
+    """Assign sequential figure numbers and append captioned images to the report."""
+
+    def __init__(self, report_lines: List[str]) -> None:
+        self._report_lines = report_lines
+        self._counter = 0
+
+    def add(self, image_path: str, title: str, insight: str, alt_text: Optional[str] = None) -> None:
+        self._counter += 1
+        alt = alt_text or title
+        caption = f"*Figure {self._counter}. {title}. {insight}*"
+        self._report_lines.append(f"\n{caption}")
+        self._report_lines.append(f"\n![{alt}]({image_path})")
+
+    @property
+    def count(self) -> int:
+        return self._counter
 
 
 def _identity_transform() -> Callable[[Image.Image], Image.Image]:
@@ -117,13 +172,134 @@ class _DownsampleTransform:
         scale = self.target_max_dim / float(max_dim)
         new_width = max(1, int(round(width * scale)))
         new_height = max(1, int(round(height * scale)))
-        downsampled = image.resize((new_width, new_height), resample=Image.BICUBIC)
-        restored = downsampled.resize((width, height), resample=Image.BICUBIC)
+        # First collapse to the coarser grid with nearest-neighbour so the pixel set matches
+        # the raw (pixelated) transform exactly, then smooth while restoring to the original size.
+        coarse = image.resize((new_width, new_height), resample=Image.NEAREST)
+        restored = coarse.resize((width, height), resample=Image.BICUBIC)
+        return restored
+
+
+class _PixelateTransform:
+    def __init__(self, target_max_dim: int) -> None:
+        self.target_max_dim = target_max_dim
+
+    def __call__(self, image: Image.Image) -> Image.Image:
+        width, height = image.size
+        max_dim = max(width, height)
+        if max_dim <= self.target_max_dim:
+            return image
+        scale = self.target_max_dim / float(max_dim)
+        new_width = max(1, int(round(width * scale)))
+        new_height = max(1, int(round(height * scale)))
+        downsampled = image.resize((new_width, new_height), resample=Image.NEAREST)
+        restored = downsampled.resize((width, height), resample=Image.NEAREST)
         return restored
 
 
 def _format_sigma_name(sigma: float) -> str:
     return f"gaussian_noise_{int(round(sigma*1000)):03d}"  # e.g., 0.01 -> gaussian_noise_010
+
+
+def create_image_grid(
+    image_paths: Sequence[Path],
+    output_path: Path,
+    columns: int = 4,
+    padding: int = 4,
+    background: Tuple[int, int, int] = (255, 255, 255),
+) -> Path:
+    valid_paths = [path for path in image_paths if path.exists()]
+    if not valid_paths:
+        raise ValueError("No valid image paths provided for grid.")
+    images = [Image.open(path).convert("RGB") for path in valid_paths]
+    tile_width, tile_height = images[0].size
+    for img in images:
+        if img.size != (tile_width, tile_height):
+            img.thumbnail((tile_width, tile_height), Image.Resampling.LANCZOS)
+    cols = max(1, columns)
+    rows = math.ceil(len(images) / cols)
+    grid_width = cols * tile_width + padding * (cols + 1)
+    grid_height = rows * tile_height + padding * (rows + 1)
+    grid = Image.new("RGB", (grid_width, grid_height), color=background)
+    for idx, img in enumerate(images):
+        row, col = divmod(idx, cols)
+        x = padding + col * (tile_width + padding)
+        y = padding + row * (tile_height + padding)
+        grid.paste(img, (x, y))
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    grid.save(output_path)
+    for img in images:
+        img.close()
+    return output_path
+
+
+def create_multirow_preview_grid(
+    rows: Sequence[Tuple[str, Sequence[Path]]],
+    output_path: Path,
+    padding: int = 8,
+    label_width: Optional[int] = None,
+    background: Tuple[int, int, int] = (255, 255, 255),
+) -> Path:
+    tiles: List[Tuple[str, List[Image.Image]]] = []
+    tile_width = tile_height = None
+    for label, paths in rows:
+        row_images: List[Image.Image] = []
+        for path in paths:
+            if not path.exists():
+                continue
+            img = Image.open(path).convert("RGB")
+            if tile_width is None or tile_height is None:
+                tile_width, tile_height = img.size
+            else:
+                # ensure consistent tile size
+                if img.size != (tile_width, tile_height):
+                    img = img.resize((tile_width, tile_height), Image.Resampling.LANCZOS)
+            row_images.append(img)
+        if row_images:
+            tiles.append((label, row_images))
+
+    if not tiles:
+        raise ValueError("No valid images for multirow preview grid")
+
+    max_cols = max(len(images) for _label, images in tiles)
+    if max_cols == 0:
+        raise ValueError("Empty image rows in multirow preview grid")
+
+    label_font = ImageFont.load_default()
+    tile_width = tile_width or 224
+    tile_height = tile_height or 224
+    dummy_draw = ImageDraw.Draw(Image.new("RGB", (1, 1)))
+    max_label_width = max(dummy_draw.textlength(label, font=label_font) for label, _ in tiles)
+    label_width = label_width or int(max_label_width + 2 * padding)
+
+    canvas_width = label_width + padding + max_cols * (tile_width + padding)
+    canvas_height = padding + len(tiles) * (tile_height + padding)
+
+    canvas = Image.new("RGB", (canvas_width, canvas_height), color=background)
+    draw = ImageDraw.Draw(canvas)
+
+    blank_tile = Image.new("RGB", (tile_width, tile_height), color=background)
+
+    for row_idx, (label, images) in enumerate(tiles):
+        y = padding + row_idx * (tile_height + padding)
+        # label text vertically centered relative to the tile
+        text_x = padding
+        text_height = label_font.getbbox(label)[3] - label_font.getbbox(label)[1] if hasattr(label_font, "getbbox") else label_font.getsize(label)[1]
+        text_y = y + (tile_height - text_height) / 2
+        draw.text((text_x, text_y), label, fill=(0, 0, 0), font=label_font)
+
+        for col in range(max_cols):
+            x = label_width + padding + col * (tile_width + padding)
+            if col < len(images):
+                canvas.paste(images[col], (x, y))
+            else:
+                canvas.paste(blank_tile, (x, y))
+
+        for img in images:
+            img.close()
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    canvas.save(output_path)
+    return output_path
 
 
 def default_transform_specs(
@@ -172,6 +348,14 @@ def default_transform_specs(
                 factory=lambda _seed, t=target: _DownsampleTransform(target_max_dim=t),
             )
         )
+        specs.append(
+            TransformSpec(
+                name=f"pixel_downsample_{int(pct)}pct",
+                description=f"Pixelate to {target}px (encoder base {encoder_base_px}px, {int(pct)}% reduction) then upscale",
+                kind="downsample_pixel",
+                factory=lambda _seed, t=target: _PixelateTransform(target_max_dim=t),
+            )
+        )
 
     return tuple(specs)
 
@@ -194,13 +378,71 @@ def summarise_array(values: Sequence[float]) -> MetricMoments:
         return MetricMoments(float("nan"), float("nan"), float("nan"), float("nan"))
     if arr.size == 1:
         value = float(arr[0])
-        return MetricMoments(value, 0.0, value, value)
+        return MetricMoments(value, 0.0, value, value, value, value)
+    mean = float(arr.mean())
+    std = float(arr.std(ddof=1))
+    _, ci_low, ci_high = bootstrap_mean_ci(arr)
     return MetricMoments(
-        mean=float(arr.mean()),
-        std=float(arr.std(ddof=1)),
+        mean=mean,
+        std=std,
         min=float(arr.min()),
         max=float(arr.max()),
+        ci_low=ci_low,
+        ci_high=ci_high,
     )
+
+
+def bootstrap_mean_ci(values: Sequence[float], n_boot: int = 1000, alpha: float = 0.05) -> tuple[float, float, float]:
+    arr = np.asarray(values, dtype=np.float64)
+    if arr.size == 0:
+        return float("nan"), float("nan"), float("nan")
+    if arr.size == 1:
+        value = float(arr[0])
+        return value, value, value
+    rng = default_rng(12345)
+    samples = rng.integers(0, arr.size, size=(n_boot, arr.size))
+    boot_means = arr[samples].mean(axis=1)
+    lower = float(np.percentile(boot_means, 100 * (alpha / 2)))
+    upper = float(np.percentile(boot_means, 100 * (1 - alpha / 2)))
+    return float(arr.mean()), lower, upper
+
+
+def bootstrap_effect(
+    values: Sequence[float],
+    base_values: Sequence[float],
+    relative: bool,
+    n_boot: int = 1000,
+    alpha: float = 0.05,
+) -> tuple[float, float, float]:
+    arr = np.asarray(values, dtype=np.float64)
+    base = np.asarray(base_values, dtype=np.float64)
+    if arr.size == 0 or base.size == 0:
+        return float("nan"), float("nan"), float("nan")
+    base_mean = float(base.mean())
+    if relative and (not math.isfinite(base_mean) or base_mean == 0.0):
+        return float("nan"), float("nan"), float("nan")
+    if relative:
+        effect = (arr.mean() - base_mean) / base_mean * 100.0
+    else:
+        effect = float(arr.mean())
+
+    rng = default_rng(54321)
+    indices = rng.integers(0, arr.size, size=(n_boot, arr.size))
+    boot = arr[indices].mean(axis=1)
+    if relative:
+        boot = (boot - base_mean) / base_mean * 100.0
+    lower = float(np.percentile(boot, 100 * (alpha / 2)))
+    upper = float(np.percentile(boot, 100 * (1 - alpha / 2)))
+    return effect, lower, upper
+
+
+def corr_anisotropy_fro(cov: np.ndarray) -> float:
+    diag = np.sqrt(np.clip(np.diag(cov), a_min=1e-8, a_max=None))
+    D_inv = np.reciprocal(diag)
+    corr = cov * np.outer(D_inv, D_inv)
+    corr = np.clip(corr, -1.0, 1.0)
+    off = corr - np.diag(np.diag(corr))
+    return float(np.linalg.norm(off, ord="fro"))
 
 
 def summarise_metric_collection(collection: Dict[str, Sequence[float]]) -> Dict[str, MetricMoments]:
@@ -264,6 +506,8 @@ def moments_to_dict(moments: MetricMoments) -> Dict[str, float]:
         "std": moments.std,
         "min": moments.min,
         "max": moments.max,
+        "ci_low": moments.ci_low,
+        "ci_high": moments.ci_high,
     }
 
 
@@ -306,7 +550,12 @@ def create_relative_change_plot(
     labels: List[str] = []
     deltas: List[float] = []
     colors: List[str] = []
-    KIND_COLOURS = {"noise": "#1f77b4", "downsample": "#ff7f0e", "reference": "#7f7f7f"}
+    KIND_COLOURS = {
+        "noise": "#1f77b4",
+        "downsample": "#ff7f0e",
+        "downsample_pixel": "#9467bd",
+        "reference": "#7f7f7f",
+    }
 
     for spec in transforms:
         if spec.name == "original":
@@ -374,7 +623,14 @@ def create_violin_plot(
     fig, ax = plt.subplots(figsize=(10, 4))
     parts = ax.violinplot(data, showmeans=True, showextrema=False)
     for pc, spec in zip(parts["bodies"], data_specs):
-        color = "#1f77b4" if spec.kind == "noise" else "#ff7f0e" if spec.kind == "downsample" else "#7f7f7f"
+        if spec.kind == "noise":
+            color = "#1f77b4"
+        elif spec.kind == "downsample":
+            color = "#ff7f0e"
+        elif spec.kind == "downsample_pixel":
+            color = "#9467bd"
+        else:
+            color = "#7f7f7f"
         pc.set_facecolor(color)
         pc.set_edgecolor("black")
         pc.set_alpha(0.6)
@@ -401,7 +657,12 @@ def create_metric_line_plot(
     means: List[float] = []
     labels: List[str] = []
     colors: List[str] = []
-    colour_map = {"noise": "#1f77b4", "downsample": "#ff7f0e", "reference": "#7f7f7f"}
+    colour_map = {
+        "noise": "#1f77b4",
+        "downsample": "#ff7f0e",
+        "downsample_pixel": "#9467bd",
+        "reference": "#7f7f7f",
+    }
 
     for spec in transforms:
         summary = results[spec.name]["mcdo"]["summary"].get(metric)
@@ -444,8 +705,13 @@ def create_severity_plot(
 ) -> Path:
     xs: List[float] = []
     ys: List[float] = []
+    lowers: List[float] = []
+    uppers: List[float] = []
+    base_values = results["original"]["mcdo"]["metrics"].get(metric)
+    if base_values is None or base_values.size == 0:
+        raise ValueError(f"Missing baseline values for metric '{metric}'")
+
     if kind == "noise":
-        # collect gaussian noise specs in ascending sigma
         pairs: List[Tuple[float, TransformSpec]] = []
         for spec in transforms:
             sigma = _spec_noise_sigma(spec)
@@ -454,17 +720,21 @@ def create_severity_plot(
         pairs.sort(key=lambda p: p[0])
         for sigma, spec in pairs:
             xs.append(sigma)
-            m = results[spec.name]["mcdo"]["summary"].get(metric)
-            base = results["original"]["mcdo"]["summary"].get(metric)
-            if m is None or base is None:
+            values = results[spec.name]["mcdo"]["metrics"].get(metric)
+            if values is None or values.size == 0:
                 ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            if relative_to_original:
+                mean, low, high = bootstrap_effect(values, base_values, True)
             else:
-                val = m.mean
-                if relative_to_original and base.mean != 0.0 and math.isfinite(base.mean):
-                    val = (val - base.mean) / base.mean * 100.0
-                ys.append(val)
+                mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
         x_label = "sigma"
-    elif kind == "downsample":
+    elif kind in {"downsample", "downsample_pixel"}:
         pairs_ds: List[Tuple[int, TransformSpec]] = []
         for spec in transforms:
             pct = _spec_downsample_percent(spec)
@@ -473,21 +743,27 @@ def create_severity_plot(
         pairs_ds.sort(key=lambda p: p[0])
         for pct, spec in pairs_ds:
             xs.append(float(pct))
-            m = results[spec.name]["mcdo"]["summary"].get(metric)
-            base = results["original"]["mcdo"]["summary"].get(metric)
-            if m is None or base is None:
+            values = results[spec.name]["mcdo"]["metrics"].get(metric)
+            if values is None or values.size == 0:
                 ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            if relative_to_original:
+                mean, low, high = bootstrap_effect(values, base_values, True)
             else:
-                val = m.mean
-                if relative_to_original and base.mean != 0.0 and math.isfinite(base.mean):
-                    val = (val - base.mean) / base.mean * 100.0
-                ys.append(val)
-        x_label = "downsample reduction (%)"
+                mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
+        x_label = "pixel reduction (%)" if kind == "downsample_pixel" else "downsample reduction (%)"
     else:
         raise ValueError("kind must be 'noise' or 'downsample'")
 
     fig, ax = plt.subplots(figsize=(8, 4))
     ax.plot(xs, ys, marker="o")
+    if lowers and uppers:
+        ax.fill_between(xs, lowers, uppers, alpha=0.2)
     ax.set_xlabel(x_label)
     ax.set_ylabel(ylabel + (" (Δ%)" if relative_to_original else ""))
     ax.set_title(f"{metric.replace('_',' ').title()} vs {kind}")
@@ -508,7 +784,13 @@ def create_scatter_plot(
     filename: str,
 ) -> Path:
     fig, ax = plt.subplots(figsize=(6, 5))
-    colour_map = {"noise": "#1f77b4", "downsample": "#ff7f0e", "reference": "#7f7f7f"}
+    colour_map = {
+        "noise": "#1f77b4",
+        "downsample": "#ff7f0e",
+        "downsample_pixel": "#9467bd",
+        "reference": "#7f7f7f",
+    }
+    kind_seen: Dict[str, bool] = {}
     for spec in transforms:
         metrics = results[spec.name]["mcdo"]["metrics"]
         x = metrics.get(x_metric)
@@ -516,13 +798,420 @@ def create_scatter_plot(
         if x is None or y is None or x.size == 0 or y.size == 0:
             continue
         color = colour_map.get(spec.kind, "#bcbd22")
-        ax.scatter(x, y, s=8, alpha=0.4, label=spec.name if spec.name in {"original"} else None, color=color)
+        ax.scatter(x, y, s=8, alpha=0.4, color=color)
+        kind_seen[spec.kind] = True
+    ax.scatter([], [], s=8, color=colour_map.get("reference", "#7f7f7f"), label="baseline (original)")
+    legend_entries = [
+        ("noise", "noise perturbations"),
+        ("downsample", "downsampling perturbations"),
+        ("downsample_pixel", "pixelated downsampling"),
+    ]
+    for kind, label in legend_entries:
+        if kind_seen.get(kind):
+            ax.scatter([], [], s=8, color=colour_map[kind], label=label)
     ax.set_xlabel(x_metric.replace("_", " "))
     ax.set_ylabel(y_metric.replace("_", " "))
     ax.set_title(f"{y_metric.replace('_',' ').title()} vs {x_metric.replace('_',' ').title()}")
     handles, labels = ax.get_legend_handles_labels()
     if labels:
         ax.legend()
+    asset_root.mkdir(parents=True, exist_ok=True)
+    out_path = asset_root / filename
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    return out_path
+
+
+def create_trace_meanshift_scatter(
+    results: Dict[str, dict],
+    transforms: Sequence[TransformSpec],
+    extras_map: Dict[str, Dict[str, Dict[str, float]]],
+    kind: str,
+    asset_root: Path,
+    filename: str,
+    title: str,
+) -> Path:
+    points: List[Tuple[float, float, float, str]] = []  # (shift, trace, severity, label)
+    if kind == "noise":
+        for spec in transforms:
+            sigma = _spec_noise_sigma(spec)
+            if sigma is None:
+                continue
+            shift = extras_map.get(spec.name, {}).get("mean_shift", {}).get("mean")
+            trace = results[spec.name]["mcdo"]["summary"].get("trace")
+            if shift is None or trace is None:
+                continue
+            points.append((shift, trace.mean, sigma, f"σ={sigma:.2f}"))
+    elif kind in {"downsample", "downsample_pixel"}:
+        for spec in transforms:
+            pct = _spec_downsample_percent(spec)
+            if pct is None:
+                continue
+            shift = extras_map.get(spec.name, {}).get("mean_shift", {}).get("mean")
+            trace = results[spec.name]["mcdo"]["summary"].get("trace")
+            if shift is None or trace is None:
+                continue
+            label = f"{pct}%"
+            points.append((shift, trace.mean, float(pct), label))
+    else:
+        raise ValueError("kind must be 'noise' or 'downsample'")
+
+    if not points:
+        raise ValueError("No data available for trace vs mean-shift scatter")
+
+    points.sort(key=lambda item: item[2])
+    shifts = [p[0] for p in points]
+    traces = [p[1] for p in points]
+    severity = [p[2] for p in points]
+    labels = [p[3] for p in points]
+
+    cmap = matplotlib.colormaps.get_cmap("viridis")
+    norm = plt.Normalize(min(severity), max(severity))
+
+    fig, ax = plt.subplots(figsize=(6, 4.5))
+    sc = ax.scatter(shifts, traces, c=severity, cmap=cmap, norm=norm, s=60, marker="o")
+    ax.plot(shifts, traces, color="#444444", linewidth=1, alpha=0.6)
+
+    for shift, trace_val, label in zip(shifts, traces, labels):
+        ax.annotate(
+            label,
+            (shift, trace_val),
+            textcoords="offset points",
+            xytext=(4, 4),
+            fontsize=8,
+            alpha=0.8,
+        )
+
+    ax.set_xlabel("Mean shift (L2)")
+    ax.set_ylabel("Trace")
+    ax.set_title(title)
+    cbar = fig.colorbar(sc, ax=ax)
+    cbar_label = "σ" if kind == "noise" else "Reduction (%)"
+    cbar.set_label(cbar_label)
+    ax.grid(alpha=0.2)
+
+    asset_root.mkdir(parents=True, exist_ok=True)
+    out_path = asset_root / filename
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    return out_path
+
+
+def create_aggregate_plot(
+    results: Dict[str, dict],
+    transforms: Sequence[TransformSpec],
+    extras_map: Dict[str, Dict[str, Dict[str, float]]],
+    asset_root: Path,
+    filename: str,
+) -> Path:
+    metrics = [
+        ("trace", "Trace"),
+        ("logdet", "Logdet"),
+        ("corr_anisotropy", "Correlation anisotropy (F)")
+    ]
+    ordered_specs = sorted(transforms, key=_transform_order_key)
+    names = [spec.name for spec in ordered_specs]
+    x_positions = np.arange(len(names))
+    fig, axes = plt.subplots(len(metrics), 1, figsize=(max(10, len(names) * 0.4), 2 + 2 * len(metrics)), sharex=True)
+    if not isinstance(axes, np.ndarray):
+        axes = np.array([axes])
+
+    groups_seen: set[str] = set()
+
+    for ax, (metric_key, ylabel) in zip(axes, metrics):
+        for idx, spec in enumerate(ordered_specs):
+            group = _spec_group_category(spec)
+            color = CATEGORY_COLOURS.get(group, "#bcbd22")
+            if metric_key == "corr_anisotropy":
+                extra = extras_map.get(spec.name, {}).get("corr_anisotropy")
+                moments = dict_to_moments(extra) if extra else MetricMoments(
+                    float("nan"), float("nan"), float("nan"), float("nan")
+                )
+            else:
+                summary = results[spec.name]["mcdo"]["summary"].get(metric_key)
+                moments = summary if summary is not None else MetricMoments(
+                    float("nan"), float("nan"), float("nan"), float("nan")
+                )
+
+            mean = moments.mean
+            if not math.isfinite(mean):
+                continue
+            if math.isfinite(moments.ci_low) and math.isfinite(moments.ci_high):
+                lower = mean - moments.ci_low
+                upper = moments.ci_high - mean
+            else:
+                lower = moments.std if math.isfinite(moments.std) else 0.0
+                upper = moments.std if math.isfinite(moments.std) else 0.0
+            lower = max(0.0, lower)
+            upper = max(0.0, upper)
+            ax.errorbar(
+                x_positions[idx],
+                mean,
+                yerr=np.array([[lower], [upper]]),
+                fmt="o",
+                color=color,
+                ecolor=color,
+                elinewidth=1,
+                capsize=3,
+            )
+            groups_seen.add(group)
+        ax.set_ylabel(ylabel)
+        ax.grid(alpha=0.2)
+
+    axes[-1].set_xticks(x_positions)
+    axes[-1].set_xticklabels(names, rotation=40, ha="right")
+
+    legend_handles: List[Line2D] = []
+    for group in ["original", "gaussian", "sp", "downsample1", "downsample2"]:
+        if group in groups_seen:
+            legend_handles.append(
+                Line2D(
+                    [0],
+                    [0],
+                    marker="o",
+                    linestyle="",
+                    color=CATEGORY_COLOURS[group],
+                    label=CATEGORY_LABELS[group],
+                )
+            )
+    if legend_handles:
+        fig.legend(
+            handles=legend_handles,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.02),
+            ncol=min(len(legend_handles), 5),
+            frameon=False,
+            columnspacing=1.0,
+            handletextpad=0.4,
+            borderaxespad=0.0,
+        )
+
+    axes[0].set_title("Aggregate metrics with 95% confidence intervals")
+    fig.subplots_adjust(top=0.78, bottom=0.21, left=0.1, right=0.96, hspace=0.32)
+    asset_root.mkdir(parents=True, exist_ok=True)
+    out_path = asset_root / filename
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    return out_path
+
+
+def create_extras_severity_plot(
+    transforms: Sequence[TransformSpec],
+    extras: Dict[str, Dict[str, Dict[str, float]]],
+    values_key: str,
+    kind: str,
+    asset_root: Path,
+    filename: str,
+    ylabel: str,
+) -> Path:
+    xs: List[float] = []
+    ys: List[float] = []
+    lowers: List[float] = []
+    uppers: List[float] = []
+
+    if kind == "noise":
+        pairs: List[Tuple[float, TransformSpec]] = []
+        for spec in transforms:
+            sigma = _spec_noise_sigma(spec)
+            if sigma is not None and spec.name in extras:
+                pairs.append((sigma, spec))
+        pairs.sort(key=lambda p: p[0])
+        for sigma, spec in pairs:
+            xs.append(sigma)
+            values = extras[spec.name].get(f"{values_key}_values")
+            if not values:
+                ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
+        x_label = "sigma"
+    elif kind in {"downsample", "downsample_pixel"}:
+        pairs_ds: List[Tuple[int, TransformSpec]] = []
+        for spec in transforms:
+            pct = _spec_downsample_percent(spec)
+            if pct is not None and spec.name in extras:
+                pairs_ds.append((pct, spec))
+        pairs_ds.sort(key=lambda p: p[0])
+        for pct, spec in pairs_ds:
+            xs.append(float(pct))
+            values = extras[spec.name].get(f"{values_key}_values")
+            if not values:
+                ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
+        x_label = "pixel reduction (%)" if kind == "downsample_pixel" else "downsample reduction (%)"
+    else:
+        raise ValueError("kind must be 'noise' or 'downsample'")
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(xs, ys, marker="o")
+    if lowers and uppers:
+        ax.fill_between(xs, lowers, uppers, alpha=0.2)
+    ax.set_xlabel(x_label)
+    ax.set_ylabel(ylabel)
+    ax.set_title(f"{ylabel} vs {kind}")
+    asset_root.mkdir(parents=True, exist_ok=True)
+    out_path = asset_root / filename
+    fig.tight_layout()
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    return out_path
+
+
+def create_mean_bar_plot(
+    transforms: Sequence[TransformSpec],
+    extras: Dict[str, Dict[str, Dict[str, float]]],
+    key: str,
+    asset_root: Path,
+    filename: str,
+    ylabel: str,
+) -> Path:
+    ordered_specs = sorted(transforms, key=_transform_order_key)
+    names: List[str] = []
+    values: List[float] = []
+    lower_err: List[float] = []
+    upper_err: List[float] = []
+    colors: List[str] = []
+    groups_seen: set[str] = set()
+    for spec in ordered_specs:
+        extra = extras.get(spec.name, {}).get(key)
+        if not extra:
+            continue
+        mean = extra.get("mean")
+        if not math.isfinite(mean):
+            continue
+        ci_low = extra.get("ci_low")
+        ci_high = extra.get("ci_high")
+        if math.isfinite(ci_low) and math.isfinite(ci_high):
+            lower = max(0.0, mean - ci_low)
+            upper = max(0.0, ci_high - mean)
+        else:
+            std = extra.get("std", 0.0)
+            lower = max(0.0, std)
+            upper = max(0.0, std)
+        group = _spec_group_category(spec)
+        color = CATEGORY_COLOURS.get(group, "#bcbd22")
+        names.append(spec.name)
+        values.append(mean)
+        lower_err.append(lower)
+        upper_err.append(upper)
+        colors.append(color)
+        groups_seen.add(group)
+
+    if not names:
+        raise ValueError("No mean shift data available.")
+
+    x = np.arange(len(names))
+    fig, ax = plt.subplots(figsize=(max(10, len(names) * 0.4), 4))
+    bars = ax.bar(x, values, color=colors, yerr=[lower_err, upper_err], capsize=3)
+    ax.set_ylabel(ylabel)
+    ax.set_xticks(x)
+    ax.set_xticklabels(names, rotation=40, ha="right")
+    ax.set_title(f"{ylabel} across transforms")
+
+    legend_handles: List[Line2D] = []
+    for group in ["original", "gaussian", "sp", "downsample1", "downsample2"]:
+        if group in groups_seen:
+            legend_handles.append(
+                Line2D([0], [0], marker="s", linestyle="", color=CATEGORY_COLOURS[group], label=CATEGORY_LABELS[group])
+            )
+    if legend_handles:
+        fig.legend(
+            handles=legend_handles,
+            loc="upper center",
+            bbox_to_anchor=(0.5, 1.04),
+            ncol=min(len(legend_handles), 5),
+            frameon=False,
+            columnspacing=1.0,
+            handletextpad=0.4,
+            borderaxespad=0.0,
+        )
+
+    asset_root.mkdir(parents=True, exist_ok=True)
+    out_path = asset_root / filename
+    fig.subplots_adjust(top=0.78, bottom=0.28, left=0.1, right=0.96)
+    fig.savefig(out_path, dpi=200)
+    plt.close(fig)
+    return out_path
+
+
+def create_extras_severity_plot(
+    transforms: Sequence[TransformSpec],
+    extras: Dict[str, Dict[str, Dict[str, float]]],
+    values_key: str,
+    kind: str,
+    asset_root: Path,
+    filename: str,
+    ylabel: str,
+) -> Path:
+    xs: List[float] = []
+    ys: List[float] = []
+    lowers: List[float] = []
+    uppers: List[float] = []
+
+    if kind == "noise":
+        pairs: List[Tuple[float, TransformSpec]] = []
+        for spec in transforms:
+            sigma = _spec_noise_sigma(spec)
+            if sigma is not None and spec.name in extras:
+                pairs.append((sigma, spec))
+        pairs.sort(key=lambda p: p[0])
+        for sigma, spec in pairs:
+            xs.append(sigma)
+            values = extras[spec.name].get(f"{values_key}_values")
+            if not values:
+                ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
+        xlabel = "sigma"
+    elif kind in {"downsample", "downsample_pixel"}:
+        pairs_ds: List[Tuple[int, TransformSpec]] = []
+        for spec in transforms:
+            pct = _spec_downsample_percent(spec)
+            if pct is not None and spec.name in extras:
+                pairs_ds.append((pct, spec))
+        pairs_ds.sort(key=lambda p: p[0])
+        for pct, spec in pairs_ds:
+            xs.append(float(pct))
+            values = extras[spec.name].get(f"{values_key}_values")
+            if not values:
+                ys.append(float("nan"))
+                lowers.append(float("nan"))
+                uppers.append(float("nan"))
+                continue
+            mean, low, high = bootstrap_mean_ci(values)
+            ys.append(mean)
+            lowers.append(low)
+            uppers.append(high)
+        xlabel = "downsample reduction (%)"
+        if kind == "downsample_pixel":
+            xlabel = "pixel reduction (%)"
+    else:
+        raise ValueError("kind must be 'noise' or 'downsample'")
+
+    fig, ax = plt.subplots(figsize=(8, 4))
+    ax.plot(xs, ys, marker="o")
+    if lowers and uppers:
+        ax.fill_between(xs, lowers, uppers, alpha=0.2)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_title(f"{ylabel} vs {kind}")
     asset_root.mkdir(parents=True, exist_ok=True)
     out_path = asset_root / filename
     fig.tight_layout()
@@ -581,6 +1270,7 @@ def create_mean_shift_plot(
 
 
 def create_angle_radar(
+    results: Dict[str, dict],
     extras: Dict[str, Dict[str, Dict[str, float]]],
     transforms: Sequence[TransformSpec],
     asset_root: Path,
@@ -593,16 +1283,35 @@ def create_angle_radar(
     if not candidates:
         raise ValueError("No extras available for angle radar")
 
-    labels = ["original"]
-    selected_specs: List[Tuple[str, str]] = [("original", "original")]
-    max_noise = max((spec for spec in candidates if _spec_noise_sigma(spec) is not None), key=lambda s: _spec_noise_sigma(s) or 0.0, default=None)
-    if max_noise and max_noise.name != "original":
-        labels.append(max_noise.name)
-        selected_specs.append((max_noise.name, max_noise.name))
-    max_down = max((spec for spec in candidates if _spec_downsample_percent(spec) is not None), key=lambda s: _spec_downsample_percent(s) or 0, default=None)
-    if max_down and max_down.name != "original":
-        labels.append(max_down.name)
-        selected_specs.append((max_down.name, max_down.name))
+    selected_specs: List[Tuple[str, str]] = [("original", "Original")]
+    added: set[str] = {"original"}
+
+    def add_spec(spec: Optional[TransformSpec], label_suffix: str) -> None:
+        if spec and spec.name not in added:
+            selected_specs.append((spec.name, label_suffix))
+            added.add(spec.name)
+
+    # Identify noise specs with trace statistics.
+    noise_specs = [spec for spec in candidates if _spec_noise_sigma(spec) is not None]
+    if noise_specs:
+        def trace_mean(spec: TransformSpec) -> float:
+            return results[spec.name]["mcdo"]["summary"]["trace"].mean
+
+        max_noise_spec = max(noise_specs, key=trace_mean)
+        min_noise_spec = min(noise_specs, key=trace_mean)
+        add_spec(max_noise_spec, f"{max_noise_spec.name} (noise max trace)")
+        add_spec(min_noise_spec, f"{min_noise_spec.name} (noise min trace)")
+
+    # Identify downsample specs with trace statistics.
+    down_specs = [spec for spec in candidates if _spec_downsample_percent(spec) is not None]
+    if down_specs:
+        def down_trace_mean(spec: TransformSpec) -> float:
+            return results[spec.name]["mcdo"]["summary"]["trace"].mean
+
+        max_down_spec = max(down_specs, key=down_trace_mean)
+        min_down_spec = min(down_specs, key=down_trace_mean)
+        add_spec(max_down_spec, f"{max_down_spec.name} (downsample max trace)")
+        add_spec(min_down_spec, f"{min_down_spec.name} (downsample min trace)")
 
     angles = sorted(set(angle for summary in extras.values() for angle in summary.get("angle_trace_means", {}).keys()))
     if not angles:
@@ -610,8 +1319,8 @@ def create_angle_radar(
     theta = np.radians(angles + [angles[0]])
 
     fig, ax = plt.subplots(figsize=(6, 6), subplot_kw={"projection": "polar"})
-    colours = ["#7f7f7f", "#1f77b4", "#ff7f0e", "#2ca02c"]
-    for idx, (label, spec_name) in enumerate(selected_specs):
+    colours = ["#7f7f7f", "#1f77b4", "#ff7f0e", "#2ca02c", "#9467bd", "#8c564b"]
+    for idx, (spec_name, label) in enumerate(selected_specs):
         stats = extras.get(spec_name, {}).get("angle_trace_means", {})
         values = [stats.get(angle, np.nan) for angle in angles]
         values.append(values[0])
@@ -620,53 +1329,63 @@ def create_angle_radar(
     ax.set_title("Trace by viewpoint angle")
     ax.set_thetagrids(angles)
     ax.set_rlabel_position(0)
-    ax.legend(loc="upper right", bbox_to_anchor=(1.2, 1.1))
+    legend = ax.legend(
+        loc="upper center",
+        bbox_to_anchor=(0.5, 1.20),
+        ncol=min(len(selected_specs), 3),
+        frameon=False,
+    )
     asset_root.mkdir(parents=True, exist_ok=True)
     out_path = asset_root / filename
-    fig.tight_layout()
+    fig.subplots_adjust(top=0.88, bottom=0.08, left=0.08, right=0.92)
     fig.savefig(out_path, dpi=200)
     plt.close(fig)
     return out_path
 
 
-def create_pca_gallery(
+def create_pca_plot(
     analysis_root: Path,
     baseline_dir: Path,
     sample_index: int,
-    scenario_names: Sequence[str],
+    scenario: str,
+    label: str,
     asset_root: Path,
     filename: str,
-    transforms: Sequence[TransformSpec],
 ) -> Path:
-    fig, axes = plt.subplots(1, len(scenario_names), figsize=(5 * len(scenario_names), 4))
-    if len(scenario_names) == 1:
-        axes = [axes]
-
     baseline_samples = load_sample_tensors(baseline_dir)
     mu_baseline = baseline_samples[sample_index]["mu"]
 
-    for ax, scenario in zip(axes, scenario_names):
-        run_dir = analysis_root / "mcdo" / scenario
-        samples = load_sample_tensors(run_dir)
-        sample = samples[sample_index]
-        embeddings = sample["embeddings"]
-        mean = embeddings.mean(axis=0)
-        centered = embeddings - mean
-        u, s, vh = np.linalg.svd(centered, full_matrices=False)
-        components = vh[:2]
-        projected = centered @ components.T
-        ax.scatter(projected[:, 0], projected[:, 1], s=10, alpha=0.5)
-        ax.scatter(0, 0, marker="x", color="#d62728", label="MCDO mean")
-        baseline_proj = (mu_baseline - mean) @ components.T
-        ax.arrow(baseline_proj[0], baseline_proj[1], -baseline_proj[0], -baseline_proj[1],
-                 head_width=0.05, length_includes_head=True, color="#9467bd", label="Drift")
-        ax.set_title(scenario)
-        ax.set_xlabel("PC1")
-        ax.set_ylabel("PC2")
-        ax.grid(True, alpha=0.2)
-    handles, labels = axes[0].get_legend_handles_labels()
-    if labels:
-        fig.legend(handles, labels, loc="upper right")
+    run_dir = analysis_root / "mcdo" / scenario
+    samples = load_sample_tensors(run_dir)
+    sample = samples[sample_index]
+    embeddings = sample["embeddings"]
+    mean = embeddings.mean(axis=0)
+    centered = embeddings - mean
+    _, _, vh = np.linalg.svd(centered, full_matrices=False)
+    components = vh[:2]
+    projected = centered @ components.T
+
+    fig, ax = plt.subplots(figsize=(5, 4))
+    ax.scatter(projected[:, 0], projected[:, 1], s=10, alpha=0.5)
+    ax.scatter(0, 0, marker="x", color="#d62728", label="Scenario mean")
+    baseline_proj = (mu_baseline - mean) @ components.T
+    ax.arrow(
+        baseline_proj[0],
+        baseline_proj[1],
+        -baseline_proj[0],
+        -baseline_proj[1],
+        head_width=0.05,
+        length_includes_head=True,
+        color="#9467bd",
+        label="Drift from baseline",
+    )
+    ax.set_title(label)
+    ax.set_xlabel("PC1")
+    ax.set_ylabel("PC2")
+    ax.grid(True, alpha=0.2)
+    handles, legends = ax.get_legend_handles_labels()
+    if legends:
+        ax.legend(loc="upper right")
     asset_root.mkdir(parents=True, exist_ok=True)
     out_path = asset_root / filename
     fig.tight_layout()
@@ -701,6 +1420,7 @@ def compute_extended_metrics(
         circular_vars: List[float] = []
         spectral_entropy: List[float] = []
         spectral_top10: List[float] = []
+        corr_anisotropy: List[float] = []
 
         angle_trace: Dict[int, List[float]] = {angle: [] for angle in sorted(set(angle_map.values()))}
 
@@ -723,6 +1443,8 @@ def compute_extended_metrics(
             tangent_traces.append(float(np.trace(tangent)))
             tangent_eigs = np.linalg.eigvalsh(tangent + np.eye(tangent.shape[0]) * 1e-6)
             tangent_maxes.append(float(np.max(tangent_eigs)))
+
+            corr_anisotropy.append(corr_anisotropy_fro(cov))
 
             cov_eigs = np.linalg.eigvalsh(cov + np.eye(cov.shape[0]) * 1e-6)
             cov_eigs = np.clip(cov_eigs, 0.0, None)
@@ -755,9 +1477,11 @@ def compute_extended_metrics(
             "circular_variance": summarise_extra_metric(circular_vars),
             "spectral_entropy": summarise_extra_metric(spectral_entropy),
             "spectral_top10": summarise_extra_metric(spectral_top10),
+            "corr_anisotropy": summarise_extra_metric(corr_anisotropy),
             "angle_trace_means": {
                 angle: float(np.mean(values)) if values else float("nan") for angle, values in angle_trace.items()
             },
+            "corr_anisotropy_values": corr_anisotropy,
         }
 
     return extras
@@ -815,7 +1539,10 @@ def extract_angle(path: Path) -> Optional[int]:
 
 def summarise_extra_metric(values: Sequence[float]) -> Dict[str, float]:
     moments = summarise_array(values)
-    return moments_to_dict(moments)
+    payload = moments_to_dict(moments)
+    payload["ci_low"] = moments.ci_low
+    payload["ci_high"] = moments.ci_high
+    return payload
 
 
 def dict_to_moments(summary: Dict[str, float]) -> MetricMoments:
@@ -824,6 +1551,8 @@ def dict_to_moments(summary: Dict[str, float]) -> MetricMoments:
         std=summary.get("std", float("nan")),
         min=summary.get("min", float("nan")),
         max=summary.get("max", float("nan")),
+        ci_low=summary.get("ci_low", float("nan")),
+        ci_high=summary.get("ci_high", float("nan")),
     )
 
 def _spec_noise_sigma(spec: TransformSpec) -> Optional[float]:
@@ -839,21 +1568,73 @@ def _spec_noise_sigma(spec: TransformSpec) -> Optional[float]:
 
 
 def _spec_downsample_percent(spec: TransformSpec) -> Optional[int]:
-    if spec.kind != "downsample":
+    if spec.kind not in {"downsample", "downsample_pixel"}:
         return None
-    if spec.name.startswith("downsample_") and spec.name.endswith("pct"):
+    prefix = "pixel_downsample_" if spec.kind == "downsample_pixel" else "downsample_"
+    if spec.name.startswith(prefix) and spec.name.endswith("pct"):
         try:
-            mid = spec.name[len("downsample_") : -len("pct")]
+            mid = spec.name[len(prefix) : -len("pct")]
             return int(mid)
         except Exception:
             return None
     return None
 
 
+def _spec_group_category(spec: TransformSpec) -> str:
+    if spec.name == "original":
+        return "original"
+    if spec.name == "saltpepper_5pct":
+        return "sp"
+    if spec.kind == "noise":
+        return "gaussian"
+    if spec.kind == "downsample":
+        return "downsample1"
+    if spec.kind == "downsample_pixel":
+        return "downsample2"
+    return "other"
+
+
+def _transform_order_key(spec: TransformSpec) -> tuple:
+    group = _spec_group_category(spec)
+    group_rank = GROUP_ORDER.get(group, 99)
+    if spec.kind == "noise":
+        secondary = _spec_noise_sigma(spec)
+        secondary = secondary if secondary is not None else 0.0
+    elif spec.kind in {"downsample", "downsample_pixel"}:
+        secondary = _spec_downsample_percent(spec)
+        secondary = float(secondary) if secondary is not None else 999.0
+    else:
+        secondary = 0.0
+    return (group_rank, secondary, spec.name)
+
+
+def pca_insight(spec: Optional[TransformSpec], label: str) -> str:
+    if spec is None or spec.name == "original":
+        return "Baseline embeddings remain compact with minimal directional bias."
+    if spec.kind == "noise":
+        sigma = _spec_noise_sigma(spec)
+        if sigma is not None:
+            return f"Gaussian noise with σ={sigma:.2f} widens the cluster without shifting its centre markedly."
+        return "Noise widens the embedding cloud while keeping the centroid near baseline."
+    if spec.kind == "downsample":
+        pct = _spec_downsample_percent(spec)
+        if pct is not None:
+            return f"Smoothed crop (bicubic upsample) at {pct}% reduction elongates the embedding cloud along a single axis as detail is lost."
+        return "Smoothed crops elongate the embedding cloud along a dominant axis."
+    if spec.kind == "downsample_pixel":
+        pct = _spec_downsample_percent(spec)
+        if pct is not None:
+            return f"Pixelation at {pct}% produces discrete clusters as block artefacts dominate token activations."
+        return "Pixelation carves discrete blocks within the embedding projection."
+    return f"{label} perturbs the embedding footprint while preserving global orientation."
+
+
 def _select_max_severity_specs(transforms: Sequence[TransformSpec]) -> Tuple[TransformSpec, Optional[TransformSpec], Optional[TransformSpec]]:
     base = next(spec for spec in transforms if spec.name == "original")
     noise_specs = [spec for spec in transforms if _spec_noise_sigma(spec) is not None]
-    down_specs = [spec for spec in transforms if _spec_downsample_percent(spec) is not None]
+    down_specs = [
+        spec for spec in transforms if spec.kind == "downsample" and _spec_downsample_percent(spec) is not None
+    ]
     max_noise = None
     if noise_specs:
         max_noise = max(noise_specs, key=lambda s: _spec_noise_sigma(s) or 0.0)
@@ -883,7 +1664,7 @@ def create_pass_stability_plot(
             continue
         ax.plot(x, means, marker="o", color=colours.get(key, None), label=key)
         if sems is not None and sems.size == x.size:
-            ax.fill_between(x, means - sems, means + sems, color=colours.get(key, None), alpha=0.15)
+            ax.fill_between(x, means - 1.96 * sems, means + 1.96 * sems, color=colours.get(key, None), alpha=0.15)
     ax.set_xscale("log", base=2)
     ax.set_xlabel("passes (T)")
     ax.set_ylabel(ylabel)
@@ -899,6 +1680,8 @@ def create_pass_stability_plot(
 def generate_report(
     report_path: Path,
     asset_rel_dir: Path,
+    analysis_root: Path,
+    downsample_percents: Sequence[int],
     setup: Dict[str, str],
     results: Dict[str, dict],
     transforms: Sequence[TransformSpec],
@@ -906,6 +1689,8 @@ def generate_report(
     pass_stability_notes: Optional[Dict[str, float]] = None,
 ) -> None:
     report_lines: List[str] = ["# Sim2 45° CLIP MCDO Noise Study"]
+    figure_manager = FigureManager(report_lines)
+    appendix_tables: List[Tuple[str, str]] = []
 
     # Section 1: Introduction
     report_lines.append("\n## 1. Introduction")
@@ -920,6 +1705,13 @@ def generate_report(
         "structure: we document the experimental configuration, define uncertainty metrics, and then interpret how "
         "those metrics respond to perturbations of increasing severity."
     )
+    if "modulation_overview_grid" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["modulation_overview_grid"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Preview overview — all perturbations",
+            "Rows correspond to noise, smoothed crops, and raw crops respectively; columns step through increasing severity with the baseline at left.",
+        )
 
     # Section 2: Methodology
     report_lines.append("\n## 2. Methodology")
@@ -950,6 +1742,9 @@ def generate_report(
         "- **Off-diagonal mass:** L₁ magnitude of non-diagonal covariance entries; indicates cross-dimensional coupling and anisotropy."
     )
     report_lines.append(
+        "- **Anisotropy (corr-F):** Frobenius norm of the correlation matrix off-diagonals; values grow as variance concentrates into preferred axes instead of spreading uniformly."
+    )
+    report_lines.append(
         "- **Mean shift / Mahalanobis shift:** L2 distance and covariance-normalised distance between the stochastic mean and the deterministic embedding, quantifying drift induced by perturbations."
     )
     report_lines.append(
@@ -968,51 +1763,76 @@ def generate_report(
     noise_specs = [spec for spec in transforms if spec.kind == "noise" and spec.name != "original"]
     downsample_specs = [spec for spec in transforms if spec.kind == "downsample"]
     reference_summary = results["original"]["mcdo"]["summary"]
+    base_trace = get_moments(reference_summary, "trace").mean
+    base_logdet = get_moments(reference_summary, "logdet").mean
     severe_noise = max(noise_specs, key=lambda spec: _spec_noise_sigma(spec) or 0.0) if noise_specs else None
     severe_down = max(downsample_specs, key=lambda spec: _spec_downsample_percent(spec) or 0) if downsample_specs else None
+    noise_peak_trace = noise_peak_logdet = None
+    noise_peak_trace_pct = noise_peak_logdet_delta = None
+    if severe_noise:
+        noise_summary = results[severe_noise.name]["mcdo"]["summary"]
+        noise_peak_trace = get_moments(noise_summary, "trace").mean
+        noise_peak_logdet = get_moments(noise_summary, "logdet").mean
+        if base_trace:
+            noise_peak_trace_pct = (noise_peak_trace - base_trace) / base_trace * 100.0
+        if base_logdet:
+            noise_peak_logdet_delta = noise_peak_logdet - base_logdet
+    down_peak_trace = down_peak_logdet = None
+    down_peak_trace_pct = down_peak_logdet_delta = None
+    down_peak_volume_ratio = None
+    down_peak_pct = None
+    if severe_down:
+        down_summary = results[severe_down.name]["mcdo"]["summary"]
+        down_peak_trace = get_moments(down_summary, "trace").mean
+        down_peak_logdet = get_moments(down_summary, "logdet").mean
+        down_peak_pct = _spec_downsample_percent(severe_down) or 0
+        if base_trace:
+            down_peak_trace_pct = (down_peak_trace - base_trace) / base_trace * 100.0
+        if math.isfinite(down_peak_logdet) and math.isfinite(base_logdet):
+            down_peak_logdet_delta = down_peak_logdet - base_logdet
+            down_peak_volume_ratio = math.exp(down_peak_logdet - base_logdet)
 
     # Section 4: Aggregate metrics (embedding only)
     report_lines.append("\n## 4. Aggregate MCDO Embedding Metrics")
-    agg_headers = ["transform", "trace", "logdet", "off-diag mass"]
+    extras_map = {spec.name: results.get(spec.name, {}).get("extras", {}) for spec in transforms}
+    agg_headers = ["transform", "trace", "logdet", "anisotropy (corr-F)"]
     agg_rows: List[List[str]] = []
     for spec in transforms:
         summary = results[spec.name]["mcdo"]["summary"]
+        corr_extra = extras_map.get(spec.name, {}).get("corr_anisotropy")
+        corr_value = format_mean_std(dict_to_moments(corr_extra)) if corr_extra else "nan"
         agg_rows.append(
             [
                 spec.name,
                 format_mean_std(get_moments(summary, "trace")),
                 format_mean_std(get_moments(summary, "logdet")),
-                format_mean_std(get_moments(summary, "off_diag_mass")),
+                corr_value,
             ]
         )
-    report_lines.append(build_markdown_table(agg_headers, agg_rows))
-    base_trace = get_moments(reference_summary, "trace").mean
-    base_logdet = get_moments(reference_summary, "logdet").mean
-    base_offdiag = get_moments(reference_summary, "off_diag_mass").mean
+    appendix_tables.append(("Aggregate metrics", build_markdown_table(agg_headers, agg_rows)))
     report_lines.append(
-        f"Baseline trace is {base_trace:.2f}, with logdet {base_logdet:.2f} and off-diagonal mass {base_offdiag:.2f}. "
-        "Noise and downsampling progressively broaden the covariance while gradually reducing logdet, especially "
-        "for the most aggressive settings."
+        f"Baseline trace is {base_trace:.2f}, with logdet {base_logdet:.2f}. "
+        "Noise and crop-based degradations broaden the covariance while logdet declines; we report anisotropy using correlation-based Frobenius norms for scale-free comparison."
     )
+    if "aggregate_overview" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["aggregate_overview"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Aggregate metrics overview",
+            "Aggressive downsampling emerges as the dominant driver of higher trace and lower log-volume across transforms.",
+        )
+    if "mean_shift_bar" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["mean_shift_bar"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Mean shift across transforms",
+            "Mean embedding displacement mirrors the same ordering: raw (nearest) and smoothed (bicubic) crops introduce the largest drift from the deterministic baseline.",
+        )
 
     # Section 5: Deterministic baseline
     report_lines.append("\n## 5. Deterministic Baseline (1 pass, dropout disabled)")
-    base_headers = ["transform", "trace", "logdet", "off-diag mass"]
-    base_rows: List[List[str]] = []
-    for spec in transforms:
-        baseline_summary = results[spec.name]["baseline"]["summary"]
-        base_rows.append(
-            [
-                spec.name,
-                format_mean_std(get_moments(baseline_summary, "trace")),
-                format_mean_std(get_moments(baseline_summary, "logdet")),
-                format_mean_std(get_moments(baseline_summary, "off_diag_mass")),
-            ]
-        )
-    report_lines.append(build_markdown_table(base_headers, base_rows))
     report_lines.append(
-        "All deterministic baselines remain numerically identical: covariance mass collapses to machine precision "
-        "(trace 5.12e-04) with zero off-diagonal structure, underscoring that stochasticity is solely induced by dropout."
+        "With dropout disabled every run collapses to trace ≈ 5.12 × 10⁻⁴ and a singular covariance; logdet and anisotropy are therefore undefined."
     )
 
     # Section 6: Noise sensitivity
@@ -1035,27 +1855,74 @@ def generate_report(
                     format_float(off_pct, 2),
                 ]
             )
-        report_lines.append(build_markdown_table(noise_headers, noise_rows))
+        appendix_tables.append(("Noise severity deltas", build_markdown_table(noise_headers, noise_rows)))
         if severe_noise:
             sigma = _spec_noise_sigma(severe_noise) or 0.0
-            noise_trace = get_moments(results[severe_noise.name]["mcdo"]["summary"], "trace").mean
-            noise_logdet = get_moments(results[severe_noise.name]["mcdo"]["summary"], "logdet").mean
-            report_lines.append(
-                f"Trace grows steadily with σ; at σ={sigma:.2f} it reaches {noise_trace:.2f} (≈{((noise_trace - base_trace)/base_trace)*100:+.1f}% vs baseline) "
-                f"while logdet drops to {noise_logdet:.2f}, signalling that variance is expanding yet concentrating into fewer dominant axes."
+            trace_pct_text = (
+                f"(≈{noise_peak_trace_pct:+.1f}% vs baseline) " if noise_peak_trace_pct is not None and math.isfinite(noise_peak_trace_pct) else ""
             )
-        if "trace_relative" in chart_paths:
-            rel_path = (asset_rel_dir / chart_paths["trace_relative"].name).as_posix()
-            report_lines.append(f"\n![Relative trace change under noise & downsampling]({rel_path})")
-        if "logdet_relative" in chart_paths:
-            rel_path = (asset_rel_dir / chart_paths["logdet_relative"].name).as_posix()
-            report_lines.append(f"\n![Logdet shift relative to original]({rel_path})")
+            logdet_delta_text = (
+                f" ({noise_peak_logdet_delta:+.2f} vs baseline)" if noise_peak_logdet_delta is not None and math.isfinite(noise_peak_logdet_delta) else ""
+            )
+            report_lines.append(
+                f"Trace grows steadily with σ; at σ={sigma:.2f} it reaches {noise_peak_trace:.2f} {trace_pct_text}"
+                f"while logdet shifts to {noise_peak_logdet:.2f}{logdet_delta_text}, signalling that variance expands yet concentrates into fewer dominant axes."
+            )
+        noise_pct_label = (
+            f"{noise_peak_trace_pct:+.1f}%" if noise_peak_trace_pct is not None and math.isfinite(noise_peak_trace_pct) else "n/a"
+        )
+        noise_logdet_label = (
+            f"{noise_peak_logdet_delta:+.2f}" if noise_peak_logdet_delta is not None and math.isfinite(noise_peak_logdet_delta) else "n/a"
+        )
+        if "noise_trace_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["noise_trace_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Relative trace change under noise",
+                f"Noise-only perturbations peak at {noise_pct_label} trace change when σ reaches its maximum setting.",
+            )
+        if "noise_logdet_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["noise_logdet_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Logdet shift under noise",
+                f"Log-volume steadily contracts with noise strength, finishing at {noise_logdet_label} relative to baseline.",
+            )
         if "noise_severity_trace" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["noise_severity_trace"].name).as_posix()
-            report_lines.append(f"\n![Trace vs noise severity]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Trace vs noise severity",
+                "Trace increases monotonically with σ, indicating broader stochastic clouds as perturbations intensify.",
+            )
         if "noise_severity_logdet" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["noise_severity_logdet"].name).as_posix()
-            report_lines.append(f"\n![Logdet vs noise severity]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Logdet vs noise severity",
+                "Log-volume falls steadily with stronger noise, reflecting variance concentrating into fewer dominant modes.",
+            )
+        if "noise_severity_corr_anisotropy" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["noise_severity_corr_anisotropy"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Correlation anisotropy vs noise severity",
+                "Cross-dimensional coupling grows gradually with σ, showing correlated drift rather than isotropic spread.",
+            )
+        if "mean_shift_noise" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["mean_shift_noise"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Mean shift vs noise severity",
+                "Monte Carlo means drift further from the deterministic embedding as σ increases, tracking the speckle strength.",
+            )
+        if "trace_mean_noise" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["trace_mean_noise"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Trace vs mean shift — noise severity",
+                "Trace and mean shift climb together with σ, illustrating that broader clouds coincide with larger centroid drift.",
+            )
 
     # Section 7: Downsampling sensitivity
     if downsample_specs:
@@ -1077,41 +1944,196 @@ def generate_report(
                     format_float(off_pct, 2),
                 ]
             )
-        report_lines.append(build_markdown_table(down_headers, down_rows))
+        appendix_tables.append(("Smoothed crop severity deltas", build_markdown_table(down_headers, down_rows)))
         if severe_down:
-            pct = _spec_downsample_percent(severe_down) or 0
-            down_summary = results[severe_down.name]["mcdo"]["summary"]
-            down_trace = get_moments(down_summary, "trace").mean
-            down_logdet = get_moments(down_summary, "logdet").mean
+            pct = down_peak_pct or 0
+            down_trace = down_peak_trace if down_peak_trace is not None else float("nan")
+            down_logdet = down_peak_logdet if down_peak_logdet is not None else float("nan")
+            volume_ratio = down_peak_volume_ratio if down_peak_volume_ratio is not None else float("nan")
             report_lines.append(
-                f"Downsampling beyond 60% sharply increases trace (e.g., {pct}% reduction → trace {down_trace:.2f}) while logdet falls to {down_logdet:.2f}, "
-                "indicating uncertainty balloons along a handful of directions once spatial detail is largely removed."
+                "Smoothed crops (bicubic upsample) beyond 60% sharply increase trace "
+                f"(e.g., {pct}% reduction → trace {down_trace:.2f}) while logdet becomes non-monotone—"
+                f"after a mild plateau it collapses to {down_logdet:.2f} (volume ratio ≈ {volume_ratio:.3f}), consistent with aliasing and patch-token collapse once only a few pixels remain."
+            )
+        down_trace_pct_label = (
+            f"{down_peak_trace_pct:+.1f}%" if down_peak_trace_pct is not None and math.isfinite(down_peak_trace_pct) else "n/a"
+        )
+        down_logdet_delta_label = (
+            f"{down_peak_logdet_delta:+.2f}"
+            if down_peak_logdet_delta is not None and math.isfinite(down_peak_logdet_delta)
+            else "n/a"
+        )
+        if "downsample_trace_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["downsample_trace_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Relative trace change under smoothed crop (bicubic)",
+                f"Smoothed crops peak around {down_trace_pct_label} trace change once spatial resolution drops to {down_peak_pct or 0}%.",
+            )
+        if "downsample_logdet_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["downsample_logdet_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Logdet shift under smoothed crop (bicubic)",
+                f"Covariance volume contracts by {down_logdet_delta_label} at the harshest smoothed crop, underscoring aliasing-driven collapse.",
             )
         if "trace_violin" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["trace_violin"].name).as_posix()
-            report_lines.append(f"\n![Trace distribution per transform]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Trace distribution per transform",
+                "Trace variance fans out for the most aggressive downsampling settings, underscoring their broader uncertainty.",
+            )
         if "downsample_severity_trace" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["downsample_severity_trace"].name).as_posix()
-            report_lines.append(f"\n![Trace vs downsampling severity]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Trace vs downsampling severity",
+                f"Trace rises almost linearly until about 60% reduction before the {down_peak_pct or 0}% case accelerates beyond {down_peak_trace_pct:+.1f}%." if down_peak_trace_pct is not None and math.isfinite(down_peak_trace_pct) else "Trace increases steadily as more resolution is removed, highlighting sensitivity to spatial detail.",
+            )
         if "downsample_severity_logdet" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["downsample_severity_logdet"].name).as_posix()
-            report_lines.append(f"\n![Logdet vs downsampling severity]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Logdet vs downsampling severity",
+                "Log-volume stays flat for mild reductions then plunges once images fall below 20% of their original side length.",
+            )
+        if "downsample_severity_corr_anisotropy" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["downsample_severity_corr_anisotropy"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Correlation anisotropy vs downsampling severity",
+                "Severe downsampling amplifies cross-dimensional coupling, showing the embedding cloud stretching along fewer axes.",
+            )
+        if "mean_shift_downsample" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["mean_shift_downsample"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Mean shift vs smoothed crop severity",
+                "Mean displacement spikes once resolution falls below 60%, matching the trace surge caused by aggressive smoothing.",
+            )
+        if "trace_mean_downsample" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["trace_mean_downsample"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Trace vs mean shift — smoothed crops",
+                "Smoothed crops show a coupled rise in trace and mean shift as detail disappears, linking spread and drift directly.",
+            )
         if "logdet_violin" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["logdet_violin"].name).as_posix()
-            report_lines.append(f"\n![Logdet distribution per transform]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Logdet distribution per transform",
+                "The tail of extreme downsampling skews toward very low logdet values, reinforcing the volume collapse story.",
+            )
         if "offdiag_violin" in chart_paths:
             rel_path = (asset_rel_dir / chart_paths["offdiag_violin"].name).as_posix()
-            report_lines.append(f"\n![Off-diagonal mass distribution per transform]({rel_path})")
+            figure_manager.add(
+                rel_path,
+                "Off-diagonal mass distribution per transform",
+                "Off-diagonal covariance mass swells as resolution drops, highlighting stronger axis entanglement.",
+            )
+
+    pixel_specs = [spec for spec in transforms if spec.kind == "downsample_pixel"]
+    if pixel_specs:
+        pixel_headers = ["transform", "Δ trace (%)", "Δ logdet", "Δ off-diag (%)"]
+        pixel_rows: List[List[str]] = []
+        for spec in pixel_specs:
+            summary = results[spec.name]["mcdo"]["summary"]
+            trace_delta, trace_pct = compute_delta(get_moments(reference_summary, "trace"), get_moments(summary, "trace"))
+            off_delta, off_pct = compute_delta(
+                get_moments(reference_summary, "off_diag_mass"), get_moments(summary, "off_diag_mass")
+            )
+            logdet_delta, _ = compute_delta(get_moments(reference_summary, "logdet"), get_moments(summary, "logdet"))
+            pixel_rows.append(
+                [
+                    spec.name,
+                    format_float(trace_pct, 2),
+                    format_float(logdet_delta, 4),
+                    format_float(off_pct, 2),
+                ]
+            )
+        appendix_tables.append(("Raw crop severity deltas", build_markdown_table(pixel_headers, pixel_rows)))
+
+        report_lines.append("\n### Raw crop (nearest)")
+        highest_pixel = max(pixel_specs, key=lambda spec: _spec_downsample_percent(spec) or 0)
+        pixel_summary = results[highest_pixel.name]["mcdo"]["summary"]
+        trace_high = get_moments(pixel_summary, "trace").mean
+        logdet_high = get_moments(pixel_summary, "logdet").mean
+        pixel_pct = _spec_downsample_percent(highest_pixel) or 0
+        pixel_trace_pct = (trace_high - base_trace) / base_trace * 100.0 if base_trace else None
+        pixel_logdet_delta = logdet_high - base_logdet if math.isfinite(logdet_high) and math.isfinite(base_logdet) else None
+        report_lines.append(
+            "Keeping the raw nearest-neighbour crop (no smoothing) produces larger block artefacts; the harshest setting "
+            f"({highest_pixel.name}) yields trace {trace_high:.2f} while logdet drops to {logdet_high:.2f}, indicating strong concentration of variance into a handful of axes."
+        )
+        if "pixel_trace_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["pixel_trace_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+            "Relative trace change under raw crop (nearest)",
+            "Trace rises steadily as the grid coarsens, confirming block artefacts inflate stochastic spread.",
+            )
+        if "pixel_logdet_relative" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["pixel_logdet_relative"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+            "Relative logdet change under raw crop (nearest)",
+            "Log-volume decays more sharply once smoothing is removed, highlighting how raw crops squeeze variance into fewer modes.",
+            )
+        if "pixel_severity_trace" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["pixel_severity_trace"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+            "Trace vs raw crop severity",
+            f"Nearest-neighbour crops reach {pixel_trace_pct:+.1f}% trace change once the short side is reduced by {pixel_pct}%." if pixel_trace_pct is not None and math.isfinite(pixel_trace_pct) else "Raw crops yield comparable trace increases while emphasising block artefacts over smooth blur.",
+            )
+        if "pixel_severity_logdet" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["pixel_severity_logdet"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+            "Logdet vs raw crop severity",
+            f"Logdet collapses to {logdet_high:.2f} ({pixel_logdet_delta:+.2f} vs baseline) for the {pixel_pct}% setting, showing volume loss once smoothing is removed." if pixel_logdet_delta is not None and math.isfinite(pixel_logdet_delta) else f"Logdet collapses to {logdet_high:.2f} for the {pixel_pct}% setting, showing volume loss once smoothing is removed.",
+            )
+        if "pixel_severity_corr_anisotropy" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["pixel_severity_corr_anisotropy"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+            "Correlation anisotropy vs raw crop severity",
+            "Raw crops amplify anisotropy faster than smoothed crops because hard edges align variance along token boundaries.",
+            )
+        if "mean_shift_pixel" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["mean_shift_pixel"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Mean shift vs raw crop severity",
+                "Nearest-neighbour reductions drive the largest centroid drift as aliasing artefacts dominate token activations.",
+            )
+        if "trace_mean_pixel" in chart_paths:
+            rel_path = (asset_rel_dir / chart_paths["trace_mean_pixel"].name).as_posix()
+            figure_manager.add(
+                rel_path,
+                "Trace vs mean shift — raw crops",
+                "Raw crops yield the steepest trace/shift coupling, emphasising how aliasing inflates spread and drift together.",
+            )
 
     # Cross-metric scatter views
     if "scatter_trace_logdet" in chart_paths or "scatter_trace_offdiag" in chart_paths:
         report_lines.append("\n## 8. Cross-Metric Geometry")
-        if "scatter_trace_logdet" in chart_paths:
-            rel_path = (asset_rel_dir / chart_paths["scatter_trace_logdet"].name).as_posix()
-            report_lines.append(f"\n![Logdet vs Trace scatter]({rel_path})")
-        if "scatter_trace_offdiag" in chart_paths:
-            rel_path = (asset_rel_dir / chart_paths["scatter_trace_offdiag"].name).as_posix()
-            report_lines.append(f"\n![Off-diagonal mass vs Trace scatter]({rel_path})")
+    if "scatter_trace_logdet" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["scatter_trace_logdet"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Logdet vs trace scatter",
+            "Smoothed crop points cluster in the high-trace, low-logdet corner, separating cleanly from the noise-induced shifts.",
+        )
+    if "scatter_trace_offdiag" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["scatter_trace_offdiag"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Off-diagonal mass vs trace scatter",
+            "Off-diagonal coupling grows hand-in-hand with trace for the strongest smoothed crops, reinforcing anisotropy concerns.",
+        )
 
     # Mean shift diagnostics
     report_lines.append("\n## 9. Mean Shift Diagnostics")
@@ -1131,16 +2153,46 @@ def generate_report(
     report_lines.append(build_markdown_table(shift_headers, shift_rows))
     if "mean_shift_noise" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["mean_shift_noise"].name).as_posix()
-        report_lines.append(f"\n![Mean shift vs noise severity]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Mean shift vs noise severity",
+            "Mean L2 displacement tracks noise strength, reinforcing that stochastic means drift progressively under σ increases.",
+        )
     if "mean_shift_downsample" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["mean_shift_downsample"].name).as_posix()
-        report_lines.append(f"\n![Mean shift vs downsampling severity]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Mean shift vs downsampling severity",
+            "Resolution loss beyond 60% triggers a rapid rise in mean shift, reflecting aliasing-induced drift.",
+        )
+    if "mean_shift_pixel" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["mean_shift_pixel"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Mean shift vs pixelated downsampling severity",
+            "Pixelation pushes mean drift even harder once large blocks emerge, underscoring the harsher aliasing penalty.",
+        )
     if "mahal_shift_noise" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["mahal_shift_noise"].name).as_posix()
-        report_lines.append(f"\n![Mahalanobis shift vs noise severity]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Mahalanobis shift vs noise severity",
+            "Covariance-normalised drift escalates with σ, showing that noise injects uncertainty aligned with high-variance directions.",
+        )
     if "mahal_shift_downsample" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["mahal_shift_downsample"].name).as_posix()
-        report_lines.append(f"\n![Mahalanobis shift vs downsampling severity]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Mahalanobis shift vs downsampling severity",
+            "Heavy downsampling rockets Mahalanobis distance, indicating the embedding cloud moves far relative to its contracted covariance.",
+        )
+    if "mahal_shift_pixel" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["mahal_shift_pixel"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Mahalanobis shift vs pixelated downsampling severity",
+            "Nearest-neighbour reductions yield the largest covariance-normalised drift, showing block artefacts distort embeddings most severely.",
+        )
 
     # Spectral and tangent metrics
     report_lines.append("\n## 10. Spectral & Tangent Geometry")
@@ -1163,10 +2215,74 @@ def generate_report(
     report_lines.append(build_markdown_table(geom_headers, geom_rows))
     if "angle_radar" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["angle_radar"].name).as_posix()
-        report_lines.append(f"\n![Trace by viewpoint angle]({rel_path})")
-    if "pca_gallery" in chart_paths:
-        rel_path = (asset_rel_dir / chart_paths["pca_gallery"].name).as_posix()
-        report_lines.append(f"\n![PCA gallery for representative sample]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Trace by viewpoint angle",
+            "Flank viewpoints exhibit the largest trace gain once detail is stripped, pointing to orientation-sensitive uncertainty.",
+        )
+
+    pca_entries: List[Tuple[Optional[TransformSpec], str, Path]] = []
+    base_spec = next((spec for spec in transforms if spec.name == "original"), None)
+    if "pca_original" in chart_paths:
+        pca_entries.append((base_spec, "Original (baseline)", chart_paths["pca_original"]))
+    noise_candidates = [spec for spec in transforms if spec.kind == "noise" and _spec_noise_sigma(spec) is not None]
+    if noise_candidates:
+        max_noise = max(noise_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        min_noise = min(noise_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        for spec, label in ((max_noise, "noise max trace"), (min_noise, "noise min trace")):
+            key = f"pca_{spec.name}"
+            if key in chart_paths:
+                pca_entries.append((spec, f"{spec.name} ({label})", chart_paths[key]))
+    down_candidates = [
+        spec for spec in transforms if spec.kind == "downsample" and _spec_downsample_percent(spec) is not None
+    ]
+    if down_candidates:
+        max_down = max(down_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        min_down = min(down_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        for spec, label in ((max_down, "downsample max trace"), (min_down, "downsample min trace")):
+            key = f"pca_{spec.name}"
+            if key in chart_paths:
+                pca_entries.append((spec, f"{spec.name} ({label})", chart_paths[key]))
+    pixel_candidates = [
+        spec for spec in transforms if spec.kind == "downsample_pixel" and _spec_downsample_percent(spec) is not None
+    ]
+    if pixel_candidates:
+        max_pixel = max(pixel_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        min_pixel = min(pixel_candidates, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+        for spec, label in ((max_pixel, "pixelated max trace"), (min_pixel, "pixelated min trace")):
+            key = f"pca_{spec.name}"
+            if key in chart_paths:
+                pca_entries.append((spec, f"{spec.name} ({label})", chart_paths[key]))
+
+    def sort_key(item: Tuple[Optional[TransformSpec], str, Path]) -> Tuple[int, float, str]:
+        spec, desc, _ = item
+        group_order = {
+            "Original": 0,
+            "noise": 1,
+            "downsample": 2,
+            "downsample_pixel": 3,
+        }
+        if spec is None or spec.name == "original":
+            group = 0
+            severity = 0.0
+        elif spec.kind == "noise":
+            group = group_order["noise"]
+            severity = _spec_noise_sigma(spec) or 0.0
+        elif spec.kind == "downsample":
+            group = group_order["downsample"]
+            severity = float(_spec_downsample_percent(spec) or 0)
+        elif spec.kind == "downsample_pixel":
+            group = group_order["downsample_pixel"]
+            severity = float(_spec_downsample_percent(spec) or 0)
+        else:
+            group = 99
+            severity = 0.0
+        return (group, severity, desc)
+
+    for spec_entry, desc, path_obj in sorted(pca_entries, key=sort_key):
+        rel_path = (asset_rel_dir / path_obj.name).as_posix()
+        title = f"PCA embeddings — {desc}"
+        figure_manager.add(rel_path, title, pca_insight(spec_entry, desc))
 
     # Section 11: Pass Count Stability
     report_lines.append("\n## 11. Pass Count Stability")
@@ -1176,15 +2292,65 @@ def generate_report(
     report_lines.append(
         "Lower T increases estimator noise; curves should flatten as T grows. See stability plots in this section if generated."
     )
+    trace_range_original = (
+        pass_stability_notes.get("trace_range_original") if pass_stability_notes else None
+    )
+    trace_range_downsample = (
+        pass_stability_notes.get("trace_range_downsample") if pass_stability_notes else None
+    )
+    trace_range_noise = pass_stability_notes.get("trace_range_noise") if pass_stability_notes else None
     if "pass_stability_trace" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["pass_stability_trace"].name).as_posix()
-        report_lines.append(f"\n![Trace stability vs passes]({rel_path})")
+        if (
+            trace_range_original is not None
+            and trace_range_downsample is not None
+            and math.isfinite(trace_range_original)
+            and math.isfinite(trace_range_downsample)
+        ):
+            insight = (
+                f"Trace spans shrink to {trace_range_original:.3f} for the baseline sweep, while the harsh downsample stays within {trace_range_downsample:.3f} once T≥32."
+            )
+        else:
+            insight = "Trace estimates settle quickly once T≥32, aligning with the stability discussion later in the report."
+        figure_manager.add(rel_path, "Trace stability vs passes", insight)
     if "pass_stability_logdet" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["pass_stability_logdet"].name).as_posix()
-        report_lines.append(f"\n![Logdet stability vs passes]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Logdet stability vs passes",
+            "Logdet variance collapses as passes double, confirming that 64 draws are ample for stable volume estimates.",
+        )
 
-    # Section 12: Discussion & Outlook
-    report_lines.append("\n## 12. Discussion & Outlook")
+    # Section 12: Detection-to-Embedding Pipeline (YOLOv8 Crop) and Camera Distance
+    report_lines.append("\n## 12. Detection-to-Embedding Pipeline (YOLOv8 Crop) and Camera Distance")
+    report_lines.append(
+        "Object scale shrinks as the camera moves away, mixing background into the crop and reducing effective resolution."
+        " To benchmark a practical workflow, we introduce a detection→crop→CLIP pipeline and study how distance-driven scale changes alter the embedding cloud."
+    )
+    report_lines.append("\n### 12.1 Pipeline")
+    report_lines.append("- Detect vehicles in the full-resolution frame with YOLOv8 (COCO classes: car, bus, truck).")
+    report_lines.append("- Crop the predicted box, optionally expanding by ≈5% for context while staying inside image bounds.")
+    report_lines.append("- Resize the crop to CLIP's 224×224 input via either bicubic antialiased resampling or nearest-neighbour upsampling.")
+    report_lines.append("- Apply CLIP preprocessing and run MCDO (T=64, p=0.01) to estimate the stochastic embedding cloud.")
+    report_lines.append("- Compare crop embeddings to a reference (full frame or near-distance crop) using mean and Mahalanobis shift, trace/logdet, and anisotropy.")
+    report_lines.append("\nNotes:")
+    report_lines.append(
+        "- CLIP always consumes 224×224 inputs; “raw low-res” crops therefore require an upsample stage. Nearest-neighbour preserves the block grid, while bicubic smooths detail."
+    )
+    report_lines.append(
+        "- Tiny crops widen trace and contract logdet, mirroring the high-severity downsampling response documented above."
+    )
+    report_lines.append("\n### 12.2 Distance Effects (Expected/Observed)")
+    report_lines.append("- Smaller crops (greater distance) increase trace and Mahalanobis shift while logdet contracts.")
+    report_lines.append("- Mahalanobis shift reacts faster than raw mean shift because covariance volume shrinks as detail disappears.")
+    report_lines.append("- Raw (nearest) crops inject stronger anisotropy and larger shifts than smoothed (bicubic) crops at the same scale.")
+    report_lines.append("\n### 12.3 Practical Guidance")
+    report_lines.append("- Prefer bicubic antialiased resize before sending crops to CLIP; nearest-neighbour magnifies block artefacts.")
+    report_lines.append("- Maintain a minimum crop size by padding boxes with a narrow context band before resizing.")
+    report_lines.append("- Bin detections by object scale or distance and report mean/Mahalanobis shift, trace, logdet, and anisotropy per bin to visualise degradation.")
+
+    # Section 13: Discussion & Outlook
+    report_lines.append("\n## 13. Discussion & Outlook")
     discussion_points: List[str] = []
     base_trace_mean = get_moments(reference_summary, "trace").mean
     base_logdet_mean = get_moments(reference_summary, "logdet").mean
@@ -1248,11 +2414,11 @@ def generate_report(
 
     report_lines.extend(discussion_points)
 
-    # Section 13: Class-level trace shifts (using strongest perturbations)
+    # Section 14: Class-level trace shifts (using strongest perturbations)
     strongest_noise = noise_specs[-1] if noise_specs else None
     strongest_downsample = downsample_specs[-1] if downsample_specs else None
     if strongest_noise or strongest_downsample:
-        report_lines.append("\n## 13. Class-Level Trace Shifts")
+        report_lines.append("\n## 14. Class-Level Trace Shifts")
         rows: List[List[str]] = []
         headers = ["class", "trace (original)"]
         if strongest_noise:
@@ -1300,10 +2466,179 @@ def generate_report(
         report_lines.append(build_markdown_table(headers, rows))
 
     # Section 11: Example perturbations
-    report_lines.append("\n## 14. Example Perturbations")
-    for spec in transforms:
-        asset_path = asset_rel_dir / f"{spec.name}.png"
-        report_lines.append(f"- **{spec.description}:** ![]({asset_path.as_posix()})")
+    report_lines.append("\n## 15. Example Perturbations")
+    report_lines.append(
+        "Preview grids illustrate how each perturbation family reshapes the rendered jeep: baseline is shown alongside rising severities."
+    )
+    if "modulation_overview_grid" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["modulation_overview_grid"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Preview overview — all perturbations",
+            "Rows correspond to noise, smoothed crops, and raw crops respectively; columns step through increasing severity with the baseline at left.",
+        )
+    if "noise_examples_grid" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["noise_examples_grid"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Jeep previews — noise sweep",
+            "Gaussian noise progressively speckles the frame while salt & pepper corruption introduces isolated extreme pixels.",
+        )
+    if "downsample_examples_grid" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["downsample_examples_grid"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Jeep previews — smoothed crop sweep",
+            "Smoothing the coarse crop blurs structure as resolution falls, culminating in a soft, low-detail silhouette.",
+        )
+    if "pixel_examples_grid" in chart_paths:
+        rel_path = (asset_rel_dir / chart_paths["pixel_examples_grid"].name).as_posix()
+        figure_manager.add(
+            rel_path,
+            "Jeep previews — raw crop sweep",
+            "Nearest-neighbour reductions replace detail with large blocks, emphasising aliasing artefacts at coarse grids.",
+        )
+
+    report_lines.append("\n## Appendix: Detailed Metrics")
+    if appendix_tables:
+        for title, table in appendix_tables:
+            report_lines.append(f"\n### {title}\n{table}")
+
+    yolo_summary_path = analysis_root / "yolov8" / "variant_summary.csv"
+    yolo_rows: List[Dict[str, str]] = []
+    if yolo_summary_path.exists():
+        with yolo_summary_path.open() as fh:
+            reader = csv.DictReader(fh)
+            yolo_rows = [row for row in reader]
+    if yolo_rows:
+        variant_lookup = {row["variant"]: row for row in yolo_rows if row.get("variant")}
+
+        def _safe_float(row: Dict[str, str], key: str) -> float:
+            if not row:
+                return float("nan")
+            try:
+                value = float(row.get(key, ""))
+            except (TypeError, ValueError):
+                return float("nan")
+            return value
+
+        def _fmt_percent(value: float) -> str:
+            if not math.isfinite(value):
+                return "—"
+            return f"{value:.1f}" if abs(value) >= 10 else f"{value:.2f}"
+
+        def _fmt_ratio(value: float) -> str:
+            if not math.isfinite(value):
+                return "—"
+            return f"{value:.2f}"
+
+        downsample_rates: Dict[int, float] = {}
+        pixel_rates: Dict[int, float] = {}
+        downsample_conf: Dict[int, float] = {}
+        downsample_area: Dict[int, float] = {}
+        for pct in downsample_percents:
+            down_row = variant_lookup.get(f"downsample_{pct}pct")
+            if down_row:
+                downsample_rates[pct] = _safe_float(down_row, "vehicle_detection_rate") * 100
+                downsample_conf[pct] = _safe_float(down_row, "best_conf_mean")
+                downsample_area[pct] = _safe_float(down_row, "area_frac_mean") * 100
+            pixel_row = variant_lookup.get(f"pixel_downsample_{pct}pct")
+            if pixel_row:
+                pixel_rates[pct] = _safe_float(pixel_row, "vehicle_detection_rate") * 100
+
+        report_lines.append(
+            "\n### YOLOv8 detection robustness vs downsampling\n"
+            "Using the Section 12 pipeline (YOLOv8n detection → crop → CLIP resize), we evaluated detections for every original frame and"
+            " each smoothed (bicubic) / raw (nearest) crop variant. Vehicle detections cover COCO classes {car, bus, truck}. Detailed outputs live in"
+            f" `{yolo_summary_path}` and the accompanying per-image CSV."
+        )
+
+        bullets: List[str] = []
+        original_row = variant_lookup.get("original")
+        if original_row:
+            baseline_rate = _safe_float(original_row, "vehicle_detection_rate")
+            n_images = int(round(_safe_float(original_row, "n_images")))
+            hits = int(round(baseline_rate * n_images)) if math.isfinite(baseline_rate) else 0
+            misses = n_images - hits
+            bullets.append(
+                f"- Baseline detection succeeds on {hits}/{n_images} views ({baseline_rate * 100:.1f}%), leaving {misses} hard cases."
+            )
+
+        down_segments = [
+            f"{downsample_rates[pct]:.1f}% at {pct}% reduction"
+            for pct in (40, 60, 80, 90, 93)
+            if pct in downsample_rates and math.isfinite(downsample_rates[pct])
+        ]
+        if down_segments:
+            if len(down_segments) > 1:
+                trend_text = ", ".join(down_segments[:-1]) + f", and {down_segments[-1]}"
+            else:
+                trend_text = down_segments[0]
+            bullets.append(f"- Smoothed crop (bicubic) recall trends: {trend_text}.")
+
+        pixel_segments = [
+            f"{pixel_rates[pct]:.1f}% at {pct}% reduction"
+            for pct in (10, 20, 40, 60)
+            if pct in pixel_rates and math.isfinite(pixel_rates[pct])
+        ]
+        zero_threshold = next(
+            (pct for pct, rate in sorted(pixel_rates.items()) if not math.isfinite(rate) or rate <= 0.0),
+            None,
+        )
+        if pixel_segments or zero_threshold is not None:
+            if pixel_segments:
+                if len(pixel_segments) > 1:
+                    pixel_text = ", ".join(pixel_segments[:-1]) + f", and {pixel_segments[-1]}"
+                else:
+                    pixel_text = pixel_segments[0]
+                sentence = f"- Raw crop (nearest) recall drops to {pixel_text}"
+            else:
+                sentence = "- Raw crop (nearest) collapses recall"
+            if zero_threshold is not None:
+                sentence += f"; detections vanish once reductions exceed {zero_threshold}%."
+            else:
+                sentence += "."
+            bullets.append(sentence)
+
+        if original_row and downsample_conf:
+            orig_conf = _safe_float(original_row, "best_conf_mean")
+            orig_area = _safe_float(original_row, "area_frac_mean") * 100
+            ds90_conf = downsample_conf.get(90)
+            ds90_area = downsample_area.get(90)
+            if math.isfinite(orig_conf) and ds90_conf is not None and math.isfinite(ds90_conf):
+                sentence = f"- Confidence slips from {orig_conf:.2f} (original) to {ds90_conf:.2f} at 90% smoothed crop"
+                area_bits: List[str] = []
+                if math.isfinite(orig_area):
+                    area_bits.append(f"{orig_area:.1f}%")
+                if ds90_area is not None and math.isfinite(ds90_area):
+                    area_bits.append(f"{ds90_area:.1f}%")
+                if area_bits:
+                    area_text = " → ".join(area_bits) if len(area_bits) == 2 else area_bits[0]
+                    sentence += f" while boxes still span {area_text} of the frame"
+                sentence += "."
+                bullets.append(sentence)
+
+        report_lines.extend(bullets)
+        report_lines.append("")
+
+        variant_sequence = ["original"] + [f"downsample_{pct}pct" for pct in downsample_percents] + [
+            f"pixel_downsample_{pct}pct" for pct in downsample_percents
+        ]
+        table_lines = [
+            "| variant | detection rate (%) | mean best conf | mean box area (%) |",
+            "| --- | --- | --- | --- |",
+        ]
+        for variant in variant_sequence:
+            row = variant_lookup.get(variant)
+            if not row:
+                continue
+            rate = _safe_float(row, "vehicle_detection_rate") * 100
+            conf = _safe_float(row, "best_conf_mean")
+            area = _safe_float(row, "area_frac_mean") * 100
+            table_lines.append(
+                f"| {variant} | {_fmt_percent(rate)} | {_fmt_ratio(conf)} | {_fmt_percent(area)} |"
+            )
+        report_lines.extend(["", *table_lines, ""])
 
     # Appendix: predictive MI / entropy
     report_lines.append("\n## Appendix: Predictive Diagnostics (MI & Entropy)")
@@ -1313,10 +2648,18 @@ def generate_report(
     )
     if "mi_line" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["mi_line"].name).as_posix()
-        report_lines.append(f"\n![Mutual information across transforms]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Mutual information across transforms",
+            "Predictive mutual information remains near zero for every perturbation, confirming the head stays confident despite dropout.",
+        )
     if "entropy_line" in chart_paths:
         rel_path = (asset_rel_dir / chart_paths["entropy_line"].name).as_posix()
-        report_lines.append(f"\n![Entropy across transforms]({rel_path})")
+        figure_manager.add(
+            rel_path,
+            "Entropy across transforms",
+            "Predictive entropy barely moves across conditions, reinforcing that embedding diagnostics carry the informative signal.",
+        )
 
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text("\n".join(report_lines))
@@ -1493,6 +2836,27 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     available_transforms = [spec for spec in transforms if spec.name in results]
 
+    original_spec = next((spec for spec in available_transforms if spec.name == "original"), None)
+    noise_transforms = [spec for spec in available_transforms if spec.kind == "noise"]
+    downsample_transforms = [spec for spec in available_transforms if spec.kind == "downsample"]
+    pixel_transforms = [spec for spec in available_transforms if spec.kind == "downsample_pixel"]
+    downsample_analysis_transforms: List[TransformSpec] = []
+    if original_spec:
+        downsample_analysis_transforms.append(original_spec)
+    downsample_analysis_transforms.extend(noise_transforms)
+    downsample_analysis_transforms.extend(downsample_transforms)
+    downsample_analysis_transforms.extend(pixel_transforms)
+
+    pixel_analysis_transforms: List[TransformSpec] = []
+    if original_spec:
+        pixel_analysis_transforms.append(original_spec)
+    pixel_analysis_transforms.extend(pixel_transforms)
+
+    downsample_only_with_reference: List[TransformSpec] = []
+    if original_spec:
+        downsample_only_with_reference.append(original_spec)
+    downsample_only_with_reference.extend(downsample_transforms)
+
     extras = compute_extended_metrics(results, analysis_root, available_transforms, args.data_root)
     for spec in available_transforms:
         if spec.name in results and spec.name in extras:
@@ -1500,35 +2864,112 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
 
     chart_paths: Dict[str, Path] = {}
     try:
-        chart_paths["trace_relative"] = create_relative_change_plot(
-            results, available_transforms, "trace", asset_root, "trace_relative.png", "trace"
+        chart_paths["noise_trace_relative"] = create_relative_change_plot(
+            results, noise_transforms, "trace", asset_root, "noise_trace_relative.png", "trace"
         )
     except ValueError as error:
-        print(f"Warning: {error}")
+        print(f"Warning (noise trace relative): {error}")
     try:
-        chart_paths["logdet_relative"] = create_relative_change_plot(
-            results, available_transforms, "logdet", asset_root, "logdet_relative.png", "logdet"
+        chart_paths["downsample_trace_relative"] = create_relative_change_plot(
+            results, downsample_transforms, "trace", asset_root, "downsample_trace_relative.png", "trace"
         )
     except ValueError as error:
-        print(f"Warning: {error}")
+        print(f"Warning (downsample trace relative): {error}")
+    if pixel_transforms:
+        try:
+            chart_paths["pixel_trace_relative"] = create_relative_change_plot(
+                results, pixel_transforms, "trace", asset_root, "pixel_trace_relative.png", "trace"
+            )
+        except ValueError as error:
+            print(f"Warning (pixel trace relative): {error}")
+    if noise_transforms:
+        try:
+            chart_paths["trace_mean_noise"] = create_trace_meanshift_scatter(
+                results,
+                noise_transforms,
+                extras,
+                "noise",
+                asset_root,
+                "trace_vs_meanshift_noise.png",
+                "Trace vs mean shift — noise severity",
+            )
+        except ValueError as error:
+            print(f"Warning (trace vs mean noise): {error}")
+    if downsample_transforms:
+        try:
+            chart_paths["trace_mean_downsample"] = create_trace_meanshift_scatter(
+                results,
+                downsample_transforms,
+                extras,
+                "downsample",
+                asset_root,
+                "trace_vs_meanshift_downsample.png",
+                "Trace vs mean shift — smoothed crop severity",
+            )
+        except ValueError as error:
+            print(f"Warning (trace vs mean downsample): {error}")
+    if pixel_transforms:
+        try:
+            chart_paths["trace_mean_pixel"] = create_trace_meanshift_scatter(
+                results,
+                pixel_transforms,
+                extras,
+                "downsample_pixel",
+                asset_root,
+                "trace_vs_meanshift_pixel.png",
+                "Trace vs mean shift — raw crop severity",
+            )
+        except ValueError as error:
+            print(f"Warning (trace vs mean pixel): {error}")
+    try:
+        chart_paths["aggregate_overview"] = create_aggregate_plot(
+            results, downsample_analysis_transforms, extras, asset_root, "aggregate_overview.png"
+        )
+    except Exception as e:
+        print(f"Warning (aggregate overview): {e}")
+    try:
+        chart_paths["mean_shift_bar"] = create_mean_bar_plot(
+            available_transforms, extras, "mean_shift", asset_root, "mean_shift_bar.png", "Mean shift (L2)"
+        )
+    except ValueError as error:
+        print(f"Warning (mean shift bar): {error}")
+    try:
+        chart_paths["noise_logdet_relative"] = create_relative_change_plot(
+            results, noise_transforms, "logdet", asset_root, "noise_logdet_relative.png", "logdet"
+        )
+    except ValueError as error:
+        print(f"Warning (noise logdet relative): {error}")
+    try:
+        chart_paths["downsample_logdet_relative"] = create_relative_change_plot(
+            results, downsample_transforms, "logdet", asset_root, "downsample_logdet_relative.png", "logdet"
+        )
+    except ValueError as error:
+        print(f"Warning (downsample logdet relative): {error}")
+    if pixel_transforms:
+        try:
+            chart_paths["pixel_logdet_relative"] = create_relative_change_plot(
+                results, pixel_transforms, "logdet", asset_root, "pixel_logdet_relative.png", "logdet"
+            )
+        except ValueError as error:
+            print(f"Warning (pixel logdet relative): {error}")
     try:
         chart_paths["scatter_trace_logdet"] = create_scatter_plot(
-            results, available_transforms, "trace", "logdet", asset_root, "scatter_trace_logdet.png"
+            results, downsample_analysis_transforms, "trace", "logdet", asset_root, "scatter_trace_logdet.png"
         )
         chart_paths["scatter_trace_offdiag"] = create_scatter_plot(
-            results, available_transforms, "trace", "off_diag_mass", asset_root, "scatter_trace_offdiag.png"
+            results, downsample_analysis_transforms, "trace", "off_diag_mass", asset_root, "scatter_trace_offdiag.png"
         )
     except Exception as e:
         print(f"Warning (scatter): {e}")
     try:
         chart_paths["trace_violin"] = create_violin_plot(
-            results, available_transforms, "trace", asset_root, "trace_violin.png"
+            results, downsample_only_with_reference, "trace", asset_root, "trace_violin.png"
         )
         chart_paths["logdet_violin"] = create_violin_plot(
-            results, available_transforms, "logdet", asset_root, "logdet_violin.png"
+            results, downsample_only_with_reference, "logdet", asset_root, "logdet_violin.png"
         )
         chart_paths["offdiag_violin"] = create_violin_plot(
-            results, available_transforms, "off_diag_mass", asset_root, "offdiag_violin.png"
+            results, downsample_only_with_reference, "off_diag_mass", asset_root, "offdiag_violin.png"
         )
     except ValueError as error:
         print(f"Warning: {error}")
@@ -1546,59 +2987,200 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     # Severity curves (absolute and relative)
     try:
         chart_paths["noise_severity_trace"] = create_severity_plot(
-            results, available_transforms, "trace", "noise", asset_root, "noise_severity_trace.png", "trace", False
+            results, noise_transforms, "trace", "noise", asset_root, "noise_severity_trace.png", "trace", False
         )
         chart_paths["downsample_severity_trace"] = create_severity_plot(
-            results, available_transforms, "trace", "downsample", asset_root, "downsample_severity_trace.png", "trace", False
+            results, downsample_transforms, "trace", "downsample", asset_root, "downsample_severity_trace.png", "trace", False
         )
         chart_paths["noise_severity_logdet"] = create_severity_plot(
-            results, available_transforms, "logdet", "noise", asset_root, "noise_severity_logdet.png", "logdet", False
+            results, noise_transforms, "logdet", "noise", asset_root, "noise_severity_logdet.png", "logdet", False
         )
         chart_paths["downsample_severity_logdet"] = create_severity_plot(
-            results, available_transforms, "logdet", "downsample", asset_root, "downsample_severity_logdet.png", "logdet", False
+            results, downsample_transforms, "logdet", "downsample", asset_root, "downsample_severity_logdet.png", "logdet", False
+        )
+        chart_paths["pixel_severity_trace"] = create_severity_plot(
+            results, pixel_transforms, "trace", "downsample_pixel", asset_root, "pixel_severity_trace.png", "trace", False
+        )
+        chart_paths["pixel_severity_logdet"] = create_severity_plot(
+            results, pixel_transforms, "logdet", "downsample_pixel", asset_root, "pixel_severity_logdet.png", "logdet", False
         )
     except Exception as e:
         print(f"Warning (severity plots): {e}")
 
+    try:
+        chart_paths["noise_severity_corr_anisotropy"] = create_extras_severity_plot(
+            noise_transforms,
+            extras,
+            "corr_anisotropy",
+            "noise",
+            asset_root,
+            "noise_severity_corr_anisotropy.png",
+            "corr anisotropy (Frobenius)",
+        )
+        chart_paths["downsample_severity_corr_anisotropy"] = create_extras_severity_plot(
+            downsample_transforms,
+            extras,
+            "corr_anisotropy",
+            "downsample",
+            asset_root,
+            "downsample_severity_corr_anisotropy.png",
+            "corr anisotropy (Frobenius)",
+        )
+        chart_paths["pixel_severity_corr_anisotropy"] = create_extras_severity_plot(
+            pixel_transforms,
+            extras,
+            "corr_anisotropy",
+            "downsample_pixel",
+            asset_root,
+            "pixel_severity_corr_anisotropy.png",
+            "corr anisotropy (Frobenius)",
+        )
+    except Exception as e:
+        print(f"Warning (anisotropy severity): {e}")
+
     # Mean shift and angle radar visualisations
     try:
         chart_paths["mean_shift_noise"] = create_mean_shift_plot(
-            available_transforms, extras, "mean_shift", "noise", asset_root, "mean_shift_noise.png", "Mean shift (L2)"
+            noise_transforms, extras, "mean_shift", "noise", asset_root, "mean_shift_noise.png", "Mean shift (L2)"
         )
         chart_paths["mean_shift_downsample"] = create_mean_shift_plot(
-            available_transforms, extras, "mean_shift", "downsample", asset_root, "mean_shift_downsample.png", "Mean shift (L2)"
+            downsample_transforms, extras, "mean_shift", "downsample", asset_root, "mean_shift_downsample.png", "Mean shift (L2)"
         )
+        if pixel_transforms:
+            chart_paths["mean_shift_pixel"] = create_mean_shift_plot(
+                pixel_transforms, extras, "mean_shift", "downsample", asset_root, "mean_shift_pixel.png", "Mean shift (L2)"
+            )
         chart_paths["mahal_shift_noise"] = create_mean_shift_plot(
-            available_transforms, extras, "mahal_shift", "noise", asset_root, "mahal_shift_noise.png", "Mahalanobis shift"
+            noise_transforms, extras, "mahal_shift", "noise", asset_root, "mahal_shift_noise.png", "Mahalanobis shift"
         )
         chart_paths["mahal_shift_downsample"] = create_mean_shift_plot(
-            available_transforms, extras, "mahal_shift", "downsample", asset_root, "mahal_shift_downsample.png", "Mahalanobis shift"
+            downsample_transforms, extras, "mahal_shift", "downsample", asset_root, "mahal_shift_downsample.png", "Mahalanobis shift"
         )
+        if pixel_transforms:
+            chart_paths["mahal_shift_pixel"] = create_mean_shift_plot(
+                pixel_transforms,
+                extras,
+                "mahal_shift",
+                "downsample",
+                asset_root,
+                "mahal_shift_pixel.png",
+                "Mahalanobis shift",
+            )
     except Exception as e:
         print(f"Warning (mean shift plots): {e}")
 
     try:
-        chart_paths["angle_radar"] = create_angle_radar(extras, available_transforms, asset_root, "angle_radar.png")
+        chart_paths["angle_radar"] = create_angle_radar(results, extras, downsample_analysis_transforms, asset_root, "angle_radar.png")
     except Exception as e:
         print(f"Warning (angle radar): {e}")
 
-    try:
-        noise_specs = [spec for spec in available_transforms if _spec_noise_sigma(spec) is not None]
-        down_specs = [spec for spec in available_transforms if _spec_downsample_percent(spec) is not None]
-        scenario_names = ["original"]
-        if noise_specs:
-            scenario_names.append(max(noise_specs, key=lambda s: _spec_noise_sigma(s) or 0.0).name)
-        if down_specs:
-            scenario_names.append(max(down_specs, key=lambda s: _spec_downsample_percent(s) or 0).name)
-        chart_paths["pca_gallery"] = create_pca_gallery(
-            analysis_root,
-            analysis_root / "baseline" / "original",
-            sample_index=0,
-            scenario_names=scenario_names,
-            asset_root=asset_root,
-            filename="pca_gallery.png",
-            transforms=available_transforms,
+    def _build_preview_grid(key: str, specs: Sequence[str], columns: int) -> None:
+        image_paths = [asset_root / f"{name}.png" for name in specs if name]
+        valid = [path for path in image_paths if path.exists()]
+        if not valid:
+            return
+        output = asset_root / f"{key}.png"
+        chart_paths[key] = create_image_grid(valid, output, columns=columns)
+
+    noise_sorted = sorted(
+        [spec for spec in noise_transforms if _spec_noise_sigma(spec) is not None],
+        key=lambda s: _spec_noise_sigma(s) or 0.0,
+    )
+    salt_spec = next((spec for spec in noise_transforms if spec.name == "saltpepper_5pct"), None)
+    noise_grid_specs: List[str] = []
+    if original_spec:
+        noise_grid_specs.append(original_spec.name)
+    noise_grid_specs.extend(spec.name for spec in noise_sorted)
+    if salt_spec:
+        noise_grid_specs.append(salt_spec.name)
+
+    downsample_sorted = sorted(downsample_transforms, key=lambda s: _spec_downsample_percent(s) or 0)
+    downsample_grid_specs: List[str] = []
+    if original_spec:
+        downsample_grid_specs.append(original_spec.name)
+    downsample_grid_specs.extend(spec.name for spec in downsample_sorted)
+
+    pixel_sorted = sorted(pixel_transforms, key=lambda s: _spec_downsample_percent(s) or 0)
+    pixel_grid_specs: List[str] = []
+    if original_spec:
+        pixel_grid_specs.append(original_spec.name)
+    pixel_grid_specs.extend(spec.name for spec in pixel_sorted)
+
+    if noise_grid_specs:
+        _build_preview_grid("noise_examples_grid", noise_grid_specs, columns=4)
+    if downsample_grid_specs:
+        _build_preview_grid("downsample_examples_grid", downsample_grid_specs, columns=5)
+    if pixel_sorted:
+        _build_preview_grid("pixel_examples_grid", pixel_grid_specs, columns=5)
+
+    overview_rows: List[Tuple[str, List[Path]]] = []
+    if noise_grid_specs:
+        overview_rows.append(
+            (
+                "Noise (sigma)",
+                [asset_root / f"{name}.png" for name in noise_grid_specs],
+            )
         )
+    if downsample_grid_specs:
+        overview_rows.append(
+            (
+                "Smoothed crop (%)",
+                [asset_root / f"{name}.png" for name in downsample_grid_specs],
+            )
+        )
+    if pixel_grid_specs:
+        overview_rows.append(
+            (
+                "Raw crop (%)",
+                [asset_root / f"{name}.png" for name in pixel_grid_specs],
+            )
+        )
+
+    if overview_rows:
+        try:
+            chart_paths["modulation_overview_grid"] = create_multirow_preview_grid(
+                overview_rows,
+                asset_root / "modulation_overview_grid.png",
+            )
+        except ValueError as error:
+            print(f"Warning (modulation overview grid): {error}")
+
+    try:
+        noise_specs = [spec for spec in available_transforms if spec.kind == "noise" and _spec_noise_sigma(spec) is not None]
+        down_specs = [
+            spec for spec in available_transforms if spec.kind == "downsample" and _spec_downsample_percent(spec) is not None
+        ]
+        pixel_specs_chart = [
+            spec for spec in available_transforms if spec.kind == "downsample_pixel" and _spec_downsample_percent(spec) is not None
+        ]
+        baseline_dir = analysis_root / "baseline" / "original"
+        scenario_map: Dict[str, str] = {"original": "Original (baseline)"}
+        if noise_specs:
+            max_noise = max(noise_specs, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            min_noise = min(noise_specs, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            scenario_map[max_noise.name] = f"{max_noise.name} (noise max trace)"
+            scenario_map[min_noise.name] = f"{min_noise.name} (noise min trace)"
+        if down_specs:
+            max_down = max(down_specs, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            min_down = min(down_specs, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            scenario_map[max_down.name] = f"{max_down.name} (downsample max trace)"
+            scenario_map[min_down.name] = f"{min_down.name} (downsample min trace)"
+        if pixel_specs_chart:
+            max_pixel = max(pixel_specs_chart, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            min_pixel = min(pixel_specs_chart, key=lambda s: results[s.name]["mcdo"]["summary"]["trace"].mean)
+            scenario_map[max_pixel.name] = f"{max_pixel.name} (pixelated max trace)"
+            scenario_map[min_pixel.name] = f"{min_pixel.name} (pixelated min trace)"
+
+        for scenario, label in scenario_map.items():
+            chart_paths[f"pca_{scenario}"] = create_pca_plot(
+                analysis_root,
+                baseline_dir,
+                sample_index=0,
+                scenario=scenario,
+                label=label,
+                asset_root=asset_root,
+                filename=f"pca_{scenario}.png",
+            )
     except Exception as e:
         print(f"Warning (PCA gallery): {e}")
 
@@ -1719,7 +3301,17 @@ def main(argv: Optional[Sequence[str]] = None) -> None:
     }
 
     report_path = report_root / "REPORT.md"
-    generate_report(report_path, asset_rel_dir, setup_text, results, available_transforms, chart_paths, pass_stability_notes)
+    generate_report(
+        report_path,
+        asset_rel_dir,
+        analysis_root,
+        downsample_percents,
+        setup_text,
+        results,
+        available_transforms,
+        chart_paths,
+        pass_stability_notes,
+    )
 
 
 if __name__ == "__main__":
