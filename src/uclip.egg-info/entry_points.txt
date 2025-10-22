@@ -1,0 +1,6 @@
+[console_scripts]
+uclip-car-sim = uclip.cli.car_sim_driver:main
+uclip-car-sim-perturb = uclip.cli.car_sim_perturbation_study:main
+uclip-mnist = uclip.cli.mnist_driver:main
+uclip-perturb = uclip.cli.perturbation_study:main
+uclip-sample = uclip.cli.sample:main
