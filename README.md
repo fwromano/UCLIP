@@ -50,3 +50,18 @@ Provide either `--labels prompts.txt` (newline-separated prompts) or `--text-emb
 - The CLI reapplies selective dropout enabling before every pass so LayerNorm and other modules stay in evaluation mode.
 
 The scripts expect the Hugging Face `transformers` cache to be accessible or network downloads to be allowed the first time a backbone is requested.
+
+## Sim2 relative heading dataset
+
+The [labeled Sim2 dataset](data/car_sim/heading_labels/README.md) contains
+1,949 cropped vehicle views, including 1,404 Jeep views, with recovered camera-relative
+headings: front = 0 degrees and rear = 180 degrees. Use the CSV labels rather than
+the original filename angles. Four source-counter artifacts have one-degree uncertainty.
+
+- [Interactive viewer](https://fwromano.github.io/datasets/sim2-headings/)
+- [CSV labels](data/car_sim/heading_labels/heading_labels.csv)
+- [JSON labels and provenance](data/car_sim/heading_labels/heading_labels.json)
+
+Every crop was matched exactly to its source video; independent verification
+replayed 110 source frames and cross-checked all 46 images in the 45-degree subset.
+See the dataset README for reproduction commands and the angle convention.

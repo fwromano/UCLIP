@@ -1,0 +1,14 @@
+{
+  "images": 1949,
+  "label_status": {
+    "verified_source_pixels": 1949
+  },
+  "filename_corrections": 378,
+  "label_methods": {
+    "source_video_counter": 1943,
+    "counter_artifact_review": 4,
+    "manual_source_counter_read": 2
+  },
+  "anchors": 46,
+  "anchors_matched": 46
+}

@@ -1,0 +1,72 @@
+{
+  "schema": "sim2.reviewed_counter_labels.v1",
+  "review_evidence": "counter_review.png",
+  "images": [
+    {
+      "image_path": "sim2_cropped/Indigo/Indigo_990.png",
+      "image_sha256": "7e2351875f7a0f9b42b6e24952448d05c8bbfde2c91b3869b86dbbcde34ebc61",
+      "source_frame_index": 984,
+      "relative_heading_deg": 99,
+      "source_counter_deg": null,
+      "source_counter_text": "990",
+      "label_method": "counter_artifact_review",
+      "heading_uncertainty_deg": 1,
+      "review_note": "Source overlay shows 990 at the 99-to-100 transition; valid neighboring counters constrain the recovered label to 99 degrees."
+    },
+    {
+      "image_path": "sim2_cropped/Magenta/Magenta_990.png",
+      "image_sha256": "e48067b3e28ebc6141780953a0ebaa870e50980e90b6f56784c73152a695f09f",
+      "source_frame_index": 1018,
+      "relative_heading_deg": 99,
+      "source_counter_deg": null,
+      "source_counter_text": "990",
+      "label_method": "counter_artifact_review",
+      "heading_uncertainty_deg": 1,
+      "review_note": "Source overlay shows 990 at the 99-to-100 transition; valid neighboring counters constrain the recovered label to 99 degrees."
+    },
+    {
+      "image_path": "sim2_cropped/Moose3/Moose3_298.png",
+      "image_sha256": "a6da762358ed4aad6bf8823c56b5ad7df51b5ffe470c126a117e53ccf229e603",
+      "source_frame_index": 3367,
+      "relative_heading_deg": 298,
+      "source_counter_deg": 298,
+      "source_counter_text": "298",
+      "label_method": "manual_source_counter_read",
+      "heading_uncertainty_deg": 0,
+      "review_note": "Manually read the exact matched video frame after automated glyph recognition rejected it."
+    },
+    {
+      "image_path": "sim2_cropped/White/White_079.png",
+      "image_sha256": "f207a5ccbb11587d68a19e3b92b9ac4bc7ebb6837906d54d4ae2263d8cd69bd8",
+      "source_frame_index": 788,
+      "relative_heading_deg": 79,
+      "source_counter_deg": 79,
+      "source_counter_text": "79",
+      "label_method": "manual_source_counter_read",
+      "heading_uncertainty_deg": 0,
+      "review_note": "Manually read the exact matched video frame after automated glyph recognition rejected it."
+    },
+    {
+      "image_path": "sim2_cropped/White/White_990.png",
+      "image_sha256": "714d729b43778e768b655e82d15132e8f0dd843b137ce04f7a0c69415f7c1475",
+      "source_frame_index": 1028,
+      "relative_heading_deg": 99,
+      "source_counter_deg": null,
+      "source_counter_text": "990",
+      "label_method": "counter_artifact_review",
+      "heading_uncertainty_deg": 1,
+      "review_note": "Source overlay shows 990 at the 99-to-100 transition; valid neighboring counters constrain the recovered label to 99 degrees."
+    },
+    {
+      "image_path": "sim2_cropped/Yellow/Yellow_990.png",
+      "image_sha256": "60c84554d5059fb62ed0f57457ae13064739a831c87708cf5b1eaf51a74abdf3",
+      "source_frame_index": 1054,
+      "relative_heading_deg": 99,
+      "source_counter_deg": null,
+      "source_counter_text": "990",
+      "label_method": "counter_artifact_review",
+      "heading_uncertainty_deg": 1,
+      "review_note": "Source overlay shows 990 at the 99-to-100 transition; valid neighboring counters constrain the recovered label to 99 degrees."
+    }
+  ]
+}
