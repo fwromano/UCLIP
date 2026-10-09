@@ -82,3 +82,13 @@ python3 scripts/embed_sim2.py --output /tmp/sim2-clip-regenerated --verify
 
 This supplies cached appearance features for simulation. WIRE appearance ingest
 and association scoring remain separate integration work.
+
+Explore the [heading-linked embedding orbit](https://fwromano.github.io/datasets/sim2-headings/embedding.html):
+rotate a Jeep view and watch its cached B/16 vector move through a fixed PCA
+space shared by all four colors. The standalone [HTML](data/car_sim/clip_embeddings/heading_pca.html)
+includes all previews and Plotly for offline use; the [projection JSON](data/car_sim/clip_embeddings/heading_pca.json)
+retains the basis, variance and embedding-row associations.
+
+```bash
+OPENBLAS_NUM_THREADS=1 python3 scripts/build_sim2_embedding_view.py
+```

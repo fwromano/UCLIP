@@ -1,0 +1,21 @@
+{
+  "schema": "sim2.heading_pca_verification.v1",
+  "passed": true,
+  "images_and_vector_rows_verified": 1404,
+  "projection": "centered SVD, reused scripts.clip_mcdo_pca.fit_pca",
+  "orthonormal_basis_max_error": 1.5543122344752192e-15,
+  "three_component_variance_fraction": 0.3887063479453557,
+  "generator_sha256": "ee72bd509030d7b86cd3fd87c115c76fce3cf97c7fe92fd963adcab60ecc9bc6",
+  "template_sha256": "3078fa4e971cd92c7b7632ef5036ec007bb761f281b4a8f55842ff610116bfdc",
+  "pca_implementation_sha256": "d1fc6e0f1365b826f81bd6989c01381b752684a2614aaaad3a07e8269cc3d31c",
+  "files": {
+    "heading_pca.html": {
+      "sha256": "253fd23e803311678e97df4547ece07b8a733b34796742eb3abc85ef83167ec6",
+      "bytes": 36176770
+    },
+    "heading_pca.json": {
+      "sha256": "b6c60f835c17bc00d5eac64eb5f2f6904e6109bac29b302dfdf91e21545bf019",
+      "bytes": 645344
+    }
+  }
+}

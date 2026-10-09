@@ -66,6 +66,40 @@ matrix shape/type, finite values and unit norms, then independently re-encodes
 the selected views one image at a time. A hash mismatch or numeric disagreement
 causes a nonzero exit. The report records the maximum observed disagreement.
 
+## Heading-linked PCA explorer
+
+Open [the interactive embedding orbit](heading_pca.html), or use the
+[public viewer](https://fwromano.github.io/datasets/sim2-headings/embedding.html).
+The heading slider and autoplay select actual cropped Jeep images and their
+cached vectors together. The plot supports interactive 3D, three 2D axis pairs,
+click-to-select measured points, all four colors, and a full-vector cosine
+comparison to each color's nearest front view. At 360 degrees it selects the
+same crop/vector as at zero. All previews and Plotly are embedded in the HTML.
+
+The shared, centered PCA uses all 1,404 normalized Jeep embeddings. It reuses
+`scripts/clip_mcdo_pca.py:fit_pca`; the top three axes capture 38.87 percent of
+their variation. Changing color or axes does not refit the basis. One measured
+crop represents each available heading; duplicates remain visible in the sample
+cloud and can be selected directly. Solid path segments cover angular gaps up
+to five degrees. Larger gaps and the wraparound seam are dashed guides, with no
+synthetic image, vector interpolation, loop constraint or uncertainty ellipsoid.
+
+`heading_pca.json` exports the mean, three PCA components, variance ratios and
+all projected coordinates keyed by embedding row. `heading_pca_verification.json`
+records input/output hashes and numerical checks. The browser verification
+record and screenshots accompany the generated explorer.
+
+Rebuild from UCLIP with its analysis dependencies installed:
+
+```bash
+OPENBLAS_NUM_THREADS=1 python3 scripts/build_sim2_embedding_view.py
+```
+
+The browser performs presentation and control updates only; Python fits the PCA,
+checks image/vector associations and prepares preview images. The template is
+`src/uclip/viz/sim2_embedding_orbit.html`. The full 512-dimensional cache remains
+the authoritative appearance feature; projected distances omit other axes.
+
 ## Simulation evidence boundary
 
 This cache supplies appearance features for a selected crop. It does not add
