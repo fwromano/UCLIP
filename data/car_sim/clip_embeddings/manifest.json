@@ -1,0 +1,82 @@
+{
+  "schema": "sim2.clip_embedding_cache.v1",
+  "model": {
+    "name": "openai/clip-vit-base-patch16",
+    "revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+  },
+  "embedding": {
+    "dimensions": 512,
+    "dtype": "float32",
+    "normalization": "L2 unit length",
+    "feature": "CLIP projected image features",
+    "raw_reconstruction": "embeddings[row] * raw_norms[row]",
+    "inference": "eval, no dropout sampling, torch.inference_mode, float32"
+  },
+  "preprocessing": {
+    "implementation": "transformers.CLIPImageProcessor",
+    "input_conversion": "PIL RGB",
+    "configuration": {
+      "_processor_class": null,
+      "do_resize": true,
+      "size": {
+        "shortest_edge": 224
+      },
+      "resample": 3,
+      "do_center_crop": true,
+      "crop_size": {
+        "height": 224,
+        "width": 224
+      },
+      "do_rescale": true,
+      "rescale_factor": 0.00392156862745098,
+      "do_normalize": true,
+      "image_mean": [
+        0.48145466,
+        0.4578275,
+        0.40821073
+      ],
+      "image_std": [
+        0.26862954,
+        0.26130258,
+        0.27577711
+      ],
+      "do_convert_rgb": true,
+      "image_processor_type": "CLIPImageProcessor"
+    }
+  },
+  "source_labels": {
+    "path": "heading_labels/heading_labels.json",
+    "sha256": "24464a42f27698519b3d1a231a7bc540278927223d7461863909d80c407a3439"
+  },
+  "generation": {
+    "device": "cpu",
+    "batch_size": 16,
+    "threads": 4,
+    "seed": 0,
+    "deterministic_algorithms": true,
+    "tf32": false,
+    "elapsed_sec": 364.5535275530128
+  },
+  "versions": {
+    "python": "3.11.7",
+    "torch": "2.7.0+cu126",
+    "transformers": "4.51.3",
+    "numpy": "1.26.4",
+    "Pillow": "9.5.0"
+  },
+  "rows": 1949,
+  "artifacts": {
+    "embeddings.npy": {
+      "sha256": "fbcbb80245177449783c42681797b3e4894ef78ed2e9138d2c8283f14b6754c8",
+      "bytes": 3991680
+    },
+    "raw_norms.npy": {
+      "sha256": "95a72f756789ab3c01f78892e99f67af5d266630863abe3c07b8d894b08f7126",
+      "bytes": 7924
+    },
+    "index.json": {
+      "sha256": "197fae98f6c436d2af0ee2ae9b5984d9926789de60c309f4b38093c5c6e00aa0",
+      "bytes": 1592481
+    }
+  }
+}

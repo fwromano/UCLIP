@@ -65,3 +65,20 @@ the original filename angles. Four source-counter artifacts have one-degree unce
 Every crop was matched exactly to its source video; independent verification
 replayed 110 source frames and cross-checked all 46 images in the 45-degree subset.
 See the dataset README for reproduction commands and the angle convention.
+
+## Sim2 cached image embeddings
+
+The [CLIP embedding cache](data/car_sim/clip_embeddings/README.md) adds one
+512-dimensional float32 vector for every labeled crop using
+`openai/clip-vit-base-patch16`. Unit vectors are stored in `embeddings.npy`;
+`index.json` links each row to the original image hash, corrected heading and
+source provenance. The model revision and preprocessing are pinned in the
+manifest. The cache covers all 1,949 crops, including the 1,404 Jeep images.
+
+```bash
+python3 scripts/embed_sim2.py --output /tmp/sim2-clip-regenerated
+python3 scripts/embed_sim2.py --output /tmp/sim2-clip-regenerated --verify
+```
+
+This supplies cached appearance features for simulation. WIRE appearance ingest
+and association scoring remain separate integration work.

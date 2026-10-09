@@ -65,6 +65,14 @@ Jeep cardinal-view convention. All source-video counter audits have zero
 unexplained decreases or jumps above three degrees. This is dataset-label
 verification, not a trained heading-estimator benchmark.
 
+## Cached appearance features
+
+The adjacent [CLIP cache](../clip_embeddings/README.md) adds a
+512-dimensional `openai/clip-vit-base-patch16` image embedding for every crop.
+Its `index.json` preserves these heading/provenance fields and adds
+`embedding_row`, pointing into the normalized float32 `embeddings.npy` matrix.
+The model revision, preprocessing and verification evidence are retained there.
+
 Source repository revisions at recovery:
 
 - UCLIP: `aafa1b3fc00873a0d7b7f2f9385c814f9fae35e6`
