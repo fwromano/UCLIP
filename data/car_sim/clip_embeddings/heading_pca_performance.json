@@ -1,0 +1,91 @@
+{
+  "schema": "sim2.heading_pca_performance.v1",
+  "date": "2026-10-09",
+  "baseline_source_revision": "373d4ab3b31c5d22fafe2d088b89f0e0fbf8d987",
+  "environment": {
+    "browser": "Chromium 153.0.8010.12 headless (Playwright chromium-1243)",
+    "viewport": [
+      1280,
+      900
+    ],
+    "cpu_throttle": 4,
+    "cache_disabled": true,
+    "server": "local Python HTTP server; no network throttling"
+  },
+  "method": "Two navigation and 6300ms autoplay trials per build at 60 degrees/second using the identical benchmark script. rAF intervals include preview sheet decoding. CPU slowdown applied equally. Browser timings only, not field evidence.",
+  "baseline": {
+    "url": "http://127.0.0.1:18974/baseline/heading_pca.html",
+    "cpu_throttle": 4,
+    "playback_deg_per_sec": 60,
+    "playback_duration_ms": 6300,
+    "trials": [
+      {
+        "trial": 1,
+        "ready_ms": 3734,
+        "frames": 46,
+        "frame_p50_ms": 216.59999999999945,
+        "frame_p95_ms": 249.99999999999955,
+        "long_frame_count": 40,
+        "marker_mismatch_frames": 0,
+        "long_task_count": 40,
+        "long_task_ms": 8260,
+        "html_bytes": 36176770,
+        "heading": 136,
+        "js_heap_bytes": 70374284
+      },
+      {
+        "trial": 2,
+        "ready_ms": 4268,
+        "frames": 43,
+        "frame_p50_ms": 216.80000000000018,
+        "frame_p95_ms": 283.2999999999993,
+        "long_frame_count": 38,
+        "marker_mismatch_frames": 0,
+        "long_task_count": 38,
+        "long_task_ms": 8614,
+        "html_bytes": 36176770,
+        "heading": 152,
+        "js_heap_bytes": 61315764
+      }
+    ]
+  },
+  "optimized": {
+    "url": "http://127.0.0.1:18974/new/heading_pca.html",
+    "cpu_throttle": 4,
+    "playback_deg_per_sec": 60,
+    "playback_duration_ms": 6300,
+    "trials": [
+      {
+        "trial": 1,
+        "ready_ms": 484,
+        "frames": 343,
+        "frame_p50_ms": 16.699999999999818,
+        "frame_p95_ms": 16.799999999999727,
+        "long_frame_count": 5,
+        "marker_mismatch_frames": 0,
+        "long_task_count": 5,
+        "long_task_ms": 830,
+        "html_bytes": 546407,
+        "heading": 21,
+        "js_heap_bytes": 6108540
+      },
+      {
+        "trial": 2,
+        "ready_ms": 295,
+        "frames": 353,
+        "frame_p50_ms": 16.699999999999818,
+        "frame_p95_ms": 16.800000000000068,
+        "long_frame_count": 4,
+        "marker_mismatch_frames": 0,
+        "long_task_count": 4,
+        "long_task_ms": 652,
+        "html_bytes": 546407,
+        "heading": 21,
+        "js_heap_bytes": 6823080
+      }
+    ]
+  },
+  "pca_export_sha256": "b6c60f835c17bc00d5eac64eb5f2f6904e6109bac29b302dfdf91e21545bf019",
+  "pca_export_unchanged": true,
+  "limits": "JS heap excludes native decoded image surfaces. At most three retained WebP sheets, each at most 2048x1408 pixels, plus up to two concurrent image loads. HTTP browser/GitHub caching and deployment-network latency can differ."
+}

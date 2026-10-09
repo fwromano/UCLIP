@@ -85,8 +85,9 @@ and association scoring remain separate integration work.
 
 Explore the [heading-linked embedding orbit](https://fwromano.github.io/datasets/sim2-headings/embedding.html):
 rotate a Jeep view and watch its cached B/16 vector move through a fixed PCA
-space shared by all four colors. The standalone [HTML](data/car_sim/clip_embeddings/heading_pca.html)
-includes all previews and Plotly for offline use; the [projection JSON](data/car_sim/clip_embeddings/heading_pca.json)
+space shared by all four colors. The [live HTML](data/car_sim/clip_embeddings/heading_pca.html) loads preview
+sheets on demand; the [offline HTML](data/car_sim/clip_embeddings/heading_pca_offline.html)
+embeds them for disconnected use. Both use a lightweight canvas renderer; the [projection JSON](data/car_sim/clip_embeddings/heading_pca.json)
 retains the basis, variance and embedding-row associations.
 
 ```bash

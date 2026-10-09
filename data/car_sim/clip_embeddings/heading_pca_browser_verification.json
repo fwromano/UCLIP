@@ -1,63 +1,132 @@
 {
+  "schema": "sim2.heading_pca_browser_verification.v2",
+  "date": "2026-10-09",
   "passed": true,
-  "check_count": 22,
   "checks": [
-    "Initial 3D image / cached vector / plotted coordinate",
-    "Heading 90 synchronized",
-    "Heading 180 synchronized",
-    "Heading 270 synchronized",
-    "Heading 360 synchronized",
-    "0/360 identical cached crop and embedding",
-    "Heading slider keyboard input",
-    "Magenta linked color selection",
-    "White linked color selection",
-    "Yellow linked color selection",
-    "Indigo linked color selection",
-    "Projection 01 coordinates",
-    "Projection 02 coordinates",
-    "Projection 12 coordinates",
-    "Projection 3d coordinates",
-    "Other-color toggle",
-    "All-sample toggle",
-    "Actual plotted-point click selects crop / heading / embedding",
-    "Autoplay wraps through 360, then pauses synchronized",
-    "Pause keeps heading stable",
-    "Mobile width without overflow",
-    "Offline color / heading selection loads embedded crop and matching vector"
+    {
+      "name": "initial image and PCA association",
+      "passed": true
+    },
+    {
+      "name": "heading 90",
+      "passed": true
+    },
+    {
+      "name": "heading 180",
+      "passed": true
+    },
+    {
+      "name": "heading 270",
+      "passed": true
+    },
+    {
+      "name": "heading 360",
+      "passed": true
+    },
+    {
+      "name": "heading 0",
+      "passed": true
+    },
+    {
+      "name": "color Magenta",
+      "passed": true
+    },
+    {
+      "name": "color White",
+      "passed": true
+    },
+    {
+      "name": "color Yellow",
+      "passed": true
+    },
+    {
+      "name": "color Indigo",
+      "passed": true
+    },
+    {
+      "name": "projection 01",
+      "passed": true
+    },
+    {
+      "name": "projection 02",
+      "passed": true
+    },
+    {
+      "name": "projection 12",
+      "passed": true
+    },
+    {
+      "name": "projection 3d",
+      "passed": true
+    },
+    {
+      "name": "3D drag with small incremental movements",
+      "passed": true
+    },
+    {
+      "name": "measured point click",
+      "passed": true
+    },
+    {
+      "name": "context and cloud toggles",
+      "passed": true
+    },
+    {
+      "name": "rapid scrubbing coalesces to latest view",
+      "passed": true
+    },
+    {
+      "name": "heading 350",
+      "passed": true
+    },
+    {
+      "name": "autoplay wraps and pauses",
+      "passed": true
+    },
+    {
+      "name": "mobile layout",
+      "passed": true
+    },
+    {
+      "name": "offline White heading 180",
+      "passed": true
+    },
+    {
+      "name": "offline White",
+      "passed": true
+    },
+    {
+      "name": "offline Indigo heading 180",
+      "passed": true
+    },
+    {
+      "name": "offline Indigo",
+      "passed": true
+    },
+    {
+      "name": "offline Magenta heading 180",
+      "passed": true
+    },
+    {
+      "name": "offline Magenta",
+      "passed": true
+    },
+    {
+      "name": "offline Yellow heading 180",
+      "passed": true
+    },
+    {
+      "name": "offline Yellow",
+      "passed": true
+    }
   ],
-  "final": {
-    "heading": 90,
-    "color": "Indigo",
-    "mode": "3d",
-    "selectedRow": 70,
-    "selectedHeading": 90,
-    "coords": [
-      -0.10559966876856909,
-      -0.28616059608573835,
-      0.2105732977200051
-    ],
-    "playing": false,
-    "markerRow": 70,
-    "imageRow": 70,
-    "custom": 70,
-    "point": [
-      -0.10559966876856909,
-      -0.28616059608573835,
-      0.2105732977200051
-    ],
-    "status": ""
-  },
-  "schema": "sim2.heading_pca_browser_verification.v1",
-  "url": "http://127.0.0.1:18973/heading_pca.html",
-  "console_errors": 0,
-  "screenshots": [
-    "heading_pca_desktop.png",
-    "heading_pca_mobile.png"
-  ],
-  "artifact_sha256": {
-    "heading_pca.html": "253fd23e803311678e97df4547ece07b8a733b34796742eb3abc85ef83167ec6",
-    "heading_pca.json": "b6c60f835c17bc00d5eac64eb5f2f6904e6109bac29b302dfdf91e21545bf019",
-    "heading_pca_desktop.png": "75058b20abc67bc735a03ef67c53115ecedf02da9b4ab716d70b753e5232c4b8",
-    "heading_pca_mobile.png": "1a392dec1678c05314d0c9ae100d5d1862d1f35616d9ae156ed75578b39e2ad5"
+  "page_errors": [],
+  "association_checks": "Selected row, image canvas row, marker row, PCA coordinates, original-image link and retained sheet count checked after every action. Zero and 360 select row 354; rapid scrub settles Yellow 233, row 1812. Offline checks run with browser network disabled.",
+  "test_script_sha256": "425c3e1eab5ac47b962ccb1334ec4612a3ee1ded5c08d856411c79e6cfec990d",
+  "files": {
+    "heading_pca.html": "0e1363b864a500f3a23000b4e737813a24b9ef51d288d9b4bb9bda852ff7af6a",
+    "heading_pca_offline.html": "bd17f6d7dc1dae6af0c6a830a24b661ed43e18c39bf27555349c152ba26e11b4",
+    "heading_pca_desktop.png": "e6d8090104e287624405933a1f64eb3ea6451ec3c3c4db337c22bddb824d7c7b",
+    "heading_pca_mobile.png": "6a85b4a8513ec1cdb710074bf77c15d70f740cc6efb089ce3d850284aa4d01d4"
   }
 }

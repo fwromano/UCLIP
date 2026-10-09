@@ -1,0 +1,11 @@
+async page => {
+const client=await page.context().newCDPSession(page);await client.send('Emulation.setCPUThrottlingRate',{rate:4});await client.send('Network.setCacheDisabled',{cacheDisabled:true});await client.send('Performance.enable');await page.setViewportSize({width:1280,height:900});
+const url=page.url().split('?')[0],results=[];
+for(let trial=0;trial<2;trial++){const started=Date.now();await page.goto(url,{waitUntil:'domcontentloaded'});await page.waitForFunction(()=>window.orbitState?.selectedRow!=null&&window.orbitState.markerRow===window.orbitState.selectedRow,null,{timeout:30000});const readyMs=Date.now()-started;
+await page.getByRole('combobox',{name:'Rotation speed'}).selectOption('60');
+await page.evaluate(()=>{window._perf={frames:[],mismatches:0,last:0,active:true,longtasks:[]};const o=new PerformanceObserver(list=>{for(const e of list.getEntries())if(window._perf.active)window._perf.longtasks.push(e.duration)});o.observe({type:'longtask',buffered:false});const tick=t=>{const p=window._perf;if(!p.active)return;if(p.last)p.frames.push(t-p.last);p.last=t;if(window.orbitState.markerRow!==window.orbitState.selectedRow)p.mismatches++;requestAnimationFrame(tick)};requestAnimationFrame(tick)});
+await page.getByRole('button',{name:'▶ Play',exact:true}).click();await page.waitForTimeout(6300);await page.getByRole('button',{name:'Ⅱ Pause',exact:true}).click();
+const stats=await page.evaluate(()=>{const p=window._perf;p.active=false;const f=p.frames.sort((a,b)=>a-b);const n=performance.getEntriesByType('navigation')[0];return{frames:f.length,frame_p50_ms:f[Math.floor(f.length*.5)],frame_p95_ms:f[Math.floor(f.length*.95)],long_frame_count:f.filter(v=>v>50).length,marker_mismatch_frames:p.mismatches,long_task_count:p.longtasks.length,long_task_ms:p.longtasks.reduce((a,b)=>a+b,0),html_bytes:n.encodedBodySize,heading:window.orbitState.heading}});
+const metrics=await client.send('Performance.getMetrics');stats.js_heap_bytes=metrics.metrics.find(m=>m.name==='JSHeapUsedSize').value;results.push({trial:trial+1,ready_ms:readyMs,...stats})}
+await client.send('Emulation.setCPUThrottlingRate',{rate:1});await client.detach();return{url,cpu_throttle:4,playback_deg_per_sec:60,playback_duration_ms:6300,trials:results};
+}

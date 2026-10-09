@@ -3,14 +3,12 @@
 import argparse
 import base64
 import hashlib
-import io
 import json
 import sys
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
-from plotly.offline import get_plotlyjs
 
 
 def digest(path):
@@ -22,12 +20,14 @@ def main():
     parser.add_argument('--repo-root', type=Path, default=Path(__file__).resolve().parents[1])
     parser.add_argument('--output', type=Path)
     parser.add_argument('--template', type=Path)
+    parser.add_argument('--javascript', type=Path)
     parser.add_argument('--image-base', default='https://raw.githubusercontent.com/fwromano/UCLIP/77dee02fe81b28ba2f2c33e46a9a905e4c7498b5/data/car_sim/')
     parser.add_argument('--labels-url', default='https://fwromano.github.io/datasets/sim2-headings/')
     args = parser.parse_args()
     cache = args.repo_root / 'data/car_sim/clip_embeddings'
     output = args.output or cache
     template = args.template or args.repo_root / 'src/uclip/viz/sim2_embedding_orbit.html'
+    javascript = args.javascript or args.repo_root / 'src/uclip/viz/sim2_embedding_orbit.js'
     manifest = json.loads((cache / 'manifest.json').read_text())
     for name, metadata in manifest['artifacts'].items():
         if digest(cache / name) != metadata['sha256']:
@@ -51,23 +51,39 @@ def main():
     for category in colors:
         candidates = [i for i, r in enumerate(rows) if r['category'] == category]
         references[category] = min(candidates, key=lambda i: (abs((rows[i]['relative_heading_deg'] + 180) % 360 - 180), rows[i]['embedding_row']))
+    output.mkdir(parents=True, exist_ok=True)
+    (output / 'previews').mkdir(exist_ok=True)
+    preview_fields, sprite_files = {}, []
+    # Each decoded sheet is at most 2048 x 1408 pixels. The browser retains
+    # three sheets and permits at most two concurrent sheet loads.
+    for category in colors:
+        ordered = sorted((r for r in rows if r['category'] == category),
+                         key=lambda r: (r['relative_heading_deg'], r['embedding_row']))
+        for begin in range(0, len(ordered), 64):
+            batch = ordered[begin:begin + 64]
+            sheet = Image.new('RGB', (256 * 8, 176 * ((len(batch) + 7) // 8)), '#131c29')
+            name = f'previews/{category}-{begin // 64:02d}.webp'
+            for cell, row in enumerate(batch):
+                with Image.open(args.repo_root / 'data/car_sim' / row['image_path']) as source:
+                    image = source.convert('RGB')
+                    image.thumbnail((256, 176))
+                    sheet.paste(image, ((cell % 8) * 256 + (256-image.width)//2,
+                                       (cell // 8) * 176 + (176-image.height)//2))
+                preview_fields[row['embedding_row']] = {'preview_sheet': name, 'preview_cell': cell}
+            sheet.save(output / name, format='WEBP', quality=76, method=4)
+            sprite_files.append(name)
     browser_rows, exported_rows = [], []
     for i, row in enumerate(rows):
         path = args.repo_root / 'data/car_sim' / row['image_path']
         if digest(path) != row['image_sha256']:
             raise ValueError(f"Image integrity failure: {row['image_path']}")
-        with Image.open(path) as source:
-            image = source.convert('RGB')
-            image.thumbnail((384, 256))
-            stream = io.BytesIO()
-            image.save(stream, format='JPEG', quality=83)
         record = {'embedding_row': row['embedding_row'], 'category': row['category'],
                   'heading': row['relative_heading_deg'], 'image_path': row['image_path'],
                   'image_sha256': row['image_sha256'], 'uncertainty': row['heading_uncertainty_deg'],
                   'coords': coords[i].tolist(),
                   'cos_to_front': float(matrix[i] @ matrix[references[row['category']]])}
         exported_rows.append(record)
-        browser_rows.append(dict(record, preview='data:image/jpeg;base64,' + base64.b64encode(stream.getvalue()).decode()))
+        browser_rows.append(dict(record, **preview_fields[row['embedding_row']]))
     projection = {'schema': 'sim2.heading_pca.v1', 'fit': 'shared centered PCA over all 1404 normalized Jeep image embeddings',
                   'model': manifest['model'], 'embedding_manifest_sha256': digest(cache / 'manifest.json'),
                   'embedding_sha256': manifest['artifacts']['embeddings.npy']['sha256'],
@@ -80,19 +96,26 @@ def main():
                'references': projection['references'], 'model': manifest['model'],
                'imageBase': args.image_base, 'labelsUrl': args.labels_url,
                'cacheUrl': 'https://github.com/fwromano/UCLIP/tree/77dee02fe81b28ba2f2c33e46a9a905e4c7498b5/data/car_sim/clip_embeddings'}
-    html = template.read_text().replace('__PLOTLY_JS__', get_plotlyjs())
-    html = html.replace('__ORBIT_DATA__', json.dumps(payload, separators=(',', ':'), allow_nan=False).replace('</', '<\\/'))
-    output.mkdir(parents=True, exist_ok=True)
+    source = template.read_text().replace('__ORBIT_JS__', javascript.read_text())
+    def render(data):
+        return source.replace('__ORBIT_DATA__', json.dumps(data, separators=(',', ':'), allow_nan=False).replace('</', '<\\/'))
+    html = render(payload)
     (output / 'heading_pca.html').write_text(html)
+    offline = dict(payload, atlases={name: 'data:image/webp;base64,' + base64.b64encode((output/name).read_bytes()).decode()
+                                     for name in sprite_files})
+    (output / 'heading_pca_offline.html').write_text(render(offline))
     (output / 'heading_pca.json').write_text(json.dumps(projection, indent=2, allow_nan=False) + '\n')
     verification = {'schema': 'sim2.heading_pca_verification.v1', 'passed': True,
                     'images_and_vector_rows_verified': len(rows), 'projection': 'centered SVD, reused scripts.clip_mcdo_pca.fit_pca',
                     'orthonormal_basis_max_error': float(np.max(np.abs(components @ components.T - np.eye(3)))),
                     'three_component_variance_fraction': float(ratio.sum()),
                     'generator_sha256': digest(__file__), 'template_sha256': digest(template),
+                    'javascript_sha256': digest(javascript),
+                    'preview_cache': {'max_decoded_sheets': 3, 'max_concurrent_loads': 2,
+                                      'sheet_max_pixels': 2048 * 1408, 'preview_size': [256, 176]},
                     'pca_implementation_sha256': digest(args.repo_root / 'scripts/clip_mcdo_pca.py'),
                     'files': {name: {'sha256': digest(output / name), 'bytes': (output / name).stat().st_size}
-                              for name in ('heading_pca.html', 'heading_pca.json')}}
+                              for name in ['heading_pca.html', 'heading_pca_offline.html', 'heading_pca.json', *sprite_files]}}
     (output / 'heading_pca_verification.json').write_text(json.dumps(verification, indent=2) + '\n')
     print(json.dumps(verification), flush=True)
 

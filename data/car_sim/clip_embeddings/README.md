@@ -74,7 +74,9 @@ The heading slider and autoplay select actual cropped Jeep images and their
 cached vectors together. The plot supports interactive 3D, three 2D axis pairs,
 click-to-select measured points, all four colors, and a full-vector cosine
 comparison to each color's nearest front view. At 360 degrees it selects the
-same crop/vector as at zero. All previews and Plotly are embedded in the HTML.
+same crop/vector as at zero. The live HTML loads small WebP preview sheets on
+demand. [The separate offline viewer](heading_pca_offline.html) embeds all sheets
+for disconnected use. Original PNGs remain linked at full resolution.
 
 The shared, centered PCA uses all 1,404 normalized Jeep embeddings. It reuses
 `scripts/clip_mcdo_pca.py:fit_pca`; the top three axes capture 38.87 percent of
@@ -96,9 +98,42 @@ OPENBLAS_NUM_THREADS=1 python3 scripts/build_sim2_embedding_view.py
 ```
 
 The browser performs presentation and control updates only; Python fits the PCA,
-checks image/vector associations and prepares preview images. The template is
-`src/uclip/viz/sim2_embedding_orbit.html`. The full 512-dimensional cache remains
+checks image/vector associations and prepares preview images. The template and canvas renderer are
+`src/uclip/viz/sim2_embedding_orbit.html` and `sim2_embedding_orbit.js`. The full 512-dimensional cache remains
 the authoritative appearance feature; projected distances omit other axes.
+
+## Viewer performance verification
+
+The canvas renderer retains the static point cloud between heading updates and
+redraws only the selected marker. Image/marker selection commits together after
+its preview is ready. Rapid scrubbing coalesces to the latest request; playback
+updates at most 30 times per second. Heading lookup tables and coordinate DOM
+nodes are prepared once. Preview sheets contain at most 64 crops at 256 × 176;
+the browser retains at most three decoded sheets and loads at most two at once.
+The plot renders at display resolution and supports drag rotation and zoom.
+
+`heading_pca_performance.json` records two equivalent old/new trials in local
+Chromium with network caching disabled and 4× CPU throttling. This measures
+browser presentation, not deployment-network latency or field behavior. The
+exported PCA JSON is byte-identical to the previous viewer. The browser report
+checks headings, colors, projections, scrubbing, point selection, autoplay,
+mobile layout and disconnected use.
+
+Repeat the benchmark using Playwright CLI's `run-code` command after opening
+any generated viewer URL in a browser session:
+
+```bash
+python3 -m http.server 18974 --directory data/car_sim/clip_embeddings
+# In another terminal, with playwright-cli installed:
+playwright-cli -s=orbit-bench open http://127.0.0.1:18974/heading_pca.html
+playwright-cli -s=orbit-bench run-code "$(cat scripts/benchmark_sim2_embedding_view.js)"
+```
+
+The benchmark requires Chromium's DevTools protocol. It records load-to-ready,
+requestAnimationFrame percentiles, main-thread long tasks, heap use, HTML bytes
+and marker association during a 60°/second playback. Use the same browser,
+viewport and machine for before/after comparisons. The older build is retained
+at UCLIP commit `373d4ab3b31c5d22fafe2d088b89f0e0fbf8d987`.
 
 ## Simulation evidence boundary
 
