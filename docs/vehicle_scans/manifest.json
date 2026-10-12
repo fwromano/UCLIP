@@ -1,0 +1,416 @@
+{
+  "schema": "maas.vehicle_scan_view.v1",
+  "generator_sha256": "9ae0f9a0ee1112a6244e24e71bc48dfcd44dcfdc3f7d7dcfed565e95bedc1ebe",
+  "renderer_sha256": "edce723bb7300c0de06e9118845354be320847145524661fd7d37a05b43fdf6e",
+  "template_sha256": "c9d78bf98828e3a8de2fa89fd7dc0e9e56d7a6ced3cce9ea585243bd659b3a18",
+  "rows": 3588,
+  "series": 17,
+  "preview_max_retained_sheets": 3,
+  "preview_max_concurrent_loads": 2,
+  "files": {
+    "explorer.png": {
+      "sha256": "29eef8140e7f0461ee2558c29f8cd6f68c6a2eaddfab312e64cf3a630eb1072e",
+      "bytes": 454600
+    },
+    "embedding.html": {
+      "sha256": "f1d9259218e224539f09469b97034a38dd4f7a74a7aa34ade4f709cc221290e9",
+      "bytes": 2047784
+    },
+    "study.png": {
+      "sha256": "6f8ab4bbb4b89b1fd3be29dc3d37311db2d774b1a587e899cb5a45225f1e05dd",
+      "bytes": 97340
+    },
+    "REPORT.md": {
+      "sha256": "5807a041cf012facee0557903c3a76eca11ce13d05c81b394a0c2af4403a38f0",
+      "bytes": 6651
+    },
+    "crop-overrides.json": {
+      "sha256": "43e08bba7a62e7af8ecff6dc991585d00a250305fc923e10d74cc8dfea5fa667",
+      "bytes": 2973
+    },
+    "resolution_embeddings.npy": {
+      "sha256": "e7834d5e57db987501d0966fb434510d3a220cecc6fb4972a9861bbf56fc36f3",
+      "bytes": 1491072
+    },
+    "raw_embeddings.npy": {
+      "sha256": "b649b16a47909591f9941ee603d6eefd4df6c2743a5c8465a1f21aed791d275d",
+      "bytes": 4472960
+    },
+    "index.html": {
+      "sha256": "d1ed92c18fd5b3ae8a5b6f9153bf7531aaf4ccd342c6dadf034c581945974bee",
+      "bytes": 8782
+    },
+    "study.svg": {
+      "sha256": "11626b2573cdda14f7fe2b2ed779f202f35498f5492b66b9ed8f0aa2c2dc4de9",
+      "bytes": 52960
+    },
+    "provenance.json": {
+      "sha256": "5836fc953e53ee04cd7d31aab6df50c201cc4889d111c0e215f2b569ec9a77eb",
+      "bytes": 4091
+    },
+    "crop-review-az0.jpg": {
+      "sha256": "7ef94e4ab3d30076b017f1d8e49b3cb13ce84062bc6899a8c600124fddec7ef0",
+      "bytes": 829585
+    },
+    "crop-review-az180.jpg": {
+      "sha256": "401ff653f685312350494472c2e2679845d561f47751f38e0d5538c3394ba59e",
+      "bytes": 837315
+    },
+    "cropped_embeddings.npy": {
+      "sha256": "27ee81b186b28c4121de5c65e5be725fb81a16719156859b2a1ed5948967023c",
+      "bytes": 4472960
+    },
+    "crop_index.json": {
+      "sha256": "f7b97ec85825d03eb914c6e937a4f258124ece0bfe640f538c041b5ea9647f00",
+      "bytes": 2953761
+    },
+    "crop-review-az90.jpg": {
+      "sha256": "910873cae9290a55a4d8805c470c7ebf929c5a39d2497a9c91bc0c7c7ee081d2",
+      "bytes": 929558
+    },
+    "browser-verification.json": {
+      "sha256": "a8437f0126ea728ae5166def8719a86984d62188b1a57cc18d57375d71f77cb7",
+      "bytes": 711
+    },
+    "embedding_offline.html": {
+      "sha256": "2cd1e98c2e5dab5fdc6ce03c807f30af7ceb3fc3422ba2c4fcf4ce44dba56420",
+      "bytes": 26599117
+    },
+    "elevation_holdout.json": {
+      "sha256": "d8507c4a9232fdbe45d02349848c0e22c1dab21b09eaf721baaace45c5161488",
+      "bytes": 221920
+    },
+    "projection.json": {
+      "sha256": "c4299fffc86cb09c099f9f8b109e8110a1abe89f25160e594512a9f5ccc1b756",
+      "bytes": 4564952
+    },
+    "crop-review-az270.jpg": {
+      "sha256": "3f7a850dac7662b6b7591e49a78f4034df7b6ed113454a5bece76ff9db81ceb7",
+      "bytes": 908747
+    },
+    "evaluation.json": {
+      "sha256": "6dae099555ac9bef12be282efcbb968135e8084a57922fc28a6fccde1b895118",
+      "bytes": 100926
+    },
+    "previews/sim2-jeep-magenta-01.webp": {
+      "sha256": "b5947c4ec3f7ed6b5e04cd6a776930561e38853c18952b8de1dcd79c3c1b9603",
+      "bytes": 332174
+    },
+    "previews/sim2-jeep-magenta-04.webp": {
+      "sha256": "0c8a8bd356658fdb6ec91c621ccd650596a860b84f6ba335c864a12217352b2b",
+      "bytes": 365030
+    },
+    "previews/scans-truck-white-00.webp": {
+      "sha256": "ff0f39dda826677aabd8f2a2a8f548d8414311f602dccdb600a18b29c954eb9d",
+      "bytes": 301204
+    },
+    "previews/scans-truck-white-01.webp": {
+      "sha256": "05317131ba9d0ad76491f6613fd79fffd673e1765b692c251d517c5078bc82f3",
+      "bytes": 336306
+    },
+    "previews/scans-wolf-original-02.webp": {
+      "sha256": "bda1f5fb3ec0db94184eff4e849ae6b4a4e7c3945de9f94d7a7ece67c9cc895a",
+      "bytes": 42262
+    },
+    "previews/scans-truck-black-01.webp": {
+      "sha256": "529d54c00ed6df38c4cce2b75c2740e6cad6bede4fcfd639ad2cec16e4c67ac1",
+      "bytes": 292544
+    },
+    "previews/sim2-jeep-white-02.webp": {
+      "sha256": "b63815a51f9ce5961f7057be2078397961b6c85a0436371120bcea1a42d4a225",
+      "bytes": 375320
+    },
+    "previews/sim2-jeep-yellow-00.webp": {
+      "sha256": "bd6326b85e1b4eec15c9391018b9b16b43e5a5d3aea51b5fd41bb549efb2834a",
+      "bytes": 446532
+    },
+    "previews/scans-truck-violet-02.webp": {
+      "sha256": "d227fbaccadbba4515fffce0225eb664b873e85b98707a786f6a4f0036f7c711",
+      "bytes": 198910
+    },
+    "previews/sim2-jeep-yellow-01.webp": {
+      "sha256": "998e86ed7b4a10b8c1ec3f698bc81210a4dfa9cfee6610f0417599aa63ae056a",
+      "bytes": 363840
+    },
+    "previews/sim2-jeep-yellow-04.webp": {
+      "sha256": "8f5e1dd5a0ac4ba6d1c5205c01880d957f98c223743f8c0b5f2954415fb4d975",
+      "bytes": 426638
+    },
+    "previews/sim2-jeep-indigo-01.webp": {
+      "sha256": "d2d1817ffb7ed2739e95a8876df8efb2acc4956725cccefac3aa6fe2befd18c9",
+      "bytes": 369956
+    },
+    "previews/scans-moose-original-00.webp": {
+      "sha256": "b5e242d31e2255fdda8e97e464f733bc32cff26ab7ce383c0ec321bf9651204b",
+      "bytes": 143792
+    },
+    "previews/scans-truck-violet-00.webp": {
+      "sha256": "afd34b20967f5057b616363512c7faae93af056af284ec2010ad6f1fce7ef7f6",
+      "bytes": 322172
+    },
+    "previews/sim2-jeep-indigo-00.webp": {
+      "sha256": "167436439ee802d69b2080605c42780b3cd4f95f62b2e9d0ce8314bd005a35b9",
+      "bytes": 429786
+    },
+    "previews/sim2-jeep-white-01.webp": {
+      "sha256": "009f48e084900c5302711854e1bcf7dbbb69602d52eb587dbc9f0b6e6c67340d",
+      "bytes": 336800
+    },
+    "previews/sim2-jeep-magenta-02.webp": {
+      "sha256": "e34100c737091f5494ffd4cccc7c7f00226b7cf1175041fac3ee3cb03d0b32bb",
+      "bytes": 380434
+    },
+    "previews/scans-jeep-original-00.webp": {
+      "sha256": "02c9285b74a53e35db15715f3f35f358d82d86e6d4e096299ac100b6e4e8ce60",
+      "bytes": 265854
+    },
+    "previews/scans-wolf-original-00.webp": {
+      "sha256": "d9aece6c2139ece722a0c642efd02f3b28efc9568202c76987eb5016daad9032",
+      "bytes": 145048
+    },
+    "previews/sim2-jeep-indigo-04.webp": {
+      "sha256": "8f3bd911832d785d63f6c553f01ea512daedaf266fa3a0e26291442311489f31",
+      "bytes": 409446
+    },
+    "previews/sim2-jeep-indigo-03.webp": {
+      "sha256": "b4c641d9462c8a69856562018537ba2645ac78b1bd93a5d3f86b720fdbf0c7c0",
+      "bytes": 342112
+    },
+    "previews/scans-truck-red-00.webp": {
+      "sha256": "bfb5596ba6a3312fb5d23115f5f693dd398a8c37b906431a470e562dcc0bdea8",
+      "bytes": 313722
+    },
+    "previews/sim2-jeep-magenta-03.webp": {
+      "sha256": "a77908fc2006b02e1be349bc539045fb2bbcc661f9408086a324e74c3c47eb15",
+      "bytes": 329202
+    },
+    "previews/sim2-jeep-magenta-05.webp": {
+      "sha256": "538cbade71a2a490c875fdeeea447e8e66fe86b278cd0bb004cb56fbde4acb4b",
+      "bytes": 211790
+    },
+    "previews/scans-truck-orange-01.webp": {
+      "sha256": "08fcc391af579bc6595e0261ff844f528a19d882da403cea968049fb9effc418",
+      "bytes": 383828
+    },
+    "previews/sim2-jeep-yellow-03.webp": {
+      "sha256": "d9b2d95f9421b24a804bb90601362ea38183dde4656afe5bb3b949fed9b9c337",
+      "bytes": 373050
+    },
+    "previews/scans-truck-yellow-00.webp": {
+      "sha256": "b551493f7c91cd9c6ac3b434639292704080f71b4d20e776be27bed498911abe",
+      "bytes": 333306
+    },
+    "previews/sim2-jeep-white-05.webp": {
+      "sha256": "9d27495707c17fbab37e42f903234a1579116d1b755f52e0418aa4280c2726c7",
+      "bytes": 100620
+    },
+    "previews/scans-truck-black-02.webp": {
+      "sha256": "13f685d9001d1c5037bbbb57eb95dc0982bd7e2a173e4b2c5020d1b6d4d1ea3d",
+      "bytes": 155014
+    },
+    "previews/scans-truck-indigo-02.webp": {
+      "sha256": "5f1f399999eefdb6dad5cebb680773307e583c1d980cf30dccd074ebe019a009",
+      "bytes": 193134
+    },
+    "previews/sim2-jeep-indigo-02.webp": {
+      "sha256": "27d35fdb3c0416d25e6d3287c4b5d51b082d8eba24640c57045ea6ec589ca3ac",
+      "bytes": 420298
+    },
+    "previews/scans-truck-green-02.webp": {
+      "sha256": "1a1277cdde9dc669f81de0ed55fd9398c13d627599c76acec9566ed6bdb03f1d",
+      "bytes": 209206
+    },
+    "previews/scans-truck-red-02.webp": {
+      "sha256": "6605974904bfe5043f4f40463e6f600cff8b9f8aaa6eb1e6da6d49067848e255",
+      "bytes": 192480
+    },
+    "previews/scans-truck-gray-02.webp": {
+      "sha256": "24a52b11db17ce468fc5c4aeffe6b00f206cdaf08b09165e78dc305c8aba6e8e",
+      "bytes": 170400
+    },
+    "previews/scans-truck-yellow-02.webp": {
+      "sha256": "71862049aeff4e6bd10c43b326c3188cdf7ebf7b8f44281246ef3b2289234214",
+      "bytes": 209508
+    },
+    "previews/scans-truck-gray-01.webp": {
+      "sha256": "86313809914cd7c34fcbce4fa769679f88a001ed6dd16eb4958c44e74a7c6bff",
+      "bytes": 321132
+    },
+    "previews/scans-wolf-original-01.webp": {
+      "sha256": "0cc88665ebdd74c372eca19a6ed8f95be421f16a1b7cbc45035306a16dd3180a",
+      "bytes": 121060
+    },
+    "previews/scans-truck-blue-00.webp": {
+      "sha256": "8118ead9d7481551823931bd497fc549ebd07e0a490e4ede6163672c9146aaa4",
+      "bytes": 302606
+    },
+    "previews/sim2-jeep-white-00.webp": {
+      "sha256": "ed6a4d730b83e3bec4c75b95fae1bcb9b8efbe0e1746557021a12d424c218d45",
+      "bytes": 397024
+    },
+    "previews/scans-moose-original-01.webp": {
+      "sha256": "7b3d48d6ed3f81a01406d7dd262fde70221dfcbec3db7339211dc19a462241d7",
+      "bytes": 205646
+    },
+    "previews/scans-truck-orange-02.webp": {
+      "sha256": "68ddd6b1ef70c971463f65be72d76470d5aff27084f518436c31f93ad3745465",
+      "bytes": 209948
+    },
+    "previews/sim2-jeep-magenta-00.webp": {
+      "sha256": "a1eb429db0d7383370780ec6e588e4cd3b3e5624b77a569fc08f4756b1624829",
+      "bytes": 401678
+    },
+    "previews/scans-truck-indigo-00.webp": {
+      "sha256": "3cdd4cc938c3ded6382014976f9307d69f5028058b2eb19c49c9468de3f7e2cd",
+      "bytes": 311512
+    },
+    "previews/sim2-jeep-white-03.webp": {
+      "sha256": "a300207f480824d96148ea22375c61a53b448639c0f75b47f3411fa38fd41adf",
+      "bytes": 327676
+    },
+    "previews/scans-truck-green-00.webp": {
+      "sha256": "67661cb752e202842952bdef850c42cb9597e6cb081ef1f59049632dbf09021b",
+      "bytes": 336540
+    },
+    "previews/sim2-jeep-yellow-05.webp": {
+      "sha256": "f40e0f24c4083537f1c5d7f91198a1b94458dca7e0b4caf46359f0f02ce69260",
+      "bytes": 181548
+    },
+    "previews/scans-truck-white-02.webp": {
+      "sha256": "b2550227b0564cd4cb18382aded2372e16ea74efc993807d2072d12dc064cd1e",
+      "bytes": 180144
+    },
+    "previews/sim2-jeep-indigo-05.webp": {
+      "sha256": "75b492a51fbc3298b44e10eddcbddd496119f8542ccd16e4da850b39692e62a6",
+      "bytes": 226582
+    },
+    "previews/scans-truck-blue-01.webp": {
+      "sha256": "568660c4c481bc06a77e18716d513f4d76f279b48089a4d1a7775503a72a6827",
+      "bytes": 349532
+    },
+    "previews/scans-jeep-original-02.webp": {
+      "sha256": "5e4c8cd38402a259b0b5cc377cf5ed4d14a60e902ef4c228e3e55fc5b5291501",
+      "bytes": 164164
+    },
+    "previews/scans-truck-orange-00.webp": {
+      "sha256": "820ef49b2deec7b09651358cda79f5290d7a29dac53741f048feb271c6ae856b",
+      "bytes": 334818
+    },
+    "previews/scans-jeep-original-01.webp": {
+      "sha256": "8b6049f79be9d849296652bdfb0d02f712dd2236a64fe914e5e1668487b54342",
+      "bytes": 296934
+    },
+    "previews/sim2-jeep-yellow-02.webp": {
+      "sha256": "29a7923f84a75bcdb0b6372dfcb5db1aa158f83b7931809094ac9e9fbb8df161",
+      "bytes": 394340
+    },
+    "previews/scans-truck-gray-00.webp": {
+      "sha256": "8ba18f953bfe498d98916158cd886b95eef0f23290ae47c6b491878767cf88a4",
+      "bytes": 286276
+    },
+    "previews/scans-truck-blue-02.webp": {
+      "sha256": "0221d970418ff90215a727ee64e53ffe7585b4e3daacc1b210bd57dfa0b795c5",
+      "bytes": 187536
+    },
+    "previews/scans-truck-yellow-01.webp": {
+      "sha256": "3b30408309090a3f4ce1b347d4aebfc2383bb199899d6c889a02505c3de998f6",
+      "bytes": 384970
+    },
+    "previews/scans-truck-violet-01.webp": {
+      "sha256": "e00f930a6e923ea5bd529761d208241c7cc10107db7a17f9bf2f3c1d2427b7bf",
+      "bytes": 365282
+    },
+    "previews/scans-truck-green-01.webp": {
+      "sha256": "e7435ed378b3f203375589da074fd4b61f40aede1a32b285462ffc74c6bb7bd5",
+      "bytes": 382746
+    },
+    "previews/scans-truck-black-00.webp": {
+      "sha256": "45afba4ca3ee20df31e06ce6eca45ab5a7195c518b955fd241de29dd533cbbae",
+      "bytes": 255464
+    },
+    "previews/scans-truck-red-01.webp": {
+      "sha256": "7f8c642cf664bddb4c58bd62a6f77bb2b2efd72d1b45850bdbcf7d78d0df177e",
+      "bytes": 353548
+    },
+    "previews/sim2-jeep-white-04.webp": {
+      "sha256": "7cc07410600730252a706e36070e360d75276313c99da8e5e4027a7daa4cbe7b",
+      "bytes": 389852
+    },
+    "previews/scans-moose-original-02.webp": {
+      "sha256": "65099f139fa947c7f5c926c3b75414141db6b9ba47ec6462b7f8e2d5b9573305",
+      "bytes": 112798
+    },
+    "previews/scans-truck-indigo-01.webp": {
+      "sha256": "81780939b592a1d9c59a9675fb94f97fa0cdfdbce02d6156a65560cd3392c6fa",
+      "bytes": 356216
+    },
+    "camera/camera-crops.png": {
+      "sha256": "4f218deaaf1b7d546ffa44d00a5ca58e69381863bed0a1660d47eedd5ad82b51",
+      "bytes": 127320
+    },
+    "camera/embeddings.npy": {
+      "sha256": "5f6f328641ba1f6a6a452ec923c4e3ba901eb80dd8fc7477aa6ad07060b1134e",
+      "bytes": 28800
+    },
+    "camera/index.json": {
+      "sha256": "3e418e6f194e29e11fd9a08abeeb2d2ffa2595126ba8a37690ca279be148b1ae",
+      "bytes": 32035
+    },
+    "camera/crops/004.png": {
+      "sha256": "bd897da6b5a233292c25eebeab5f184fb91103ddabd3e60f7837f91738f31fbd",
+      "bytes": 5136
+    },
+    "camera/crops/011.png": {
+      "sha256": "e0f2c2f62baf953fa1cea1bbf92ba5eaed2b7c88e95bbd41a4afa40008a17eab",
+      "bytes": 2107
+    },
+    "camera/crops/009.png": {
+      "sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "bytes": 2106
+    },
+    "camera/crops/003.png": {
+      "sha256": "bd897da6b5a233292c25eebeab5f184fb91103ddabd3e60f7837f91738f31fbd",
+      "bytes": 5136
+    },
+    "camera/crops/005.png": {
+      "sha256": "029598e312f254f71d389ea19fb8ea70cc918a20695bc41cd9667a7fc67650bf",
+      "bytes": 5137
+    },
+    "camera/crops/000.png": {
+      "sha256": "1777ba079e56c5579267ce7beda5304c4af90106e8eb68af45c079116a4f8508",
+      "bytes": 5140
+    },
+    "camera/crops/008.png": {
+      "sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "bytes": 2106
+    },
+    "camera/crops/007.png": {
+      "sha256": "1a0524ec826a0bab3e7c8e08a6abadd6c76b84a78ffc353818796d5dea7c51bf",
+      "bytes": 2107
+    },
+    "camera/crops/002.png": {
+      "sha256": "029598e312f254f71d389ea19fb8ea70cc918a20695bc41cd9667a7fc67650bf",
+      "bytes": 5137
+    },
+    "camera/crops/010.png": {
+      "sha256": "e0f2c2f62baf953fa1cea1bbf92ba5eaed2b7c88e95bbd41a4afa40008a17eab",
+      "bytes": 2107
+    },
+    "camera/crops/012.png": {
+      "sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "bytes": 2106
+    },
+    "camera/crops/001.png": {
+      "sha256": "6b999157ba73834aa8318de6896016ce01b73b4e372042654696acfb06b09938",
+      "bytes": 5138
+    },
+    "camera/crops/006.png": {
+      "sha256": "6b999157ba73834aa8318de6896016ce01b73b4e372042654696acfb06b09938",
+      "bytes": 5138
+    },
+    "camera/crops/013.png": {
+      "sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "bytes": 2106
+    }
+  }
+}

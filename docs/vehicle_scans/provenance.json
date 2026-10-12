@@ -1,0 +1,77 @@
+{
+  "schema": "maas.vehicle_scan_provenance.v1",
+  "generated_at": "2026-10-12T21:31:44.505810+00:00",
+  "components": {
+    "uclip": {
+      "head_at_verification": "4e1640afdaa1e5c5be773479e3ae9a000329c859",
+      "dirty": true
+    },
+    "program": {
+      "head_at_verification": "cdd5c4ceb16e1cff99f6ccd16d621c0278a84be0",
+      "dirty": true
+    },
+    "wire": {
+      "head_at_verification": "158617dd6d3a374625ee5c65a0bcb1ab476ce2ec",
+      "dirty": true
+    }
+  },
+  "source_sha256": {
+    "scripts/prepare_vehicle_scans.py": "f9ef88038e75a14c056afce5a4df42304ef25466e4ced48a506b9bc266b3ec9a",
+    "scripts/build_vehicle_scan_study.py": "3382eb03b8e03d00bd40fe45e6a38674b32d6c9ddd932727787c6803362a100c",
+    "scripts/evaluate_vehicle_scan_viewpoints.py": "578b5f17c036400322c0e88705009fcf5c7e538d8a8fe24dea94d67933dc7593",
+    "scripts/sample_vehicle_scan_camera.py": "aecb0f2602ad6e7997fb82230189154096018070cf7ac40c8d714b7f810fad69",
+    "scripts/build_vehicle_scan_view.py": "9ae0f9a0ee1112a6244e24e71bc48dfcd44dcfdc3f7d7dcfed565e95bedc1ebe",
+    "src/uclip/studies/vehicle_scans.py": "df8c0ec7d6290a0dd5c0d58b93841aca65b292592553392c81487086c9402827",
+    "src/uclip/viz/vehicle_scan_orbit.js": "edce723bb7300c0de06e9118845354be320847145524661fd7d37a05b43fdf6e",
+    "src/uclip/viz/vehicle_scan_orbit.html": "c9d78bf98828e3a8de2fa89fd7dc0e9e56d7a6ced3cce9ea585243bd659b3a18",
+    "tests/test_vehicle_scans.py": "f0bc7a0f696e4e1977a38f8066902ba5d0d0f9fa42d6029564ca3b98a903565c",
+    "src/uclip/viz/sim2_embedding_orbit.html": "7c98dcd97e52162cc88411e488200b87c869eb481129780a454700533d97d7e8"
+  },
+  "python": "3.11.7",
+  "package_versions": {
+    "numpy": "1.26.4",
+    "Pillow": "11.0.0",
+    "torch": "2.7.0",
+    "transformers": "4.51.3",
+    "matplotlib": "3.8.0",
+    "ultralytics": "8.3.201",
+    "opencv-python": "4.11.0.86",
+    "pyproj": "3.7.1"
+  },
+  "commands": [
+    {
+      "command": "prepare_vehicle_scans.py --archive MAAS_Vehicle-Scans_Dataset.zip --yolo-weights yolov8n.pt --crop-overrides crop-overrides.json --output CROPS",
+      "outcome": "2184 crops; 30 reviewed overrides"
+    },
+    {
+      "command": "build_vehicle_scan_study.py --crops CROPS --output STUDY --sim2-cache data/car_sim/clip_embeddings --model-cache OFFLINE_CACHE",
+      "outcome": "complete, 979.806 s"
+    },
+    {
+      "command": "evaluate_vehicle_scan_viewpoints.py --crops CROPS --study STUDY --output STUDY/elevation_holdout.json",
+      "outcome": "complete, seven folds"
+    },
+    {
+      "command": "sample_vehicle_scan_camera.py --crops CROPS --study STUDY --truth two-drone.truth.json --sensors two-drone.sensors.json --wire-root afcagc_wire --model-cache OFFLINE_CACHE --target-map truck01=truck/yellow --output CAMERA",
+      "outcome": "14 crops/features; 14 explicitly unsupported person snapshots"
+    },
+    {
+      "command": "build_vehicle_scan_view.py --crops CROPS --study STUDY --camera CAMERA --sim2-root UCLIP --output VIEWER",
+      "outcome": "complete"
+    },
+    {
+      "command": "python3 -B -m unittest discover -s tests -p test_vehicle_scans.py",
+      "outcome": "5 passed"
+    },
+    {
+      "command": "docker exec sectr-c-viewer-1 bash -c 'source /opt/ros/jazzy/setup.bash; source /opt/wire/install/setup.bash; python3 -m pytest -q -p no:cacheprovider /opt/wire/simulation'",
+      "outcome": "56 passed in 18.70 seconds"
+    }
+  ],
+  "notes": [
+    "The initial preparation proposed crops without overrides; 30 crops were reviewed and updated before encoding. The exported override file reproduces those pixels.",
+    "An initial elevation-analysis run emitted a host threadpoolctl compatibility warning. A clean explicit single-thread numerical rerun produced byte-equivalent numeric results; source now avoids that dependency.",
+    "Historical source HEADs have dirty changes; SHA256 fingerprints identify the evaluated implementation. Publication commit IDs are recorded separately.",
+    "Source orbit-parameter distance units remain unconfirmed. No artificial noise, ROS publishing, video service change or MHT likelihood change."
+  ]
+}

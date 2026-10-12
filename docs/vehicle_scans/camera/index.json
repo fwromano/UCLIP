@@ -1,0 +1,1076 @@
+{
+  "schema": "maas.vehicle_scan_camera_replay.v1",
+  "model": {
+    "name": "openai/clip-vit-base-patch16",
+    "revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+  },
+  "truth_sha256": "074cf287176b2c91e64438966d1172d5d99d78dc1e1525e36df6cc58b34277ff",
+  "sensors_sha256": "a4ee6314d26f4eeecd354739ab3554eceb576cf11275bb07774992fa9b916942",
+  "crop_index_sha256": "9fb2e9cf9d0116b6e4f2a5b8b8bd76cd212d5694b61d7c79ee1fc226299d0432",
+  "camera_source_sha256": {
+    "camera.py": "b097a4056102a4b2513dd2b7e800c629a5236209818d3da76d5988bc12361e88",
+    "profiles.py": "bd0a471d8c35fa99b16ebb0e53e0cee5c45a753bf20966095f05283801347ff9",
+    "view.py": "3a5f47dd9cd303504a6a1886e7ba0adf07aa6bc8190fa19200b1de98eb0d97e9"
+  },
+  "target_bindings": {
+    "truck01": "truck/yellow"
+  },
+  "times": [
+    0,
+    5,
+    10,
+    15,
+    20,
+    25,
+    30
+  ],
+  "observations": [
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 0,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.126568448692,
+        659.3409135596302,
+        1118.8499970437374,
+        754.4623236755601
+      ],
+      "request": {
+        "relative_heading_deg": 320.0541119536096,
+        "elevation_deg": 81.01333547798069,
+        "range_m": 99.82538417741937,
+        "forward_image_direction": [
+          -1.193890693684807e-05,
+          -13.904889315948253
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 8.986664522019307,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          96
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99995080514746
+      },
+      "crop_path": "crops/000.png",
+      "image_sha256": "1777ba079e56c5579267ce7beda5304c4af90106e8eb68af45c079116a4f8508",
+      "embedding_row": 0,
+      "cosine_to_native_view": 0.8841995596885681,
+      "coords": [
+        0.29678181323571473,
+        0.08049288757557316,
+        -0.10010031478506762
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 5,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.126526865225,
+        612.5125677706174,
+        1118.849956121651,
+        706.2850139047591
+      ],
+      "request": {
+        "relative_heading_deg": 310.4604393108322,
+        "elevation_deg": 82.3985119031565,
+        "range_m": 99.47416855552136,
+        "forward_image_direction": [
+          -1.2220642474858323e-05,
+          -13.904889315772948
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 7.601488096843518,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          94
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99994964424234
+      },
+      "crop_path": "crops/001.png",
+      "image_sha256": "6b999157ba73834aa8318de6896016ce01b73b4e372042654696acfb06b09938",
+      "embedding_row": 1,
+      "cosine_to_native_view": 0.8741855621337891,
+      "coords": [
+        0.2909875616816723,
+        0.07125562767278067,
+        -0.11497796650666758
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 10,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.1264843267513,
+        565.6842217942761,
+        1118.8499142230262,
+        658.1077039412337
+      ],
+      "request": {
+        "relative_heading_deg": 297.1003041435045,
+        "elevation_deg": 83.4928156033316,
+        "range_m": 99.23933421127411,
+        "forward_image_direction": [
+          -1.2503996231316705e-05,
+          -13.904889315633795
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 6.5071843966684035,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          93
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99994847666926
+      },
+      "crop_path": "crops/002.png",
+      "image_sha256": "029598e312f254f71d389ea19fb8ea70cc918a20695bc41cd9667a7fc67650bf",
+      "embedding_row": 2,
+      "cosine_to_native_view": 0.8939521312713623,
+      "coords": [
+        0.29789912205692726,
+        0.095912064539197,
+        -0.08253158150867043
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 15,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.1264408393677,
+        518.2467856150629,
+        1118.849871341884,
+        609.9303937849834
+      ],
+      "request": {
+        "relative_heading_deg": 279.6802194674411,
+        "elevation_deg": 84.1189104302624,
+        "range_m": 99.1217083241711,
+        "forward_image_direction": [
+          -1.2785731996700633e-05,
+          -13.90488931545849
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 5.881089569737576,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          92
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.9999473157632
+      },
+      "crop_path": "crops/003.png",
+      "image_sha256": "bd897da6b5a233292c25eebeab5f184fb91103ddabd3e60f7837f91738f31fbd",
+      "embedding_row": 3,
+      "cosine_to_native_view": 0.8873195648193359,
+      "coords": [
+        0.3000970662579975,
+        0.08998843703665207,
+        -0.09564847083976091
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 20,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.1263964001687,
+        470.0694745412321,
+        1118.8498274844972,
+        561.7530834229486
+      ],
+      "request": {
+        "relative_heading_deg": 260.3198322777696,
+        "elevation_deg": 84.11891132992733,
+        "range_m": 99.12170816384985,
+        "forward_image_direction": [
+          -1.3067467534710886e-05,
+          -13.904889315283128
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 5.8810886700726535,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          92
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99994615485807
+      },
+      "crop_path": "crops/004.png",
+      "image_sha256": "bd897da6b5a233292c25eebeab5f184fb91103ddabd3e60f7837f91738f31fbd",
+      "embedding_row": 4,
+      "cosine_to_native_view": 0.8873195648193359,
+      "coords": [
+        0.3000970662579975,
+        0.08998843703665207,
+        -0.09564847083976091
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 25,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.1263510120596,
+        421.8921632616171,
+        1118.849782647876,
+        514.31565122788
+      ],
+      "request": {
+        "relative_heading_deg": 242.89973792807098,
+        "elevation_deg": 83.492818027552,
+        "range_m": 99.23933373233906,
+        "forward_image_direction": [
+          -1.3349202845347463e-05,
+          -13.90488931510788
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 6.507181972447992,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          93
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99994499395387
+      },
+      "crop_path": "crops/005.png",
+      "image_sha256": "029598e312f254f71d389ea19fb8ea70cc918a20695bc41cd9667a7fc67650bf",
+      "embedding_row": 5,
+      "cosine_to_native_view": 0.8939521312713623,
+      "coords": [
+        0.29789912205692726,
+        0.095912064539197,
+        -0.08253158150867043
+      ]
+    },
+    {
+      "observer": "uav01",
+      "truth_id": "truck01",
+      "scene_time_sec": 30,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1920,
+        "height_px": 1080,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        1080.1263046728488,
+        373.7148517564444,
+        1118.8497368357448,
+        467.48730513671785
+      ],
+      "request": {
+        "relative_heading_deg": 229.53959122753506,
+        "elevation_deg": 82.39851531826302,
+        "range_m": 99.47416776424821,
+        "forward_image_direction": [
+          -1.363255682917952e-05,
+          -13.904889314968727
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 7.601484681736969,
+      "resampling": {
+        "isotropic_scale": 0.21910112359550563,
+        "content_size_px": [
+          39,
+          81
+        ],
+        "output_size_px": [
+          39,
+          94
+        ],
+        "upsampled": false,
+        "rotation_deg": -89.99994382637988
+      },
+      "crop_path": "crops/006.png",
+      "image_sha256": "6b999157ba73834aa8318de6896016ce01b73b4e372042654696acfb06b09938",
+      "embedding_row": 6,
+      "cosine_to_native_view": 0.8741855621337891,
+      "coords": [
+        0.2909875616816723,
+        0.07125562767278067,
+        -0.11497796650666758
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 0,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1716591085059,
+        426.30050617266966,
+        573.2630100276413,
+        478.5764397258151
+      ],
+      "request": {
+        "relative_heading_deg": 39.94588398287871,
+        "elevation_deg": 82.50987906870441,
+        "range_m": 119.62068113462699,
+        "forward_image_direction": [
+          7.71195880133746e-06,
+          -7.70670088000179
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 7.490120931295585,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          53
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005733486974
+      },
+      "crop_path": "crops/007.png",
+      "image_sha256": "1a0524ec826a0bab3e7c8e08a6abadd6c76b84a78ffc353818796d5dea7c51bf",
+      "embedding_row": 7,
+      "cosine_to_native_view": 0.8591424822807312,
+      "coords": [
+        0.29865533705466796,
+        0.13116055392329218,
+        -0.1127831889050723
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 5,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1716860093399,
+        400.2847589023625,
+        573.2630352965084,
+        451.9391554256627
+      ],
+      "request": {
+        "relative_heading_deg": 49.53955778825708,
+        "elevation_deg": 83.66893346119014,
+        "range_m": 119.32774292017953,
+        "forward_image_direction": [
+          7.555808679171605e-06,
+          -7.706700879904929
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 6.331066538809884,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          52
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005617396535
+      },
+      "crop_path": "crops/008.png",
+      "image_sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "embedding_row": 8,
+      "cosine_to_native_view": 0.8665289878845215,
+      "coords": [
+        0.30262962450101094,
+        0.13990310598443292,
+        -0.0984917420966073
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 10,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1717123685919,
+        374.2690115208515,
+        573.2630600364307,
+        425.3018710262536
+      ],
+      "request": {
+        "relative_heading_deg": 62.89969411860814,
+        "elevation_deg": 84.58296630477781,
+        "range_m": 119.13205055634546,
+        "forward_image_direction": [
+          7.398761454169289e-06,
+          -7.706700879828077
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 5.417033695222176,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          52
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005500639139
+      },
+      "crop_path": "crops/009.png",
+      "image_sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "embedding_row": 9,
+      "cosine_to_native_view": 0.8665289878845215,
+      "coords": [
+        0.30262962450101094,
+        0.13990310598443292,
+        -0.0984917420966073
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 15,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1717381862624,
+        347.97262529212406,
+        573.2630842475668,
+        398.6645865129838
+      ],
+      "request": {
+        "relative_heading_deg": 80.31977995704689,
+        "elevation_deg": 85.10536003910812,
+        "range_m": 119.0340836626044,
+        "forward_image_direction": [
+          7.242611332003435e-06,
+          -7.706700879731159
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 4.894639960891901,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          51
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005384548699
+      },
+      "crop_path": "crops/010.png",
+      "image_sha256": "e0f2c2f62baf953fa1cea1bbf92ba5eaed2b7c88e95bbd41a4afa40008a17eab",
+      "embedding_row": 10,
+      "cosine_to_native_view": 0.8613152503967285,
+      "coords": [
+        0.29875763779436126,
+        0.1333464877229958,
+        -0.11071159201378997
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 20,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1717634643287,
+        321.33534106341295,
+        573.2631079297581,
+        372.027301893196
+      ],
+      "request": {
+        "relative_heading_deg": 99.68016830728865,
+        "elevation_deg": 85.10536078932303,
+        "range_m": 119.03408352913222,
+        "forward_image_direction": [
+          7.08646120983758e-06,
+          -7.706700879634354
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 4.894639210676984,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          51
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005268458258
+      },
+      "crop_path": "crops/011.png",
+      "image_sha256": "e0f2c2f62baf953fa1cea1bbf92ba5eaed2b7c88e95bbd41a4afa40008a17eab",
+      "embedding_row": 11,
+      "cosine_to_native_view": 0.8613152503967285,
+      "coords": [
+        0.29875763779436126,
+        0.1333464877229958,
+        -0.11071159201378997
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 25,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1717882008132,
+        294.69805672818376,
+        573.2631310849359,
+        345.7309167591978
+      ],
+      "request": {
+        "relative_heading_deg": 117.10026381714488,
+        "elevation_deg": 84.58296832776094,
+        "range_m": 119.13205015747324,
+        "forward_image_direction": [
+          6.930310746611212e-06,
+          -7.706700879537436
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 5.417031672239047,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          52
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.00005152367565
+      },
+      "crop_path": "crops/012.png",
+      "image_sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "embedding_row": 12,
+      "cosine_to_native_view": 0.8665289878845215,
+      "coords": [
+        0.3026296326062784,
+        0.13990313589592557,
+        -0.09849170284473908
+      ]
+    },
+    {
+      "observer": "uav02",
+      "truth_id": "truck01",
+      "scene_time_sec": 30,
+      "series": "truck/yellow",
+      "camera": {
+        "width_px": 1280,
+        "height_px": 720,
+        "hfov_deg": 70.0,
+        "pan_deg": 0.0,
+        "depression_deg": 90.0,
+        "roll_deg": 0.0,
+        "pixel_sigma": 0.0,
+        "pose_sigma_m": 0.0,
+        "angle_sigma_deg": 0.0,
+        "min_target_pixels": 4.0
+      },
+      "target_dimensions_m": {
+        "length": 6.5,
+        "width": 2.5,
+        "height": 2.8
+      },
+      "bbox_px": [
+        552.1718123980999,
+        268.0607722609812,
+        573.2631537115656,
+        319.7151685476117
+      ],
+      "request": {
+        "relative_heading_deg": 130.4604116791024,
+        "elevation_deg": 83.66893631529372,
+        "range_m": 119.3277422606788,
+        "forward_image_direction": [
+          6.773263748982572e-06,
+          -7.706700879460584
+        ],
+        "azimuth_defined": true
+      },
+      "selected_embedding_row": 1992,
+      "selected_source_member": "MAAS_Vehicle-Scans_Dataset/truck/yellow/10_90_0.png",
+      "selected_source_sha256": "e92671baaa152a00bc16fedce4a967836a53f4c9eac7ca046174719eef7c439f",
+      "selected_crop_sha256": "78bbcb3843d918f25574e83d57fd2cce5596141a8687efa37e2787d9b40b6a91",
+      "selected_elevation_deg": 90.0,
+      "selected_relative_heading_deg": 270.0,
+      "viewing_ray_error_deg": 6.331063684706265,
+      "resampling": {
+        "isotropic_scale": 0.12359550561797752,
+        "content_size_px": [
+          22,
+          46
+        ],
+        "output_size_px": [
+          22,
+          52
+        ],
+        "upsampled": false,
+        "rotation_deg": -90.0000503561034
+      },
+      "crop_path": "crops/013.png",
+      "image_sha256": "3b5343e0241e037f42155cb094f6578841d4b37f5046f65ffb9bf0e79f6f14eb",
+      "embedding_row": 13,
+      "cosine_to_native_view": 0.8665289878845215,
+      "coords": [
+        0.3026296326062784,
+        0.13990313589592557,
+        -0.09849170284473908
+      ]
+    }
+  ],
+  "excluded": [
+    {
+      "observer": "uav01",
+      "scene_time_sec": 0,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 5,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 10,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 15,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 20,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 25,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav01",
+      "scene_time_sec": 30,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 0,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 5,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 10,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 15,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 20,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 25,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    },
+    {
+      "observer": "uav02",
+      "scene_time_sec": 30,
+      "truth_id": "person01",
+      "reason": "No dataset asset binding"
+    }
+  ],
+  "sampling": "exact retained Composer samples; ideal camera gate and physical cuboid bounds",
+  "limits": [
+    "Nearest measured viewing ray; no interpolated viewpoint or generated pixels.",
+    "In-plane orientation aligned to camera-projected body forward axis.",
+    "Physical dimensions are authored assumptions, not dimensions calibrated from this scan archive.",
+    "Padded isotropic fit; discrete-angle/model aspect differences remain.",
+    "No induced stochastics, ROS publishing or MHT appearance scoring."
+  ],
+  "embedding_sha256": "5f6f328641ba1f6a6a452ec923c4e3ba901eb80dd8fc7477aa6ad07060b1134e"
+}
