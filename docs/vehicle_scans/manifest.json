@@ -1,8 +1,8 @@
 {
   "schema": "maas.vehicle_scan_view.v1",
   "generator_sha256": "98df49030c19b7c5399745ad0957443afecf58aa6c3ef939b8e6e0729dd7a5f0",
-  "renderer_sha256": "53b8870acf43f9ebb430f9ca620fc7d240a0e4ad420e29277fff4206e2e3aa08",
-  "template_sha256": "55af40f59900c34f712d05629501c3e3da7b4dcba917d6762d909410d619a15a",
+  "renderer_sha256": "a7a3a0143bae0b8fb05aafada1b987755ff3d09ffaf1f18abc931d8060c3233e",
+  "template_sha256": "a798d26bcd2475fd34e3916cc519daf56e007e9e65e5ee6d8ea01ac7732c10f6",
   "rows": 5268,
   "series": 27,
   "preview_max_retained_sheets": 3,
@@ -21,8 +21,8 @@
       "bytes": 454600
     },
     "embedding.html": {
-      "sha256": "f3014c5fecbf403e27977f51ab56d1a27029f14453d283a2a7eb85d1c91cd16c",
-      "bytes": 2967363
+      "sha256": "1baf900314803f501f19b0ccfa7c640cdb33da0b2ea9629d16795c68e6ae1913",
+      "bytes": 2968159
     },
     "study.png": {
       "sha256": "6f8ab4bbb4b89b1fd3be29dc3d37311db2d774b1a587e899cb5a45225f1e05dd",
@@ -77,12 +77,12 @@
       "bytes": 929558
     },
     "browser-verification.json": {
-      "sha256": "8aa6bac53f5aaa13c3aa6ec88e2b8c694c2394fae3fc5bf9954affc9e0a547be",
-      "bytes": 1636
+      "sha256": "a2678336f873cc824fd86c8dcd0c3ad5abd517994bff2c30150614e3fe6ef566",
+      "bytes": 1538
     },
     "embedding_offline.html": {
-      "sha256": "b8452d67c0296c70ee74dd2d8f8dcfac20f4f53863df38b99b3f68285008a5fd",
-      "bytes": 39055756
+      "sha256": "b7ed223b0c56351144162c2732aeb76dd9cbe05b2ef8d22ed08e4297b6d3eb82",
+      "bytes": 39056552
     },
     "elevation_holdout.json": {
       "sha256": "d8507c4a9232fdbe45d02349848c0e22c1dab21b09eaf721baaace45c5161488",

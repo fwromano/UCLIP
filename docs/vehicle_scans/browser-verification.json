@@ -25,7 +25,7 @@
   "browser": "Chromium",
   "source_rows": 5268,
   "custom_color_blend": {
-    "interpolation": "OKLab",
+    "interpolation": "HSV (globally aligned hues)",
     "anchors": {
       "bottomLeft": "#ffff00",
       "topLeft": "#ff0000",
@@ -54,16 +54,17 @@
         0
       ]
     },
-    "maximumAdjacentDifference": 30.93541659651604,
+    "maximumAdjacentDifference": 11,
+    "fullSaturationPreserved": true,
     "gradientPixel": [
-      117,
-      173,
-      156
+      255,
+      38,
+      0
     ],
     "expectedPixel": [
-      117,
-      173,
-      156
+      255,
+      38,
+      0
     ],
     "gridMatches": true,
     "sampleMatches": true,
@@ -74,9 +75,6 @@
     "wraparoundMatches": true,
     "imageMarkerAligned": true,
     "urlRoundTrip": true,
-    "errors": [],
-    "palette_selection_applies_to_points": true,
-    "offline_color_editing": true,
-    "browser_color_mix_reference_maximum_error": 0
+    "errors": []
   }
 }

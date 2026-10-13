@@ -161,9 +161,9 @@ Optional **Heading paths** connect measured views within each elevation ring.
 Clicking a point updates its image and requested angle/elevation. Visibility,
 elevation scope and path settings are included in the view URL and work offline.
 The view matrix has four editable color swatches at **(0°, −5°), (0°, 90°),
-(180°, 90°), and (180°, −5°)**. Colors use a continuous **Oklab** blend across all four corners, avoiding
-hue-direction flips for custom palettes. Presets supply starting colors; edits
-select **My colors · smooth blend** and apply viewpoint coloring to the points. Custom colors persist in the
+(180°, 90°), and (180°, −5°)**. Colors blend in **HSV** with hue turns aligned across all four corners,
+avoiding per-pixel hue-direction flips while retaining saturation and brightness. Presets supply starting colors; edits
+select **My colors · vivid blend** and apply viewpoint coloring to the points. Custom colors persist in the
 URL and browser storage. The grid, recorded samples, and PCA dots share the same
 mapping. Heading colors fold 0° → 180° → 360°, with 360° matching 0°; a 360°
 request selects the existing 0° image/vector. There is no extra 360° sample.
@@ -245,6 +245,6 @@ pixel matching; per-row retry-class provenance was not retained in that recovery
 The live adapter and its bounded runtime caches remain local. The research dataset is published separately. Nothing in
 this command publishes a repository, ROS message or MHT appearance likelihood.
 
-Viewpoint colors use continuous Oklab interpolation with editable anchors.
+Viewpoint colors use globally aligned HSV interpolation with editable anchors.
 Earlier palette and color-vision screenshots document previous revisions and do
 not validate custom user colors. Numeric labels and point inspection remain.

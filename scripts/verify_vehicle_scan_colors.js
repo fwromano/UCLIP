@@ -10,12 +10,13 @@ async (page) => {
       input.value=value;input.dispatchEvent(new Event('change',{bubbles:true}));
     }
   },choices);
-  await page.waitForFunction(()=>window.orbitState?.palette==='custom'&&window.orbitState?.interpolation==='OKLab');
+  await page.waitForFunction(()=>window.orbitState?.palette==='custom'&&window.orbitState?.interpolation==='HSV (globally aligned hues)');
   const result=await page.evaluate(async()=>{
     const parse=color=>color.match(/\d+/g).map(Number);
     let maximumAdjacentDifference=0;
     for(let y=0;y<=95;y++)for(let x=0;x<=180;x++){
       const a=parse(viewpointColor(x,y-5));
+      if(Math.max(...a)!==255||Math.min(...a)!==0)throw new Error("A fully saturated palette was washed out");
       if(x>0)maximumAdjacentDifference=Math.max(maximumAdjacentDifference,Math.hypot(...a.map((v,i)=>v-parse(viewpointColor(x-1,y-5))[i])));
       if(y>0)maximumAdjacentDifference=Math.max(maximumAdjacentDifference,Math.hypot(...a.map((v,i)=>v-parse(viewpointColor(x,y-6))[i])));
     }
@@ -29,7 +30,7 @@ async (page) => {
     return {
       interpolation:window.orbitState.interpolation,anchors:window.orbitState.anchors,
       corners:{topLeft:parse(viewpointColor(0,90)),topRight:parse(viewpointColor(180,90)),bottomLeft:parse(viewpointColor(0,-5)),bottomRight:parse(viewpointColor(180,-5))},
-      maximumAdjacentDifference,gradientPixel:pixel,expectedPixel:expected,
+      maximumAdjacentDifference,fullSaturationPreserved:true,gradientPixel:pixel,expectedPixel:expected,
       gridMatches:pixel.every((v,i)=>v===expected[i]),
       sampleMatches:sample.getAttribute('fill')===viewpointColor(row.heading,row.elevation),
       markerMatches:window.orbitPoint.fill===viewpointColor(row.heading,row.elevation),

@@ -24,7 +24,7 @@ const visibleSeries=new Set(params.has('show')?params.getAll('show').filter(c=>c
 let allElevations=params.get('elevations')!=='current',showPaths=params.get('paths')==='1';
 let colorBy=params.get('colorBy')==='series'?'series':'viewpoint';
 // One mapping drives the matrix, each measured sample and its PCA point.
-// Editable colors at headings 0/180 and elevations -5/90; a continuous Oklab blend preserves the four endpoints.
+// Editable colors at headings 0/180 and elevations -5/90; globally aligned HSV hues preserve vivid colors and all four endpoints.
 const defaultPalette='red-blue-green-yellow';
 const viewPalettes={
  'red-blue-green-yellow':{label:'Red / blue / green / yellow',names:{topLeft:'green',topRight:'red',bottomLeft:'blue',bottomRight:'yellow'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[38,98,255],bottomRight:[255,212,0]}},
@@ -42,34 +42,48 @@ const customAnchors=Object.fromEntries(anchorNames.map(name=>{
  const url=params.get('anchor-'+name),saved=savedAnchors?.[name];
  return [name,validHex(url)?hexRgb(url):validHex(saved)?hexRgb(saved):[...viewPalettes[defaultPalette].anchors[name]]];
 }));
-viewPalettes.custom={label:'My colors · smooth blend',anchors:customAnchors};
+viewPalettes.custom={label:'My colors · vivid blend',anchors:customAnchors};
 let palette=Object.hasOwn(viewPalettes,params.get('palette'))?params.get('palette'):
  (anchorNames.some(name=>params.has('anchor-'+name))?'custom':defaultPalette);
 let viewAnchors=viewPalettes[palette].anchors;
-// Oklab matrices: https://bottosson.github.io/posts/oklab/ (public-domain reference).
-// Cartesian blending avoids hue-arc direction flips inside a four-corner grid.
-function toOklab(rgb){
- const [r,g,b]=rgb.map(v=>{const c=v/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4});
- const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b);
- const m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b);
- const s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
- return [.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s];
+function toHsv(rgb){
+ const [r,g,b]=rgb.map(v=>v/255),v=Math.max(r,g,b),lo=Math.min(r,g,b),d=v-lo;
+ const h=d===0?0:v===r?((g-b)/d+6)%6:v===g?(b-r)/d+2:(r-g)/d+4;
+ return [h*60,v===0?0:d/v,v];
 }
-function fromOklab([L,a,b]){
- const l=(L+.3963377774*a+.2158037573*b)**3;
- const m=(L-.1055613458*a-.0638541728*b)**3;
- const s=(L-.0894841775*a-1.291485548*b)**3;
- return [4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s].map(v=>{
-  const c=Math.max(0,Math.min(1,v));return Math.round(255*(c<=.0031308?12.92*c:1.055*c**(1/2.4)-.055));
- });
+function fromHsv([h,s,v]){
+ const c=v*s,x=c*(1-Math.abs(((h%360+360)%360)/60%2-1)),m=v-c;
+ const sector=Math.floor(((h%360+360)%360)/60);
+ return [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][sector].map(n=>Math.round(255*(n+m)));
 }
-let viewLab=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toOklab(rgb)]));
+function prepareViewHsv(anchors){
+ const hsv=Object.fromEntries(Object.entries(anchors).map(([name,rgb])=>[name,toHsv(rgb)]));
+ const positions={bottomLeft:[0,0],bottomRight:[1,0],topLeft:[0,1],topRight:[1,1]};
+ const colored=anchorNames.filter(name=>hsv[name][1]>0&&hsv[name][2]>0);
+ // Gray has no hue; black also borrows saturation so it fades a color rather than graying it.
+ for(const name of anchorNames)if(hsv[name][1]===0&&colored.length){
+  const distance=other=>positions[name].reduce((sum,v,i)=>sum+(v-positions[other][i])**2,0);
+  const neighbor=colored.reduce((best,other)=>distance(other)<distance(best)?other:best,colored[0]);
+  hsv[name][0]=hsv[neighbor][0];if(hsv[name][2]===0)hsv[name][1]=hsv[neighbor][1];
+ }
+ // Align hue turns ONCE for the whole grid. Choosing shortest arcs per pixel creates seams.
+ // Minimize the total squared hue travel around the four edges, preserving every corner.
+ const bl=hsv.bottomLeft[0];let best=null,bestCost=Infinity;
+ for(let a=-1;a<=1;a++)for(let b=-1;b<=1;b++)for(let c=-2;c<=2;c++){
+  const tl=hsv.topLeft[0]+360*a,br=hsv.bottomRight[0]+360*b,tr=hsv.topRight[0]+360*c;
+  const cost=(tl-bl)**2+(br-bl)**2+(tr-tl)**2+(tr-br)**2;
+  if(cost<bestCost){bestCost=cost;best={topLeft:tl,bottomRight:br,topRight:tr};}
+ }
+ for(const [name,hue]of Object.entries(best))hsv[name][0]=hue;
+ return hsv;
+}
+let viewHsv=prepareViewHsv(viewAnchors);
 function viewpointColor(heading,elevation){
  const h=((heading%360)+360)%360,x=(h<=180?h:360-h)/180;
  const y=elevation===null?.5:Math.max(0,Math.min(1,(elevation-D.elevations[0])/(D.elevations.at(-1)-D.elevations[0])));
  const weights={bottomLeft:(1-x)*(1-y),bottomRight:x*(1-y),topLeft:(1-x)*y,topRight:x*y};
- const lab=[0,1,2].map(i=>anchorNames.reduce((sum,name)=>sum+weights[name]*viewLab[name][i],0));
- return `rgb(${fromOklab(lab).join(' ')})`;
+ const hsv=[0,1,2].map(i=>anchorNames.reduce((sum,name)=>sum+weights[name]*viewHsv[name][i],0));
+ return `rgb(${fromHsv(hsv).join(' ')})`;
 }
 let viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
 const pointColor=row=>colorBy==='viewpoint'?viewpointColors.get(row.embedding_row):D.colors[row.category];
@@ -87,7 +101,7 @@ const ctx=base.getContext('2d'),marker=overlay.getContext('2d'),preview=$('jeep-
 const coordinateValues=[];
 for(let i=0;i<3;i++){const e=document.createElement('div');e.className='coordinate';const b=document.createElement('b');b.textContent=`PC${i+1}`;const span=document.createElement('span');e.append(b,span);$('coordinates').append(e);coordinateValues.push(span);}
 function syncUrl(){clearTimeout(urlTimer);urlTimer=setTimeout(()=>{const p=new URLSearchParams({color,heading:String(angle),elevation:String(requestedElevation),projection:mode,elevations:allElevations?'all':'current',paths:showPaths?'1':'0',colorBy,palette});if(palette==='custom')for(const name of anchorNames)p.set('anchor-'+name,rgbHex(viewAnchors[name]));for(const c of categories)if(visibleSeries.has(c))p.append('show',c);if(!visibleSeries.size)p.append('show','');history.replaceState(null,'','?'+p)},150);}
-function state(){window.orbitState={heading:angle,elevation,requestedElevation,visibleSeries:[...visibleSeries],allElevations,showPaths,colorBy,palette,anchors:Object.fromEntries(anchorNames.map(name=>[name,rgbHex(viewAnchors[name])])),interpolation:'OKLab',selectedColor:selected?pointColor(selected):null,selectedElevation:selected?.elevation??null,color,mode,selectedRow:selected?.embedding_row??null,selectedHeading:selected?.heading??null,coords:selected?[...selected.coords]:[],playing,markerRow:selected?.embedding_row??null,imageRow:selected?.embedding_row??null,pendingRow:pendingRow?.embedding_row??null,previewSheets:sheets.size};}
+function state(){window.orbitState={heading:angle,elevation,requestedElevation,visibleSeries:[...visibleSeries],allElevations,showPaths,colorBy,palette,anchors:Object.fromEntries(anchorNames.map(name=>[name,rgbHex(viewAnchors[name])])),interpolation:'HSV (globally aligned hues)',selectedColor:selected?pointColor(selected):null,selectedElevation:selected?.elevation??null,color,mode,selectedRow:selected?.embedding_row??null,selectedHeading:selected?.heading??null,coords:selected?[...selected.coords]:[],playing,markerRow:selected?.embedding_row??null,imageRow:selected?.embedding_row??null,pendingRow:pendingRow?.embedding_row??null,previewSheets:sheets.size};}
 function evict(){while(sheets.size>MAX_SHEETS){const key=[...sheets.keys()].find(k=>k!==activeSheet);if(key===undefined)break;sheets.delete(key)}}
 async function loadSheet(path){if(sheets.has(path)){const img=sheets.get(path);sheets.delete(path);sheets.set(path,img);return img}if(loading.has(path))return loading.get(path);
  const job=(async()=>{const img=new Image();img.src=D.atlases?.[path]||path;await img.decode();sheets.set(path,img);evict();return img})();loading.set(path,job);try{return await job}finally{loading.delete(path)}}
@@ -164,7 +178,7 @@ function syncPaletteKey(){for(const name of anchorNames){const item=document.que
 function applyPalette(){
  // A viewpoint-palette selection applies its colors to the graph immediately.
  colorBy='viewpoint';$('point-color').value=colorBy;
- viewLab=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toOklab(rgb)]));
+ viewHsv=prepareViewHsv(viewAnchors);
  viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
  gradientImages.clear();syncPaletteKey();drawViewSamples();updateViewPad();scheduleStatic();state();syncUrl();
 }
