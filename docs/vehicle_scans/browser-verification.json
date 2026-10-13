@@ -74,6 +74,9 @@
     "wraparoundMatches": true,
     "imageMarkerAligned": true,
     "urlRoundTrip": true,
-    "errors": []
+    "errors": [],
+    "palette_selection_applies_to_points": true,
+    "offline_color_editing": true,
+    "browser_color_mix_reference_maximum_error": 0
   }
 }

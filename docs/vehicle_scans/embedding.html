@@ -194,6 +194,8 @@ viewPad.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','
 drawViewGrid();
 function syncPaletteKey(){for(const name of anchorNames){const item=document.querySelector(`[data-view-anchor=${name}]`);item.value=rgbHex(viewAnchors[name]);item.title=item.value}}
 function applyPalette(){
+ // A viewpoint-palette selection applies its colors to the graph immediately.
+ colorBy='viewpoint';$('point-color').value=colorBy;
  viewLab=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toOklab(rgb)]));
  viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
  gradientImages.clear();syncPaletteKey();drawViewSamples();updateViewPad();scheduleStatic();state();syncUrl();
@@ -207,8 +209,6 @@ function editAnchorColor(e){
  if(palette==='custom'&&rgbHex(customAnchors[name])===e.currentTarget.value.toLowerCase())return;
  if(palette!=='custom')for(const key of anchorNames)customAnchors[key]=[...viewAnchors[key]];
  customAnchors[name]=hexRgb(e.currentTarget.value);palette='custom';viewAnchors=customAnchors;$('view-palette').value=palette;
- // Editing viewpoint colors immediately applies them to the PCA points too.
- colorBy='viewpoint';$('point-color').value=colorBy;
  try{localStorage.setItem('vehicle-view-hsv-colors',JSON.stringify(Object.fromEntries(anchorNames.map(key=>[key,rgbHex(viewAnchors[key])]))))}catch{}
  if(!paletteFrame)paletteFrame=requestAnimationFrame(()=>{paletteFrame=0;applyPalette()});
 }
