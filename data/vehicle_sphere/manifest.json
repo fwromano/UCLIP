@@ -1,0 +1,97 @@
+{
+  "schema": "uclip.vehicle_sphere_release.v1",
+  "version": "1",
+  "indexed_views": 3864,
+  "series": {
+    "jeep/black": 168,
+    "jeep/blue": 168,
+    "jeep/gray": 168,
+    "jeep/green": 168,
+    "jeep/indigo": 168,
+    "jeep/orange": 168,
+    "jeep/original": 168,
+    "jeep/red": 168,
+    "jeep/violet": 168,
+    "jeep/white": 168,
+    "jeep/yellow": 168,
+    "moose/original": 168,
+    "truck/black": 168,
+    "truck/blue": 168,
+    "truck/gray": 168,
+    "truck/green": 168,
+    "truck/indigo": 168,
+    "truck/orange": 168,
+    "truck/red": 168,
+    "truck/violet": 168,
+    "truck/white": 168,
+    "truck/yellow": 168,
+    "wolf/original": 168
+  },
+  "original_study_views": 2184,
+  "added_jeep_paint_views": 1680,
+  "original_jeep_views_repeated_in_second_archive": 168,
+  "azimuths_per_series": 24,
+  "elevations_deg": [
+    -5,
+    0,
+    18,
+    36,
+    54,
+    72,
+    90
+  ],
+  "relative_heading": "(270 - source_azimuth_deg) % 360",
+  "model": {
+    "name": "openai/clip-vit-base-patch16",
+    "revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+  },
+  "cache": {
+    "index.json": {
+      "bytes": 4743052,
+      "sha256": "907b20281f655c7a404bcd721e71d036c0dc1f879ef4aad9cdd2dd1c58911e98"
+    },
+    "evaluation.json": {
+      "bytes": 2319,
+      "sha256": "5dbd171f64b77e27fefdf613d4ca924a0bdf1cd2009331de5baf4f7413618539"
+    },
+    "cropped_embeddings.npy": {
+      "bytes": 7913600,
+      "sha256": "908c2ea798ea1773cd19d29e6d5ebf27d44bbd444e08289cc7f800b91c6a7dc2"
+    }
+  },
+  "downloads": [
+    {
+      "filename": "MAAS_Vehicle-Scans_Dataset.zip",
+      "bytes": 965670834,
+      "sha256": "c59963a48dec9903c14d07d87e827b9317aaf5b7ceccf0ab4f825e70867ee4e9",
+      "png_files": 2184,
+      "url": "https://github.com/fwromano/UCLIP/releases/download/vehicle-sphere-v1/MAAS_Vehicle-Scans_Dataset.zip"
+    },
+    {
+      "filename": "MAAS_Vehicle-Scans_Dataset_Jeep.zip",
+      "bytes": 822671064,
+      "sha256": "844a0c27d840b95d50dcac73905d8f37c7a3d21fefb0521c045fd5541fa31c83",
+      "png_files": 1848,
+      "url": "https://github.com/fwromano/UCLIP/releases/download/vehicle-sphere-v1/MAAS_Vehicle-Scans_Dataset_Jeep.zip"
+    },
+    {
+      "filename": "vehicle-sphere-prepared-v1.zip",
+      "bytes": 297771708,
+      "sha256": "b679951580e7b0beb3410824eb0c2a6f4317e4790e044fd86e48ac84fcf65d27",
+      "crop_files": 3864,
+      "url": "https://github.com/fwromano/UCLIP/releases/download/vehicle-sphere-v1/vehicle-sphere-prepared-v1.zip"
+    }
+  ],
+  "verification": {
+    "all_crop_hashes_checked": 3864,
+    "retained_2184_vectors_byte_equal": true,
+    "unit_finite_vectors": true
+  },
+  "limits": [
+    "Hemisphere and one -5 degree ring; no lower-sphere coverage.",
+    "Filename orbit distance units are unconfirmed.",
+    "Heading convention is visually inferred.",
+    "The original 13-series numerical study does not assess added Jeep paint series.",
+    "Historical index paths identify original preparation locations; use crop_path relative to the extracted prepared pack."
+  ]
+}

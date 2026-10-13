@@ -1,0 +1,37 @@
+{
+  "timestamp_utc": "2026-10-12T22:47:48.955053+00:00",
+  "numerical_checks": {
+    "view_count": 168,
+    "coordinate_shape": [
+      168,
+      3
+    ],
+    "basis_shape": [
+      3,
+      512
+    ],
+    "basis_orthonormal": true,
+    "centered_coordinates": true,
+    "source_crop_sha256_verified": 168,
+    "pinned_feature_matrix_verified": true,
+    "generator_sha256_verified": true,
+    "variance_ratio": [
+      0.3732000776895561,
+      0.11323218919489006,
+      0.07132974940593909
+    ]
+  },
+  "browser_checks": {
+    "elevation_groups": 7,
+    "points": 168,
+    "decoded_crops": 168,
+    "hover_row": 53,
+    "external_scripts": 0,
+    "page_errors": []
+  },
+  "commands": [
+    "python3 scripts/build_vehicle_object_pca.py --data docs/vehicle_scans --crops /path/to/scans-cropped --series truck/yellow --output /path/to/local-object-pca",
+    "Playwright: http://127.0.0.1:8769/single-object-pca/index.html; decode all 168 images; emit hover and inspect selected row"
+  ],
+  "scope": "Local synthetic CLIP visualization. No camera runtime, ROS, MHT or field tests required or claimed."
+}

@@ -12,6 +12,7 @@ def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument('--crops',type=Path,required=True);p.add_argument('--study',type=Path,required=True)
     p.add_argument('--camera',type=Path,required=True);p.add_argument('--sim2-root',type=Path,required=True)
+    p.add_argument('--extension',type=Path,help='Hash-validated extended native-view cache; keep the historical PCA basis')
     p.add_argument('--output',type=Path,required=True);p.add_argument('--refresh',action='store_true')
     a=p.parse_args()
     if a.output.exists() and not a.refresh:raise FileExistsError(a.output)
@@ -23,6 +24,28 @@ def main():
         raise ValueError('Crop/study/camera association mismatch')
     old=np.load(a.sim2_root/'data/car_sim/clip_embeddings/embeddings.npy',allow_pickle=False)
     new=np.load(a.study/'cropped_embeddings.npy',allow_pickle=False)
+    scan_root=a.crops
+    extension_evaluation=None
+    if a.extension:
+        extension_index=json.loads((a.extension/'index.json').read_text())
+        extension_evaluation=json.loads((a.extension/'study/evaluation.json').read_text())
+        extended=np.load(a.extension/'study/cropped_embeddings.npy',allow_pickle=False)
+        if extension_evaluation['model']!=evaluation['model']:
+            raise ValueError('Extension model differs from retained study')
+        if extension_evaluation['source_crop_index_sha256']!=digest(a.extension/'index.json') or extension_evaluation['artifacts']['cropped_embeddings.npy']['sha256']!=digest(a.extension/'study/cropped_embeddings.npy'):
+            raise ValueError('Extension index/vector hashes changed')
+        if not np.array_equal(extended[:len(new)],new) or extension_index['images'][:len(audit['images'])]!=audit['images']:
+            raise ValueError('Extension changes retained vectors or crop rows')
+        if extended.shape!=(len(extension_index['images']),512) or not np.isfinite(extended).all() or not np.allclose(np.linalg.norm(extended,axis=1),1,atol=1e-4,rtol=0):
+            raise ValueError('Invalid extended vectors')
+        if any(row['embedding_row']!=i for i,row in enumerate(extension_index['images'])):
+            raise ValueError('Extension row alignment changed')
+        projection=dict(projection,scans=list(projection['scans']))
+        basis=np.asarray(projection['components']);mean=np.asarray(projection['mean'])
+        for row in extension_index['images'][len(new):]:
+            projection['scans'].append(dict(row,coords=((extended[row['embedding_row']]-mean)@basis.T).tolist()))
+        projection['extension']={'fit':'projection only; historical mean/components unchanged','new_scan_views':len(extended)-len(new),'archive_sha256':extension_index['jeep_color_extension']['archive_sha256']}
+        new=extended;scan_root=a.extension;audit=extension_index
     old_colors={'Indigo':'#9d86ff','Magenta':'#f56dbd','White':'#d7e5f5','Yellow':'#f8ca56'}
     new_colors={'black':'#87939c','blue':'#477eff','gray':'#bfc4cb','green':'#51dc7d','indigo':'#bb83ed','orange':'#ff9d52','red':'#ef7583','violet':'#d88aef','white':'#e6edf6','yellow':'#f8d35c','original':'#80b8a2'}
     rows=[];colors={};series_meta={};vectors=[]
@@ -34,7 +57,7 @@ def main():
                 vector=old[r['embedding_row']]
             else:
                 category='Scans · '+r['series'];color=new_colors[r['color']]
-                path=a.crops/r['crop_path'];heading=r['relative_heading_deg'];elevation=r['elevation_deg']
+                path=scan_root/r['crop_path'];heading=r['relative_heading_deg'];elevation=r['elevation_deg']
                 vector=new[r['embedding_row']]
             colors[category]=color;series_meta[category]={'dataset':dataset,'step':5 if dataset=='sim2' else 15}
             rows.append({'embedding_row':len(rows),'source_embedding_row':r['embedding_row'],'dataset':dataset,
@@ -43,7 +66,7 @@ def main():
                          'crop_sha256':r.get('crop_sha256',r.get('image_sha256')),'uncertainty':r.get('heading_uncertainty_deg',0),
                          '_local_path':path})
             vectors.append(vector)
-    assert len(rows)==3588 and len(colors)==17
+    if len(rows)!=len(projection['sim2'])+len(new):raise ValueError('Missing explorer rows')
     vectors=np.stack(vectors);references={};sheets=[]
     for category in colors:
         group=[r for r in rows if r['category']==category]
@@ -67,6 +90,7 @@ def main():
              'imageBase':'https://raw.githubusercontent.com/fwromano/UCLIP/77dee02fe81b28ba2f2c33e46a9a905e4c7498b5/data/car_sim/',
              'labelsUrl':'https://fwromano.github.io/datasets/sim2-headings/','cacheUrl':'evaluation.json','methodsUrl':'index.html'}
     template=(source/'src/uclip/viz/vehicle_scan_orbit.html').read_text().replace('__ORBIT_JS__',(source/'src/uclip/viz/vehicle_scan_orbit.js').read_text())
+    template=template.replace('__ROW_COUNT__',f'{len(rows):,}').replace('__SERIES_COUNT__',str(len(colors)))
     def render(data):return template.replace('__ORBIT_DATA__',json.dumps(data,separators=(',',':'),allow_nan=False).replace('</','<\\/'))
     (a.output/'embedding.html').write_text(render(payload))
     offline=dict(payload,atlases={name:'data:image/webp;base64,'+base64.b64encode((a.output/name).read_bytes()).decode() for name in sheets})
@@ -76,6 +100,10 @@ def main():
     (a.output/'embedding_offline.html').write_text(offline_html)
     for name in ['evaluation.json','projection.json','raw_embeddings.npy','cropped_embeddings.npy','resolution_embeddings.npy','elevation_holdout.json']:
         shutil.copyfile(a.study/name,a.output/name)
+    if a.extension:
+        write(a.output/'projection.json',projection)
+        write(a.output/'extension-evaluation.json',extension_evaluation)
+        shutil.copyfile(a.extension/'study/cropped_embeddings.npy',a.output/'extended_cropped_embeddings.npy')
     clean_audit=dict(audit,source_archive=Path(audit['source_archive']).name)
     if 'reviewed_overrides' in clean_audit:
         clean_audit['reviewed_overrides']=dict(clean_audit['reviewed_overrides'],path=Path(clean_audit['reviewed_overrides']['path']).name)
@@ -139,7 +167,7 @@ The replay retained **{len(camera['observations'])} image/embedding observations
 
 ## Reproduction and evidence
 
-The source ZIP remains in SECTR-C and is identified by SHA256 `{audit['source_archive_sha256']}`. The public bundle contains previews, crop bounds, embeddings and evaluation evidence. UCLIP's `prepare_vehicle_scans.py`, `build_vehicle_scan_study.py`, `sample_vehicle_scan_camera.py` and `build_vehicle_scan_view.py` reproduce the stages with the recorded offline model cache and source ZIP. The crop-overrides JSON is an exported snapshot of the SECTR-C dataset review. `{evaluation['independent_reencodes']['images']}` independent single-image re-encodes matched cached rows; maximum absolute feature difference was {evaluation['independent_reencodes']['maximum_absolute_error']:.3g}. This is synthetic appearance/camera-replay evidence, not field perception validation.
+The source ZIP is downloadable from [the UCLIP v1 release](https://github.com/fwromano/UCLIP/releases/tag/vehicle-sphere-v1). It is identified by SHA256 `{audit['source_archive_sha256']}`. The public bundle contains previews, crop bounds, embeddings and evaluation evidence. UCLIP's `prepare_vehicle_scans.py`, `build_vehicle_scan_study.py`, `sample_vehicle_scan_camera.py` and `build_vehicle_scan_view.py` reproduce the stages with the recorded offline model cache and source ZIP. The crop-overrides JSON is an exported snapshot of the SECTR-C dataset review. `{evaluation['independent_reencodes']['images']}` independent single-image re-encodes matched cached rows; maximum absolute feature difference was {evaluation['independent_reencodes']['maximum_absolute_error']:.3g}. This is synthetic appearance/camera-replay evidence, not field perception validation.
 '''
     holdout=json.loads((a.study/'elevation_holdout.json').read_text())
     assert holdout['source_crop_index_sha256']==digest(a.crops/'index.json')
@@ -148,6 +176,8 @@ The source ZIP remains in SECTR-C and is identified by SHA256 `{audit['source_ar
     elevation_table='\n'.join(f"| {raw['query_elevation_deg']:g}° | {raw['accuracy']*100:.1f}% | {cropped['accuracy']*100:.1f}% |" for raw,cropped in zip(holdout['variants']['raw']['folds'],holdout['variants']['cropped']['folds']))
     elevation_report=f"## Transfer to a held-out elevation\n\nEach of the seven elevations is queried against all six other elevations. Every crop is evaluated once (2,184 total queries per framing), with disjoint source/crop hashes. This tests view transfer rather than supplying the same elevation in the reference gallery. Overall full-frame accuracy is {holdout['variants']['raw']['accuracy']*100:.2f}%; cropped-frame accuracy is {holdout['variants']['cropped']['accuracy']*100:.2f}%.\n\n| Held-out elevation | Full frames | Padded crops |\n|---|---:|---:|\n{elevation_table}\n\n[All elevation-fold predictions](elevation_holdout.json)\n\n"
     report=report.replace('## Shared embedding explorer',elevation_report+'## Shared embedding explorer')
+    if a.extension:
+        report += '\n## Added Jeep colors and two-dimensional view control — 2026-10-13\n\nThe explorer adds ten Jeep paint series (1,680 actual cropped image features), projected through the unchanged historical PCA mean/components. Original study results above still cover the original 13 scan series, not the added colors. The 2D view pad selects angle horizontally and requested elevation vertically, snapping image/vector selection to the nearest recorded elevation and heading. Sim2 elevation remains uncalibrated.\n\n[Extended scan vectors](extended_cropped_embeddings.npy) · [Hash-bound encoding verification](extension-evaluation.json). The first 2,184 vectors and all old projected coordinates are preserved.\n'
     (a.output/'REPORT.md').write_text(report)
     import markdown
     body=markdown.markdown(report,extensions=['tables'])
@@ -157,6 +187,8 @@ The source ZIP remains in SECTR-C and is identified by SHA256 `{audit['source_ar
                   'template_sha256':digest(source/'src/uclip/viz/vehicle_scan_orbit.html'),
                   'rows':len(rows),'series':len(colors),'preview_max_retained_sheets':3,'preview_max_concurrent_loads':2,
                   'files':{str(f.relative_to(a.output)):{'sha256':digest(f),'bytes':f.stat().st_size} for f in a.output.rglob('*') if f.is_file() and f != a.output/'manifest.json'}}
+    if a.extension:
+        verification['extension']={'new_views':projection['extension']['new_scan_views'],'crop_index_sha256':digest(a.extension/'index.json'),'pca_basis_refit':False,'study_evaluation_scope':'Original study only; added paint views are projected features.'}
     write(a.output/'manifest.json',verification)
     print(json.dumps({'output':str(a.output),'rows':len(rows),'preview_sheets':len(sheets),'files':len(verification['files'])}))
 

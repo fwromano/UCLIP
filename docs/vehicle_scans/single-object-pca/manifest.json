@@ -1,0 +1,10 @@
+{
+  "schema": "uclip.single-object-pca-manifest.v1",
+  "files": {
+    "all-views.png": "e79c3a2050b8205386c64d1d9574c696f1b480ec82f4fda29544a21a9f493c4b",
+    "all-views.svg": "fc6c29ce03843200d90ae2a1a6113badb8229394910b55554dab12d862075cc9",
+    "index.html": "b7cd588a073afa6d65d3b912cda841951a4b39b947a00f16d62907d2116119f4",
+    "pca.json": "8e2f19bd70487b7d3708a9736bdcf37a42d008c0ca1ebfc13582f2ce05377c82",
+    "verification.json": "ab3344b11e618678e6a62b50222cb9daac29a997bb5ab549f4eea2bcefeb0c33"
+  }
+}

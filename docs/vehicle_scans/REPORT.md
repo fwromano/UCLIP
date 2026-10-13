@@ -57,4 +57,10 @@ The replay retained **14 image/embedding observations**. [Actual pixel crops and
 
 ## Reproduction and evidence
 
-The source ZIP remains in SECTR-C and is identified by SHA256 `c59963a48dec9903c14d07d87e827b9317aaf5b7ceccf0ab4f825e70867ee4e9`. The public bundle contains previews, crop bounds, embeddings and evaluation evidence. UCLIP's `prepare_vehicle_scans.py`, `build_vehicle_scan_study.py`, `sample_vehicle_scan_camera.py` and `build_vehicle_scan_view.py` reproduce the stages with the recorded offline model cache and source ZIP. The crop-overrides JSON is an exported snapshot of the SECTR-C dataset review. `13` independent single-image re-encodes matched cached rows; maximum absolute feature difference was 1.19e-07. This is synthetic appearance/camera-replay evidence, not field perception validation.
+The source ZIP is downloadable from [the UCLIP v1 release](https://github.com/fwromano/UCLIP/releases/tag/vehicle-sphere-v1). It is identified by SHA256 `c59963a48dec9903c14d07d87e827b9317aaf5b7ceccf0ab4f825e70867ee4e9`. The public bundle contains previews, crop bounds, embeddings and evaluation evidence. UCLIP's `prepare_vehicle_scans.py`, `build_vehicle_scan_study.py`, `sample_vehicle_scan_camera.py` and `build_vehicle_scan_view.py` reproduce the stages with the recorded offline model cache and source ZIP. The crop-overrides JSON is an exported snapshot of the SECTR-C dataset review. `13` independent single-image re-encodes matched cached rows; maximum absolute feature difference was 1.19e-07. This is synthetic appearance/camera-replay evidence, not field perception validation.
+
+## Added Jeep colors and two-dimensional view control — 2026-10-13
+
+The explorer adds ten Jeep paint series (1,680 actual cropped image features), projected through the unchanged historical PCA mean/components. Original study results above still cover the original 13 scan series, not the added colors. The 2D view pad selects angle horizontally and requested elevation vertically, snapping image/vector selection to the nearest recorded elevation and heading. Sim2 elevation remains uncalibrated.
+
+[Extended scan vectors](extended_cropped_embeddings.npy) · [Hash-bound encoding verification](extension-evaluation.json). The first 2,184 vectors and all old projected coordinates are preserved.

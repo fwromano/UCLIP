@@ -1,0 +1,85 @@
+{
+  "schema": "sectr-c.native-view-appearance-cache.v2",
+  "model": {
+    "name": "openai/clip-vit-base-patch16",
+    "revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3"
+  },
+  "source_crop_index_sha256": "907b20281f655c7a404bcd721e71d036c0dc1f879ef4aad9cdd2dd1c58911e98",
+  "artifacts": {
+    "cropped_embeddings.npy": {
+      "sha256": "908c2ea798ea1773cd19d29e6d5ebf27d44bbd444e08289cc7f800b91c6a7dc2"
+    }
+  },
+  "retained_vectors_byte_equal": true,
+  "coverage": {
+    "jeep/original": 168,
+    "moose/original": 168,
+    "truck/black": 168,
+    "truck/blue": 168,
+    "truck/gray": 168,
+    "truck/green": 168,
+    "truck/indigo": 168,
+    "truck/orange": 168,
+    "truck/red": 168,
+    "truck/violet": 168,
+    "truck/white": 168,
+    "truck/yellow": 168,
+    "wolf/original": 168,
+    "jeep/black": 168,
+    "jeep/blue": 168,
+    "jeep/gray": 168,
+    "jeep/green": 168,
+    "jeep/indigo": 168,
+    "jeep/orange": 168,
+    "jeep/red": 168,
+    "jeep/violet": 168,
+    "jeep/white": 168,
+    "jeep/yellow": 168
+  },
+  "independent_single_encode_max_abs_errors": {
+    "black": 5.960464477539063e-08,
+    "blue": 5.960464477539063e-08,
+    "gray": 5.960464477539063e-08,
+    "green": 5.960464477539063e-08,
+    "indigo": 5.960464477539063e-08,
+    "orange": 5.960464477539063e-08,
+    "red": 8.940696716308594e-08,
+    "violet": 4.470348358154297e-08,
+    "white": 5.960464477539063e-08,
+    "yellow": 5.960464477539063e-08
+  },
+  "preprocessing": {
+    "_processor_class": null,
+    "do_resize": true,
+    "size": {
+      "shortest_edge": 224
+    },
+    "resample": 3,
+    "do_center_crop": true,
+    "crop_size": {
+      "height": 224,
+      "width": 224
+    },
+    "do_rescale": true,
+    "rescale_factor": 0.00392156862745098,
+    "do_normalize": true,
+    "image_mean": [
+      0.48145466,
+      0.4578275,
+      0.40821073
+    ],
+    "image_std": [
+      0.26862954,
+      0.26130258,
+      0.27577711
+    ],
+    "do_convert_rgb": true,
+    "image_processor_type": "CLIPImageProcessor"
+  },
+  "elapsed_sec": 249.46705343702342,
+  "limits": [
+    "Native padded study crops; no camera resolution/clipping re-encode.",
+    "Crop bounds transferred only after exact matching original frames; no new YOLO detections.",
+    "No appearance likelihood calibration or field re-identification validation."
+  ]
+}
