@@ -1,39 +1,27 @@
 {
-  "schema": "maas.vehicle_scan_browser_checks.v1",
-  "browser": "Chromium",
-  "viewport": [
-    1920,
-    1080
-  ],
-  "url": "http://localhost:8769/embedding.html",
-  "series": 17,
-  "series_elevation_checks": 95,
-  "maximum_preview_sheets": 3,
-  "point_preview_row_alignment": true,
-  "wraparound_360_equals_zero": true,
-  "sim2_elevation_is_explicitly_uncalibrated": true,
-  "camera_projection_checks": 12,
-  "modes": [
-    "01",
-    "02",
-    "12",
-    "3d"
-  ],
-  "camera_sample_rows": [
-    0,
-    7,
-    13
-  ],
-  "camera_images_native_dimensions": {
-    "uav01": [
-      39,
-      96
-    ],
-    "uav02": [
-      22,
-      53
-    ]
+  "defaults": {
+    "palette": "red-blue-green-yellow",
+    "anchors": {
+      "bottomLeft": "#2662ff",
+      "topLeft": "#00a651",
+      "topRight": "#e63946",
+      "bottomRight": "#ffd400"
+    },
+    "cached": 5268,
+    "plotted": 5268,
+    "series": 27,
+    "allRowsPresent": true,
+    "uniquePlottedRows": 5268
   },
-  "offline_image_data_urls_verified": true,
-  "page_errors": []
+  "sim2": {
+    "points": 350,
+    "headings": 309
+  },
+  "playback": true,
+  "imageMarkerAlignment": true,
+  "errors": [],
+  "schema": "maas.vehicle_scan_browser_checks.v2",
+  "date": "2026-10-13",
+  "browser": "Chromium",
+  "source_rows": 5268
 }

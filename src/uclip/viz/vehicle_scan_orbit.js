@@ -20,12 +20,14 @@ rebuildViews();
 const ranges=[0,1,2].map(i=>{const v=[...D.rows,...D.cameraSamples].map(r=>r.coords[i]),lo=Math.min(...v),hi=Math.max(...v);return[lo,hi]});
 
 let color=categories.includes(params.get('color'))?params.get('color'):D.defaultSeries;
-const visibleSeries=new Set(params.has('show')?params.getAll('show').filter(c=>categories.includes(c)):[color]);
+const visibleSeries=new Set(params.has('show')?params.getAll('show').filter(c=>categories.includes(c)):categories);
 let allElevations=params.get('elevations')!=='current',showPaths=params.get('paths')==='1';
 let colorBy=params.get('colorBy')==='series'?'series':'viewpoint';
 // One mapping drives the matrix, each measured sample and its PCA point.
 // Editable colors at headings 0/180 and elevations -5/90; HSV follows circular hue.
+const defaultPalette='red-blue-green-yellow';
 const viewPalettes={
+ 'red-blue-green-yellow':{label:'Red / blue / green / yellow',names:{topLeft:'green',topRight:'red',bottomLeft:'blue',bottomRight:'yellow'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[38,98,255],bottomRight:[255,212,0]}},
  'teal-violet':{label:'Teal × violet',names:{topLeft:'teal',topRight:'pale blue',bottomLeft:'slate',bottomRight:'violet'},anchors:{topLeft:[95,208,184],topRight:[218,227,237],bottomLeft:[101,113,131],bottomRight:[180,160,229]}},
  'blue-amber':{label:'Blue × amber',names:{topLeft:'blue',topRight:'ivory',bottomLeft:'slate',bottomRight:'amber'},anchors:{topLeft:[104,174,223],topRight:[240,226,200],bottomLeft:[101,113,131],bottomRight:[228,181,108]}},
  'custom-corners':{label:'Green / red / orange / black',names:{topLeft:'green',topRight:'red',bottomLeft:'orange',bottomRight:'black'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[245,140,35],bottomRight:[0,0,0]}}
@@ -38,11 +40,11 @@ let savedAnchors=null;
 try{savedAnchors=JSON.parse(localStorage.getItem('vehicle-view-hsv-colors'))}catch{}
 const customAnchors=Object.fromEntries(anchorNames.map(name=>{
  const url=params.get('anchor-'+name),saved=savedAnchors?.[name];
- return [name,validHex(url)?hexRgb(url):validHex(saved)?hexRgb(saved):[...viewPalettes['custom-corners'].anchors[name]]];
+ return [name,validHex(url)?hexRgb(url):validHex(saved)?hexRgb(saved):[...viewPalettes[defaultPalette].anchors[name]]];
 }));
 viewPalettes.custom={label:'My colors · HSV',anchors:customAnchors};
 let palette=Object.hasOwn(viewPalettes,params.get('palette'))?params.get('palette'):
- (anchorNames.some(name=>params.has('anchor-'+name))||savedAnchors?'custom':'teal-violet');
+ (anchorNames.some(name=>params.has('anchor-'+name))?'custom':defaultPalette);
 let viewAnchors=viewPalettes[palette].anchors;
 function toHsv(rgb){
  const [r,g,b]=rgb.map(v=>v/255),v=Math.max(r,g,b),lo=Math.min(r,g,b),d=v-lo;
