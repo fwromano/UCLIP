@@ -76,5 +76,25 @@
     "imageMarkerAligned": true,
     "urlRoundTrip": true,
     "errors": []
+  },
+  "graph_preview": {
+    "emptyClearsPreview": true,
+    "checkedVehicleSetsPreview": true,
+    "removedPreviewFallsBack": true,
+    "previewDropdownAddsToGraph": true,
+    "rapidSelectionKeepsLatest": true,
+    "savedLinkSelectsVisibleVehicle": true,
+    "final": {
+      "preview": "Scans \u00b7 jeep/green",
+      "visible": [
+        "Scans \u00b7 jeep/red",
+        "Scans \u00b7 moose/original",
+        "Scans \u00b7 jeep/green"
+      ],
+      "plotted": 504,
+      "aligned": true
+    },
+    "errors": [],
+    "offline_verified": true
   }
 }

@@ -155,7 +155,10 @@ Sim2 keeps its elevation explicitly uncalibrated.
 The PCA plot defaults to all recorded elevations of the inspected vehicle/color.
 Use **Vehicles on graph** to toggle any combination independently; **Only
 inspected**, **Show all** and **Clear** control the comparison set. Changing the
-inspected series adds it without removing comparisons. **All elevations** shows
+inspected series adds it without removing comparisons. Checking a graph series
+previews it; removing the previewed series selects another visible series.
+Clearing the graph clears the preview, and saved links restore a visible series.
+**All elevations** shows
 all 168 scan views per series; turn it off for the currently requested elevation.
 Optional **Heading paths** connect measured views within each elevation ring.
 Clicking a point updates its image and requested angle/elevation. Visibility,
