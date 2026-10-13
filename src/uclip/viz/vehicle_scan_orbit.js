@@ -24,7 +24,7 @@ const visibleSeries=new Set(params.has('show')?params.getAll('show').filter(c=>c
 let allElevations=params.get('elevations')!=='current',showPaths=params.get('paths')==='1';
 let colorBy=params.get('colorBy')==='series'?'series':'viewpoint';
 // One mapping drives the matrix, each measured sample and its PCA point.
-// Editable colors at headings 0/180 and elevations -5/90; HSV follows circular hue.
+// Editable colors at headings 0/180 and elevations -5/90; a continuous Oklab blend preserves the four endpoints.
 const defaultPalette='red-blue-green-yellow';
 const viewPalettes={
  'red-blue-green-yellow':{label:'Red / blue / green / yellow',names:{topLeft:'green',topRight:'red',bottomLeft:'blue',bottomRight:'yellow'},anchors:{topLeft:[0,166,81],topRight:[230,57,70],bottomLeft:[38,98,255],bottomRight:[255,212,0]}},
@@ -42,35 +42,34 @@ const customAnchors=Object.fromEntries(anchorNames.map(name=>{
  const url=params.get('anchor-'+name),saved=savedAnchors?.[name];
  return [name,validHex(url)?hexRgb(url):validHex(saved)?hexRgb(saved):[...viewPalettes[defaultPalette].anchors[name]]];
 }));
-viewPalettes.custom={label:'My colors · HSV',anchors:customAnchors};
+viewPalettes.custom={label:'My colors · smooth blend',anchors:customAnchors};
 let palette=Object.hasOwn(viewPalettes,params.get('palette'))?params.get('palette'):
  (anchorNames.some(name=>params.has('anchor-'+name))?'custom':defaultPalette);
 let viewAnchors=viewPalettes[palette].anchors;
-function toHsv(rgb){
- const [r,g,b]=rgb.map(v=>v/255),v=Math.max(r,g,b),lo=Math.min(r,g,b),d=v-lo;
- const h=d===0?0:v===r?((g-b)/d+6)%6:v===g?(b-r)/d+2:(r-g)/d+4;
- return [h*60,v===0?0:d/v,v];
+// Oklab matrices: https://bottosson.github.io/posts/oklab/ (public-domain reference).
+// Cartesian blending avoids hue-arc direction flips inside a four-corner grid.
+function toOklab(rgb){
+ const [r,g,b]=rgb.map(v=>{const c=v/255;return c<=.04045?c/12.92:((c+.055)/1.055)**2.4});
+ const l=Math.cbrt(.4122214708*r+.5363325363*g+.0514459929*b);
+ const m=Math.cbrt(.2119034982*r+.6806995451*g+.1073969566*b);
+ const s=Math.cbrt(.0883024619*r+.2817188376*g+.6299787005*b);
+ return [.2104542553*l+.793617785*m-.0040720468*s,1.9779984951*l-2.428592205*m+.4505937099*s,.0259040371*l+.7827717662*m-.808675766*s];
 }
-function fromHsv([h,s,v]){
- const c=v*s,x=c*(1-Math.abs(((h%360+360)%360)/60%2-1)),m=v-c;
- const sector=Math.floor(((h%360+360)%360)/60);
- return [[c,x,0],[x,c,0],[0,c,x],[0,x,c],[x,0,c],[c,0,x]][sector].map(n=>Math.round(255*(n+m)));
+function fromOklab([L,a,b]){
+ const l=(L+.3963377774*a+.2158037573*b)**3;
+ const m=(L-.1055613458*a-.0638541728*b)**3;
+ const s=(L-.0894841775*a-1.291485548*b)**3;
+ return [4.0767416621*l-3.3077115913*m+.2309699292*s,-1.2684380046*l+2.6097574011*m-.3413193965*s,-.0041960863*l-.7034186147*m+1.707614701*s].map(v=>{
+  const c=Math.max(0,Math.min(1,v));return Math.round(255*(c<=.0031308?12.92*c:1.055*c**(1/2.4)-.055));
+ });
 }
-function mixHsv(a,b,t){
- if(t<=0)return [...a];if(t>=1)return [...b];
- let [ha,sa,va]=a,[hb,sb,vb]=b;
- // Black has no hue or saturation: fade the neighboring hue into darkness.
- if(va===0){ha=hb;sa=sb}if(vb===0){hb=ha;sb=sa}
- if(sa===0)ha=hb;if(sb===0)hb=ha;
- const delta=((hb-ha+540)%360)-180;
- return [(ha+delta*t+360)%360,sa+(sb-sa)*t,va+(vb-va)*t];
-}
-let viewHsv=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toHsv(rgb)]));
+let viewLab=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toOklab(rgb)]));
 function viewpointColor(heading,elevation){
  const h=((heading%360)+360)%360,x=(h<=180?h:360-h)/180;
  const y=elevation===null?.5:Math.max(0,Math.min(1,(elevation-D.elevations[0])/(D.elevations.at(-1)-D.elevations[0])));
- const lower=mixHsv(viewHsv.bottomLeft,viewHsv.bottomRight,x),upper=mixHsv(viewHsv.topLeft,viewHsv.topRight,x);
- return `rgb(${fromHsv(mixHsv(lower,upper,y)).join(' ')})`;
+ const weights={bottomLeft:(1-x)*(1-y),bottomRight:x*(1-y),topLeft:(1-x)*y,topRight:x*y};
+ const lab=[0,1,2].map(i=>anchorNames.reduce((sum,name)=>sum+weights[name]*viewLab[name][i],0));
+ return `rgb(${fromOklab(lab).join(' ')})`;
 }
 let viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
 const pointColor=row=>colorBy==='viewpoint'?viewpointColors.get(row.embedding_row):D.colors[row.category];
@@ -88,7 +87,7 @@ const ctx=base.getContext('2d'),marker=overlay.getContext('2d'),preview=$('jeep-
 const coordinateValues=[];
 for(let i=0;i<3;i++){const e=document.createElement('div');e.className='coordinate';const b=document.createElement('b');b.textContent=`PC${i+1}`;const span=document.createElement('span');e.append(b,span);$('coordinates').append(e);coordinateValues.push(span);}
 function syncUrl(){clearTimeout(urlTimer);urlTimer=setTimeout(()=>{const p=new URLSearchParams({color,heading:String(angle),elevation:String(requestedElevation),projection:mode,elevations:allElevations?'all':'current',paths:showPaths?'1':'0',colorBy,palette});if(palette==='custom')for(const name of anchorNames)p.set('anchor-'+name,rgbHex(viewAnchors[name]));for(const c of categories)if(visibleSeries.has(c))p.append('show',c);if(!visibleSeries.size)p.append('show','');history.replaceState(null,'','?'+p)},150);}
-function state(){window.orbitState={heading:angle,elevation,requestedElevation,visibleSeries:[...visibleSeries],allElevations,showPaths,colorBy,palette,anchors:Object.fromEntries(anchorNames.map(name=>[name,rgbHex(viewAnchors[name])])),interpolation:'HSV',selectedColor:selected?pointColor(selected):null,selectedElevation:selected?.elevation??null,color,mode,selectedRow:selected?.embedding_row??null,selectedHeading:selected?.heading??null,coords:selected?[...selected.coords]:[],playing,markerRow:selected?.embedding_row??null,imageRow:selected?.embedding_row??null,pendingRow:pendingRow?.embedding_row??null,previewSheets:sheets.size};}
+function state(){window.orbitState={heading:angle,elevation,requestedElevation,visibleSeries:[...visibleSeries],allElevations,showPaths,colorBy,palette,anchors:Object.fromEntries(anchorNames.map(name=>[name,rgbHex(viewAnchors[name])])),interpolation:'OKLab',selectedColor:selected?pointColor(selected):null,selectedElevation:selected?.elevation??null,color,mode,selectedRow:selected?.embedding_row??null,selectedHeading:selected?.heading??null,coords:selected?[...selected.coords]:[],playing,markerRow:selected?.embedding_row??null,imageRow:selected?.embedding_row??null,pendingRow:pendingRow?.embedding_row??null,previewSheets:sheets.size};}
 function evict(){while(sheets.size>MAX_SHEETS){const key=[...sheets.keys()].find(k=>k!==activeSheet);if(key===undefined)break;sheets.delete(key)}}
 async function loadSheet(path){if(sheets.has(path)){const img=sheets.get(path);sheets.delete(path);sheets.set(path,img);return img}if(loading.has(path))return loading.get(path);
  const job=(async()=>{const img=new Image();img.src=D.atlases?.[path]||path;await img.decode();sheets.set(path,img);evict();return img})();loading.set(path,job);try{return await job}finally{loading.delete(path)}}
@@ -163,19 +162,26 @@ viewPad.addEventListener('keydown',e=>{if(!['ArrowLeft','ArrowRight','ArrowUp','
 drawViewGrid();
 function syncPaletteKey(){for(const name of anchorNames){const item=document.querySelector(`[data-view-anchor=${name}]`);item.value=rgbHex(viewAnchors[name]);item.title=item.value}}
 function applyPalette(){
- viewHsv=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toHsv(rgb)]));
+ viewLab=Object.fromEntries(Object.entries(viewAnchors).map(([name,rgb])=>[name,toOklab(rgb)]));
  viewpointColors=new Map(D.rows.map(row=>[row.embedding_row,viewpointColor(row.heading,row.elevation)]));
  gradientImages.clear();syncPaletteKey();drawViewSamples();updateViewPad();scheduleStatic();state();syncUrl();
 }
 for(const [name,entry] of Object.entries(viewPalettes))$('view-palette').add(new Option(entry.label,name));$('view-palette').value=palette;
 $('view-palette').onchange=()=>{palette=$('view-palette').value;viewAnchors=viewPalettes[palette].anchors;applyPalette()};
 let paletteFrame=0;
-for(const name of anchorNames)document.querySelector(`[data-view-anchor=${name}]`).addEventListener('input',e=>{
+function editAnchorColor(e){
+ const name=e.currentTarget.dataset.viewAnchor;
+ if(!validHex(e.currentTarget.value))return;
+ if(palette==='custom'&&rgbHex(customAnchors[name])===e.currentTarget.value.toLowerCase())return;
  if(palette!=='custom')for(const key of anchorNames)customAnchors[key]=[...viewAnchors[key]];
- customAnchors[name]=hexRgb(e.target.value);palette='custom';viewAnchors=customAnchors;$('view-palette').value=palette;
+ customAnchors[name]=hexRgb(e.currentTarget.value);palette='custom';viewAnchors=customAnchors;$('view-palette').value=palette;
+ // Editing viewpoint colors immediately applies them to the PCA points too.
+ colorBy='viewpoint';$('point-color').value=colorBy;
  try{localStorage.setItem('vehicle-view-hsv-colors',JSON.stringify(Object.fromEntries(anchorNames.map(key=>[key,rgbHex(viewAnchors[key])]))))}catch{}
  if(!paletteFrame)paletteFrame=requestAnimationFrame(()=>{paletteFrame=0;applyPalette()});
-});syncPaletteKey();
+}
+for(const name of anchorNames){const input=document.querySelector(`[data-view-anchor=${name}]`);input.addEventListener('input',editAnchorColor);input.addEventListener('change',editAnchorColor)}
+syncPaletteKey();
 
 function syncSeriesCheckboxes(){for(const [category,entry] of seriesCheckboxes)entry.input.checked=visibleSeries.has(category)}
 function setVisible(next){visibleSeries.clear();for(const c of next)visibleSeries.add(c);syncSeriesCheckboxes();scheduleStatic();state();syncUrl()}

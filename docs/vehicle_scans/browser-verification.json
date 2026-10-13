@@ -20,8 +20,60 @@
   "playback": true,
   "imageMarkerAlignment": true,
   "errors": [],
-  "schema": "maas.vehicle_scan_browser_checks.v2",
+  "schema": "maas.vehicle_scan_browser_checks.v3",
   "date": "2026-10-13",
   "browser": "Chromium",
-  "source_rows": 5268
+  "source_rows": 5268,
+  "custom_color_blend": {
+    "interpolation": "OKLab",
+    "anchors": {
+      "bottomLeft": "#ffff00",
+      "topLeft": "#ff0000",
+      "topRight": "#0000ff",
+      "bottomRight": "#00ff00"
+    },
+    "corners": {
+      "topLeft": [
+        255,
+        0,
+        0
+      ],
+      "topRight": [
+        0,
+        0,
+        255
+      ],
+      "bottomLeft": [
+        255,
+        255,
+        0
+      ],
+      "bottomRight": [
+        0,
+        255,
+        0
+      ]
+    },
+    "maximumAdjacentDifference": 30.93541659651604,
+    "gradientPixel": [
+      117,
+      173,
+      156
+    ],
+    "expectedPixel": [
+      117,
+      173,
+      156
+    ],
+    "gridMatches": true,
+    "sampleMatches": true,
+    "markerMatches": true,
+    "selectedColorMatches": true,
+    "colorBy": "viewpoint",
+    "plotted": 5268,
+    "wraparoundMatches": true,
+    "imageMarkerAligned": true,
+    "urlRoundTrip": true,
+    "errors": []
+  }
 }
